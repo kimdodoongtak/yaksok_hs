@@ -1,0 +1,23 @@
+# 기능 스펙 목록
+
+2026-11-06 기준, 제공된 PRD·ERD·참고 이미지로 MVP 제품 스펙 10개를 작성했다. 전체 근거·흐름·화면·충돌·미정 사항은 [분해 계획](spec-plan.md)에 기록한다. 사용자 결정에 따라 PRD와 ERD가 충돌하면 ERD를 우선한다.
+
+아래 상태는 문서 준비 상태이며 제품 구현 완료 상태가 아니다. 현재 기능은 불러오지 않았고 앱·제품 테스트는 아직 없다.
+
+| 순서 | 스펙 ID | 기능 | 스펙 | 선행 스펙·이유 | 상태 |
+| --- | --- | --- | --- | --- | --- |
+| 0 | 000-project-bootstrap | Next.js 앱과 DB 접근 기반 생성 | [초기화 스펙](features/000-project-bootstrap.md) | 없음 | 대기 |
+| 1 | 001-invitation-and-host | 초대 링크 접근과 방장 등록 | [스펙](features/001-invitation-and-host-spec.md) | 000 — 000의 Next.js·Prisma 연결 기반이 필요하다 | 확인 필요 |
+| 2 | 002-promise-settings | 약속 설정과 모집 시작 | [스펙](features/002-promise-settings-spec.md) | 001 — 001의 draft 약속, 방장 세션, 만료 검사와 마이그레이션이 필요하다. | 확인 필요 |
+| 3 | 003-participant-access | 참여자 등록과 약속별 재인증 | [스펙](features/003-participant-access-spec.md) | 002 — 002의 collecting 약속과 001의 인증·정규화·세션 기반을 사용한다. | 확인 필요 |
+| 4 | 004-availability | 가능 시간 선택과 제출 | [스펙](features/004-availability-spec.md) | 003 — 003의 참여자 인증과 002의 약속 범위·마감이 필요하다. | 초안 |
+| 5 | 005-status-and-candidates | 마감과 시간 후보 조회 | [스펙](features/005-status-and-candidates-spec.md) | 004 — 004에서 저장한 제출 상태·슬롯과 공통 마감 판정을 사용한다. | 초안 |
+| 6 | 006-confirmation | 방장 일정 확정과 결과 공유 | [스펙](features/006-confirmation-spec.md) | 005 — 005의 마감 판정·후보 계산을 확정 시 같은 트랜잭션에서 재사용한다. | 확인 필요 |
+| 7 | 007-rescheduling | 설정 변경과 재조율 | [스펙](features/007-rescheduling-spec.md) | 006 — 006까지의 상태·확정 필드와 004의 응답 버전이 있어야 재조율 결과를 검증할 수 있다. | 확인 필요 |
+| 8 | 008-participant-management | 탈퇴·내보내기와 방장 승계 | [스펙](features/008-participant-management-spec.md) | 006 — 006까지의 상태별 참석자·후보 결과와 세션이 필요하다 | 초안 |
+| 9 | 009-cancellation | 약속 취소와 접근 차단 | [스펙](features/009-cancellation-spec.md) | 008 — 008의 마지막 방장 탈퇴에서도 사용하는 약속 취소·세션 만료 서비스를 재사용한다. | 확인 필요 |
+| 10 | 010-kakao-invitation | 카카오 챗봇에서 초대 링크 받기 | [스펙](features/010-kakao-invitation-spec.md) | 001 — 001의 링크 발급·읽기 서비스를 사용한다 | 확인 필요 |
+
+007과 008은 006 이후 서로 독립적이다. 010의 실제 코드 의존성은 001이며, 외부 규격 확인은 초기에 진행할 수 있다. 전체 챗봇→확정 E2E는 001~009까지 준비된 뒤 실행한다.
+
+첫 구현 후보는 기존 000이다. 001의 닉네임·초안 세션·링크 만료 세부 결정은 001 전에 확인하며 모든 정책 결정을 000의 선행 조건으로 두지 않는다. 미제공 비즈니스 규칙·API 문서를 임의로 재현하지 않는다. 추가 자료가 오면 원본 대응표를 기준으로 갱신한다.

@@ -1,0 +1,99 @@
+# 마감과 시간 후보 조회
+
+## 식별자와 상태
+
+- 스펙 ID: 005-status-and-candidates
+- 상태: 초안
+- 작성 기준: 2026-11-05, 제품 구현·검증 전 초안.
+- 요구사항: REQ-015~017, REQ-029, REQ-034. 흐름: FLOW-009~010. 식별자는 [분해 계획](../spec-plan.md)의 분석용 ID다.
+
+## 근거 자료
+
+- DOC-001 §4 STATE-05-01~03·RESULT-03-01·RESULT-04-01~02·RESULT-06-01~02·RESULT-07-01; DOC-002 §6.1·7·8.2·11; DOC-003 전체 현황·히트맵.
+- DOC-001: [PRD](../inputs/prd.md), 버전 미상. DOC-002: [ERD](../inputs/ERD.md), 문서상 작성일 2026-09-23. DOC-003: [Figma 참고 이미지](../inputs/피그마.png), 버전 미상.
+- PRD·ERD 전체와 제공 이미지 확인. Figma 링크·node ID·원본 컴포넌트 속성은 미제공이며 MCP 조회는 수행하지 않았다. 별도 비즈니스 규칙·API 문서는 사용자에게 존재하지만 미제공·미확인이다.
+- 충돌은 2026-11-05 사용자 결정에 따라 ERD를 우선한다. ERD에 없는 비충돌 PRD 규칙은 유지한다. 제안·미정은 원본 요구사항과 구분한다.
+- 디자인 확인 범위: DOC-003의 TimeSlot Heat1~Heat4·가능 인원 숫자·CalendarToolbar 전체 현황을 참고한다. 후보 목록·빈 결과·마감 화면은 미제공.
+
+## 사용자와 문제
+
+방장과 참여자는 모집 상태를 확인하고 마감 후 실제로 함께 참석할 수 있는 시간 후보를 비교한다.
+
+## 목표와 범위
+
+기한 도달의 유효 상태, 방장 조기 마감, 제출 완료 기준 임시 집계 제안, 전체 날짜 범위 후보·추가 조회·빈 결과. 확정 쓰기는 006에서 담당한다. 주간 화면에 후보 계산을 한정하지 않는다.
+
+## 선행 작업
+
+- [004-availability](004-availability-spec.md)
+
+004에서 저장한 제출 상태·슬롯과 공통 마감 판정을 사용한다.
+
+## 사용자 흐름
+
+모집 중 전체 현황 → 임시 집계 확인 → 기한 도달 또는 방장 조기 마감 → 공식 후보 목록 → 더 보기 또는 후보 없음 안내. 화면이 오래 열려 있으면 폴링으로 상태를 갱신하고 연결 실패를 표시한다. 재조율·취소 안내는 007·009에 연결한다.
+
+## 수용 기준
+
+- [ ] AC-1: GET은 deadline≤현재이면 effectiveStatus=closed로 응답하지만 DB status를 변경하지 않는다. 전원 제출은 마감 사유가 아니며 응답이 0명·1명이어도 기한이 지나면 유효 마감이다.
+- [ ] AC-2: 방장 조기 마감과 기한 도달 후 변경 요청은 같은 약속 잠금 규칙을 따른다. 늦은 슬롯·신규 등록은 거절하고 필요한 closed 전환은 커밋한다. 조회용 API를 쓰기 트리거로 사용하지 않는다.
+- [ ] AC-3: active·제출 완료 참여자만 후보에 집계한다. 전체 날짜 범위의 미래 30분 시작점 중 소요 시간 전체가 동일 날짜 선택 경계에 드는 후보를 계산한다.
+- [ ] AC-4: 구간 전체의 동일 참여자 교집합이 2명 이상이어야 한다. 10:00 {A,B}, 10:30 {B,C}인 60분 구간은 공통 1명이므로 제외한다. 방장이 불가능해도 다른 2명이 연속 참석 가능하면 포함한다.
+- [ ] AC-5: 가능 인원 내림차순·시작 시각 오름차순으로 정렬해 상위 5개를 기본 표시하고 나머지를 조회할 수 있다. 과거가 된 후보를 제외하며 미래 유효 후보가 없으면 closed를 유지하고 안내한다.
+- [ ] AC-6: 히트맵은 슬롯별 인원이며 공식 후보 인원과 구분한다. 임시 집계를 제공하는 경우 제출 완료 응답만 집계하는 안을 사용하고 임시 표시를 한다. 미제출·빈 제출은 가능 인원 0으로 처리하고 분모는 active 전체다. 타인의 제출 여부는 응답에 공개하지 않는다.
+- [ ] AC-7: 같은 인원수라도 참석자 집합이 다른 구간을 같은 공통 구간으로 합치지 않는다. 후보·인원수·색상·순위는 계산값으로 두고 별도 후보 테이블에 저장하지 않는다.
+- [ ] AC-8: 모집·마감·로딩·연결 실패·후보 없음과 더 보기를 실제 브라우저에서 확인한다. 히트맵 색상과 인원 숫자를 이미지와 비교한다.
+
+각 AC의 근거와 확인 방법은 아래 TDD 적용 계획에 대응한다. OPEN 항목이 포함된 AC는 해당 결정 전 완료 처리하지 않는다.
+
+## 데이터와 인터페이스
+
+새 후보 테이블 없이 promises·participants·slots를 조회한다. 제안 readPromiseSnapshot(inviteToken,viewer)와 readCandidates(inviteToken,pagination), Server Action closeCollection({inviteToken}). 브라우저 폴링은 인증된 읽기 전용 Route Handler GET /api/promises/[inviteToken]/snapshot 제안으로 노출하고 Server Component는 내부 조회 함수를 직접 호출한다.
+
+응답은 effectiveStatus, 필요한 settings, 본인의 버전·제출 상태·슬롯, 공개 가능한 집계·후보만 포함한다. 타인의 제출 시각·PIN·세션은 제외한다. 후보 추가 조회는 기준 시각과 정렬의 일관성을 설계하고 시간 경과 시 최신 목록을 다시 불러온다.
+
+공통 잠금·서버 시각·오류 계약·DB 테스트 기준은 [분해 계획](../spec-plan.md)의 공통 구현·검증 계약을 따른다. 참여자 인증이 필요한 경계에서는 서버가 약속 소속·세션·현재 역할·상태를 검사한다. 공개 링크 안내와 외부 챗봇은 각 경계의 공개 범위·호출 검증을 적용한다. 다른 참여자의 민감 정보를 오류에 포함하지 않는다.
+
+## 구현 계획
+
+공통 유효 상태 조회 → 조기 마감 → 후보 순수 계산 → 집계 응답 필터링 → 결과 UI 순서. 예정 apps/web/src/lib/candidates/, src/actions/promise-status.ts, src/components/results/, src/app/api/promises/[inviteToken]/snapshot/route.ts. 별도 스케줄러는 MVP 필수로 추가하지 않는다.
+
+한 동작의 실패 assertion을 실제 확인한 뒤 최소 구현·회귀 검증을 반복한다. 테스트 도구 오류나 DB 연결 실패는 RED로 인정하지 않는다.
+
+## 검증 계획
+
+- AC별 검증 경계·원본 근거는 아래 표를 따른다. 아직 테스트 파일·제품 기능을 생성하지 않았다.
+- 단위 테스트 예정 명령: 프로젝트 루트에서 docker compose exec tools npm run test -- src/lib/candidates/candidates.test.ts.
+- DB 통합 예정 명령: docker compose exec tools npm run test:integration -- src/lib/candidates/candidates.integration.test.ts. test:integration은 현재 없으며 001에서 분리 설정을 추가할 계획이다. DB 검증 항목이 없는 AC에 억지로 통합 테스트를 만들지 않는다.
+- DB 변경이 있으면 전용 테스트 DB 보호 확인 → 로컬 마이그레이션 작성 → Client 생성 → 빈 테스트 DB에 기존 마이그레이션 적용 → 실제 제약·트랜잭션 검증 순서로 진행한다. 운영 적용은 별도 배포 요청 시 db:deploy로만 한다.
+- 격리: TEST_DATABASE_URL과 테스트 DB 이름·로컬 호스트 허용 목록을 검사하고 개발·운영 URL을 거절한다. 동시성은 독립 연결과 동시 시작 장벽을 사용한다. 상세 구성은 분해 계획에 정의한다.
+- 브라우저 동작·오류 복구·모바일을 실제 확인한다. 이미지가 있는 요소는 원본 1280×3042 참고 시트를 사용한다. 제품 화면 검수 크기는 390×844와 1280×800을 제안하며 디자인 원본 크기로 주장하지 않는다.
+- 최종 검증: 관련 단위·DB·브라우저 회귀, Docker Node.js 24의 npm run lint, npm run typecheck, npm run build. 필요한 검증을 실행하지 못하면 미검증으로 남긴다.
+
+## 미정 사항
+
+ERD §8.2의 P1 자동 마감 표기는 배치 추가 여부로 구분한다. 시간 도달 시 쓰기 차단·유효 상태 마감은 MVP에 포함한다. 후보 응답 성능 목표 수치는 OPEN-11에서 결정하며 최악 범위 측정을 남긴다.
+
+OPEN 항목의 제안은 [분해 계획](../spec-plan.md)에 있으며 사용자 확정 전 제품 규칙으로 고정하지 않는다.
+
+## 결과
+
+모든 AC 미검증. 문서 초안만 작성했으며 앱 구현·DB 변경·RED/GREEN 실행·외부 연동은 수행하지 않았다.
+
+## TDD 적용 계획
+
+| AC | TDD 구분·이유 | 공개 경계·수준 | 기대값의 원본 근거 | 예정 테스트 파일 또는 확인 방법 |
+| --- | --- | --- | --- | --- |
+| AC-1 | 필수 | 단위·실제 DB | DOC-002 §6.1·8.2·11; DOC-001 STATE-05-03 | src/lib/candidates/candidates.test.ts / src/lib/candidates/candidates.integration.test.ts |
+| AC-2 | 필수 | 실제 DB 동시성 | DOC-002 §8.2·11 | src/lib/candidates/candidates.test.ts / src/lib/candidates/candidates.integration.test.ts |
+| AC-3 | 필수 | 단위·조회 통합 | DOC-002 §7.1 | src/lib/candidates/candidates.test.ts |
+| AC-4 | 필수 | 독립 예제 단위 | DOC-002 §7.1·11 | src/lib/candidates/candidates.test.ts |
+| AC-5 | 필수 | 단위·서비스·브라우저 | DOC-002 §7.1~7.2 | src/lib/candidates/candidates.test.ts / 해당 기능 브라우저 시나리오 |
+| AC-6 | 필수 | 단위·응답 계약 | DOC-002 §7.3; 임시 집계 방식은 제안 | src/lib/candidates/candidates.test.ts |
+| AC-7 | 필수 | 단위·스키마 점검 | DOC-002 §7.2~7.3 | src/lib/candidates/candidates.test.ts |
+| AC-8 | 동작은 필수, 색상·배치 비교는 비대상 | 브라우저·시각 | DOC-003; DOC-001 §5 | src/lib/candidates/candidates.test.ts / 해당 기능 브라우저 시나리오 |
+
+- 실제 실행 기록은 구현 시작 시 context/tdd/005-status-and-candidates.md에 작성한다. 현재는 기록 파일을 만들지 않는다.
+- 공개 경계는 데이터 읽기·변경 서비스와 사용자 조작이다. 구현 내부 구조를 복제하는 테스트를 만들지 않는다.
+- 브라우저 자동화 도구는 아직 없다. 004에서 Playwright 도입을 제안하고, 이전 단계의 실제 수동 브라우저 확인과 구분한다. 색상·간격은 별도 시각 검수한다.
+

@@ -1,0 +1,60 @@
+{
+  "date": "2026-11-03",
+  "variant": "codex",
+  "source_zip_sha256": "9bec4eda719e2730effbd98ce28b9d965b8f9053e35ae8badeb772a3531990e4",
+  "skill_validation": [
+    {
+      "name": "cleanup",
+      "status": "passed"
+    },
+    {
+      "name": "feature",
+      "status": "passed"
+    },
+    {
+      "name": "list-components",
+      "status": "passed"
+    },
+    {
+      "name": "prd-to-specs",
+      "status": "passed"
+    },
+    {
+      "name": "research",
+      "status": "passed"
+    }
+  ],
+  "relative_markdown_links": 35,
+  "real_skill_directories": 5,
+  "symlinks": 0,
+  "runtime_files_unchanged": [
+    ".dockerignore",
+    ".gitignore",
+    "apps/web/.node-version",
+    "apps/web/.nvmrc",
+    "apps/web/eslint.config.mjs",
+    "apps/web/next.config.ts",
+    "apps/web/package-lock.json",
+    "apps/web/package.json",
+    "apps/web/postcss.config.mjs",
+    "apps/web/prisma/schema.prisma",
+    "apps/web/prisma.config.ts",
+    "apps/web/README.md",
+    "apps/web/tsconfig.json",
+    "apps/web/vercel.json",
+    "apps/web/vitest.config.ts",
+    "Dockerfile.dev",
+    "LICENSE.upstream"
+  ],
+  "compose_project_isolated": true,
+  "host_ports": {
+    "app": "3001",
+    "postgres": "55433",
+    "studio": "5556"
+  },
+  "shared_tdd_policy_equal": true,
+  "workflow_references_checked": true,
+  "application_tests": "not run: product source and tests absent",
+  "docker_build_and_database": "not run: Docker unavailable in packaging environment",
+  "native_agent_discovery": "not run: folder format validated only"
+}
