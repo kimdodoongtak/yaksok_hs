@@ -16,7 +16,7 @@ Next.js 16 / TypeScript 5 / Node.js 24 / Prisma 7 / Tailwind CSS 4를 사용한�
 
 PRD·유저 플로우·정책 등 여러 문서나 자료 폴더를 기능 스펙으로 나누는 요청에는 `.agents/skills/prd-to-specs/SKILL.md`를 따른다. 지정한 폴더의 하위 자료를 함께 읽고 자료 목록·읽기 상태·충돌을 기록한다. PRD는 필수가 아니다. Figma 링크가 있으면 MCP로 화면을 분석해 분해 근거로 사용한다. 분해 계획은 `context/spec-plan.md`, 개별 스펙은 `context/features/`에 기록하며 구현은 `feature` 흐름으로 이어간다.
 
-현재는 개발 소스가 없는 템플릿이다. 앱 초기화를 요청받으면 `context/features/000-project-bootstrap.md`를 사용한다. 다른 서비스의 기능·모델·완료 이력을 임의로 추가하지 않는다.
+000 앱 기반과 001 초대 링크 접근·방장 등록 기능, 첫 도메인 모델·마이그레이션·제품 테스트가 구현되어 있다. 기능별 범위와 검증 기준은 `context/features/`, 최신 상태는 `context/current-feature.md`를 따른다. 다른 서비스의 기능·모델·완료 이력을 임의로 추가하지 않는다.
 
 스펙은 `context/features/`, 조사 요청은 `context/research/`, 조사 결과는 `docs/`, 수정 기록은 `context/fixes/`에 둔다. 현재 작업과 누적 이력은 `context/current-feature.md`에서 관리한다.
 

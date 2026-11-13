@@ -1,4 +1,4 @@
-// 제품 모델은 스펙을 정한 뒤 추가한다. 원본의 모델·마이그레이션은 포함하지 않는다.
+// 001 초대·방장 모델. CHECK 및 조건부 UNIQUE는 SQL 마이그레이션에 유지한다.
 generator client {
   provider = "prisma-client"
   output   = "../src/generated/prisma"
@@ -6,4 +6,56 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+}
+
+model PromiseLink {
+  id String @id @default(uuid()) @db.Uuid
+  inviteToken String @unique @map("invite_token") @db.VarChar(64)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  promise PromiseRecord?
+  @@map("promise_links")
+}
+model PromiseRecord {
+  id String @id @default(uuid()) @db.Uuid
+  promiseLinkId String @unique @map("promise_link_id") @db.Uuid
+  participantLimit Int? @map("participant_limit")
+  dateRangeStart DateTime? @map("date_range_start") @db.Date
+  dateRangeEnd DateTime? @map("date_range_end") @db.Date
+  dailyStartMinute Int? @map("daily_start_minute") @db.SmallInt
+  dailyEndMinute Int? @map("daily_end_minute") @db.SmallInt
+  durationMinutes Int? @map("duration_minutes")
+  votingDeadlineAt DateTime? @map("voting_deadline_at") @db.Timestamptz(3)
+  status String @default("draft") @db.VarChar(16)
+  confirmedStartAt DateTime? @map("confirmed_start_at") @db.Timestamptz(3)
+  cancelledAt DateTime? @map("cancelled_at") @db.Timestamptz(3)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  link PromiseLink @relation(fields:[promiseLinkId], references:[id], onDelete:Restrict)
+  participants Participant[]
+  @@map("promises")
+}
+model Participant {
+  id String @id @default(uuid()) @db.Uuid
+  promiseId String @map("promise_id") @db.Uuid
+  nickname String @db.Text
+  normalizedNickname String @map("normalized_nickname") @db.Text
+  passwordHash String @map("password_hash") @db.Text
+  role String @db.VarChar(16)
+  status String @default("active") @db.VarChar(16)
+  availabilitySubmittedAt DateTime? @map("availability_submitted_at") @db.Timestamptz(3)
+  availabilityVersion Int @default(0) @map("availability_version")
+  cancelledAt DateTime? @map("cancelled_at") @db.Timestamptz(3)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  promise PromiseRecord @relation(fields:[promiseId], references:[id], onDelete:Restrict)
+  sessions ParticipantSession[]
+  @@unique([promiseId, normalizedNickname])
+  @@map("participants")
+}
+model ParticipantSession {
+  id String @id @default(uuid()) @db.Uuid
+  participantId String @map("participant_id") @db.Uuid
+  sessionTokenHash String @unique @map("session_token_hash") @db.VarChar(64)
+  expiresAt DateTime @map("expires_at") @db.Timestamptz(3)
+  participant Participant @relation(fields:[participantId], references:[id], onDelete:Restrict)
+  @@index([participantId])
+  @@map("participant_sessions")
 }

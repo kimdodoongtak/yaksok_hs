@@ -2,7 +2,7 @@
 
 ## 상태
 
-대기 — 템플릿 준비 완료와 앱 구현 완료는 별개다.
+완료 — 2026-11-13 요구사항 검토와 AC-1~5 최종 검증 결과를 근거로 완료 처리했다. 문서 불일치를 정리했으며 실제 실행 근거는 [TDD 기록](../tdd/000.md), 완료 이력은 [현재 기능](../current-feature.md)에 남겼다. 완료 범위는 로컬 앱 기반이며 제품 기능·Neon 연결·운영 배포는 포함하지 않는다.
 
 ## 목표
 
@@ -25,11 +25,11 @@
 
 ## 수용 기준
 
-- [ ] AC-1: Docker Node.js 버전이 24이며 의존성이 지정 메이저 범위를 유지한다.
-- [ ] AC-2: 컨테이너에서 `npm run dev` 실행 후 `http://localhost:3001`에서 시작 화면과 Tailwind 스타일을 확인한다.
-- [ ] AC-3: `npm run lint`, `npm run typecheck`, `npm run build`가 통과한다.
-- [ ] AC-4: 모델 없는 Client 생성과 Prisma를 통한 로컬 DB 연결 확인이 통과한다.
-- [ ] AC-5: `.env`, 생성 Client, 빌드 결과가 Git에 포함되지 않는다.
+- [x] AC-1: Docker Node.js 버전이 24이며 의존성이 지정 메이저 범위를 유지한다.
+- [x] AC-2: 컨테이너에서 `npm run dev` 실행 후 `http://localhost:3001`에서 시작 화면과 Tailwind 스타일을 확인한다.
+- [x] AC-3: `npm run lint`, `npm run typecheck`, `npm run build`가 통과한다.
+- [x] AC-4: 모델 없는 Client 생성과 Prisma를 통한 로컬 DB 연결 확인이 통과한다.
+- [x] AC-5: `.env`, 생성 Client, 빌드 결과가 Git에 포함되지 않는다.
 
 ## 검증
 

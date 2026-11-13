@@ -10,3 +10,7 @@ apps/web/src/generated/prisma/
 .vercel/
 .DS_Store
 *.log
+
+.next-browser/
+playwright-report/
+test-results/

@@ -1,6 +1,6 @@
 # Next.js 풀스택 + TDD — Codex 작업폴더
 
-원본 `nextjs-fullstack.zip`의 기술 스택과 개발 환경을 유지하고 스펙 기반 개발에 TDD를 추가했다. 현재는 앱 설정·문서·스킬이 준비된 템플릿이며 제품 소스·도메인 모델·제품 테스트는 없다.
+원본 `nextjs-fullstack.zip`의 기술 스택과 개발 환경을 유지하고 스펙 기반 개발에 TDD를 추가했다. 000 앱 기반에 이어 001 초대 링크·방장 등록·초안 세션과 만료 처리를 구현 중이다. 최신 진행 상태는 [현재 기능](context/current-feature.md), 실제 RED/GREEN과 검증 결과는 [001 기록](context/tdd/001-invitation-and-host.md)을 따른다.
 
 ## 구성
 
@@ -8,7 +8,7 @@
 | --- | --- |
 | `AGENTS.md` | Codex가 읽는 프로젝트 지침 |
 | `.agents/skills/` | 실제 파일로 구성한 프로젝트 전용 스킬 5개 |
-| `apps/web/` | Next.js 16 · TypeScript 5 · Prisma 7 · Tailwind CSS 4 앱 설정 |
+| `apps/web/` | Next.js 16 · TypeScript 5 · Prisma 7 · Tailwind CSS 4 앱 소스·설정 |
 | `context/inputs/` | PRD·ERD·정책과 Figma 링크 등 원본 자료 |
 | `context/features/` | 기능 명세·수용 기준·TDD 계획 |
 | `context/tdd-policy.md` | RED → GREEN → REFACTOR와 검증 기준 |
@@ -49,7 +49,7 @@ docker compose exec tools npm ci
 docker compose exec tools npm run db:validate
 ```
 
-아직 앱 소스가 없으므로 위 명령은 작업 환경과 DB를 준비한다. 앱 생성 후 실행·빌드·테스트 명령은 가이드를 따른다.
+위 명령은 작업 환경과 DB를 준비한다. 이어서 `docker compose exec tools npm run db:generate`와 `docker compose exec tools npm run dev`를 실행하면 `http://localhost:3001`에서 시작 화면을 확인할 수 있다. 빌드·검증 명령은 [로컬 개발 안내](docs/local-development.md)를 따른다.
 
 ## 스킬
 

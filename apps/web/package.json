@@ -3,7 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "engines": { "node": "24.x" },
+  "engines": {
+    "node": "24.x"
+  },
   "scripts": {
     "dev": "next dev --hostname 0.0.0.0",
     "build": "npm run db:generate && next build",
@@ -17,7 +19,11 @@
     "db:migrate": "prisma migrate dev",
     "db:deploy": "prisma migrate deploy",
     "db:status": "prisma migrate status",
-    "db:studio": "prisma studio --port 5555 --browser none"
+    "db:studio": "prisma studio --port 5555 --browser none",
+    "test:integration": "node scripts/test-integration.mjs",
+    "test:browser": "playwright test",
+    "test:db:setup": "node scripts/setup-test-database.mjs",
+    "invite:local": "node --conditions=react-server --import ./scripts/register-typescript.mjs scripts/issue-local-invite.mjs"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.0.0",
@@ -30,6 +36,7 @@
     "server-only": "^0.0.1"
   },
   "devDependencies": {
+    "@playwright/test": "^1.65.0",
     "@tailwindcss/postcss": "^4.0.0",
     "@types/node": "^24.0.0",
     "@types/pg": "^8.0.0",
