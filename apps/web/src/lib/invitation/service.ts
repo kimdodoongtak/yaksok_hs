@@ -1,4 +1,5 @@
 import "server-only";
+import type { PromiseSettingsDefaults } from "../promise-settings/policy";
 import type {
   PrismaClient,
   Prisma,
@@ -30,9 +31,12 @@ export type InvitationView =
         | "expired"
         | "available"
         | "cancelled"
-        | "ready"
         | "draft-expired"
         | "waiting";
+    }
+  | {
+      state: "ready";
+      settings?: Pick<PromiseSettingsDefaults, "dateRangeStart" | "dateRangeEnd" | "dailyStart" | "dailyEnd" | "durationMinutes">;
     }
   | {
       state: "host";
@@ -205,8 +209,7 @@ export function createInvitationService(
         return { state: "expired" };
       if (!link.promise) return { state: "available" };
       if (link.promise.status === "cancelled") return { state: "cancelled" };
-      if (link.promise.status !== "draft") return { state: "ready" };
-      if (isExpired(draftExpiresAt(link.promise.createdAt), at))
+      if (link.promise.status === "draft" && isExpired(draftExpiresAt(link.promise.createdAt), at))
         return { state: "draft-expired" };
       const session = sessionToken
         ? await db.participantSession.findUnique({
@@ -214,13 +217,34 @@ export function createInvitationService(
             include: { participant: true },
           })
         : null;
-      if (
+      const isHost = Boolean(
         session &&
         session.expiresAt > at &&
         session.participant.promiseId === link.promise.id &&
         session.participant.role === "host" &&
         session.participant.status === "active"
-      ) {
+      );
+      if (link.promise.status !== "draft") {
+        const promise = link.promise;
+        if (isHost && promise.status === "collecting" &&
+          promise.dateRangeStart && promise.dateRangeEnd &&
+          promise.dailyStartMinute !== null && promise.dailyEndMinute !== null &&
+          promise.durationMinutes !== null) {
+          const time = (minute: number) => `${String(Math.floor(minute / 60)).padStart(2, "0")}:${String(minute % 60).padStart(2, "0")}`;
+          return {
+            state: "ready",
+            settings: {
+              dateRangeStart: promise.dateRangeStart.toISOString().slice(0, 10),
+              dateRangeEnd: promise.dateRangeEnd.toISOString().slice(0, 10),
+              dailyStart: time(promise.dailyStartMinute),
+              dailyEnd: time(promise.dailyEndMinute),
+              durationMinutes: String(promise.durationMinutes),
+            },
+          };
+        }
+        return { state: "ready" };
+      }
+      if (isHost && session) {
         const expiresAt = draftExpiresAt(link.promise.createdAt);
         return {
           state: "host",

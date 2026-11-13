@@ -127,6 +127,7 @@ docker compose exec tools npm run test:browser
 - `apps/web/.env.test`의 `TEST_DATABASE_URL`은 Git에서 제외하며 비밀값을 문서·출력에 복사하지 않는다. Docker 기준 호스트는 `db`, DB·역할은 `sdd_test`다. 호스트에서 별도 실행할 때만 localhost와 현재 매핑 포트를 쓴다.
 - 실행기는 URL의 로컬 호스트·DB·역할·추가 옵션을 검사하고 실제 `current_database()`·`current_user`까지 확인한 뒤 마이그레이션과 테스트를 실행한다. 개발·Neon DB에 테스트를 실행하지 않는다.
 - 테스트는 난수 링크를 만들고 자신이 만든 데이터만 세션→참여자→약속→링크 순서로 정리한다. 통합·브라우저 명령은 **차례로** 실행한다. 롤백 검증용 trigger를 설치하므로 둘을 같은 테스트 DB에서 동시에 돌리지 않는다.
+- 브라우저 테스트와 `typecheck`·`build`도 **차례로** 실행한다. `tsconfig.json`이 `.next-browser/dev/types`를 포함하므로 테스트 서버가 타입 파일을 재생성하는 동안 빌드하면 `TS6053: File ... not found`가 발생할 수 있다. 브라우저 테스트가 완전히 종료된 뒤 타입 검사·빌드를 실행한다.
 - Playwright는 Docker 내부 `127.0.0.1:3100`에 격리 테스트 DB를 쓰는 전용 Next 서버를 띄운 뒤 종료한다. `.next-browser/`로 개발 서버의 `.next/`와 분리한다. 테스트가 서버 상태의 시각을 변경하는 대상은 테스트 DB의 자기 링크뿐이다. 서비스 시간 우회 API는 없다.
 - `test-results/`의 Chromium 화면(320·390·1440px)은 로컬 검수 산출물이며 Git 제외다. 화면은 신규 제안으로, 미제공 Figma 원본과의 일치를 주장하지 않는다.
 - 현재 로컬 `.env`는 다른 프로젝트와의 충돌을 피해 PostgreSQL 호스트 포트를 **55434**로 바꿨다. 표의 55433은 템플릿 기본값이며 컨테이너 안은 항상 `db:5432`다.

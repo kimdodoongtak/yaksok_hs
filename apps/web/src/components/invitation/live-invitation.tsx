@@ -3,12 +3,16 @@ import { useEffect, useState } from "react";
 import type { InvitationView } from "@/lib/invitation/service";
 import { RegistrationForm } from "./registration-form";
 import { AbandonForm } from "./abandon-form";
+import { SettingsForm } from "@/components/promise-settings/settings-form";
+import { ReadyInvitation } from "@/components/promise-settings/ready-invitation";
 export function LiveInvitation({
   inviteToken,
   initialView,
+  animateInvitation = false,
 }: {
   inviteToken: string;
   initialView: InvitationView;
+  animateInvitation?: boolean;
 }) {
   const [view, setView] = useState(initialView);
   const [offline, setOffline] = useState(false);
@@ -75,9 +79,9 @@ export function LiveInvitation({
       )}
       {view.state === "host" && (
         <>
-          <h1 className="text-2xl font-bold">약속 설정</h1>
-          <p className="mt-4">{view.nickname}님, 약속을 설정해 주세요.</p>
-          <p className="mt-3 text-sm leading-6 text-slate-600">
+          <h1 className="text-2xl font-bold tracking-tight text-[#243047]">약속 설정</h1>
+          <p className="mt-2 text-sm text-slate-600">{view.nickname}님, 약속을 설정해 주세요.</p>
+          <p className="mt-1 text-xs leading-5 text-slate-500">
             방장 등록 후 10분 동안 초안이 유지돼요.
           </p>
           {view.warning && (
@@ -88,6 +92,7 @@ export function LiveInvitation({
               초안이 2분 이내에 만료돼요.
             </p>
           )}
+          <SettingsForm inviteToken={inviteToken} serverNow={view.serverNow} />
           <AbandonForm inviteToken={inviteToken} />
         </>
       )}
@@ -106,12 +111,7 @@ export function LiveInvitation({
         <h1 className="text-xl font-bold">취소된 약속입니다.</h1>
       )}
       {view.state === "ready" && (
-        <>
-          <h1 className="text-xl font-bold">약속이 준비됐어요</h1>
-          <p className="mt-4 text-sm text-slate-600">
-            참여 안내를 확인해 주세요.
-          </p>
-        </>
+        <ReadyInvitation inviteToken={inviteToken} settings={view.settings} animate={animateInvitation} />
       )}
     </>
   );
