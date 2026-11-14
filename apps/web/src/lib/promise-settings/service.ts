@@ -56,6 +56,7 @@ export function createPromiseSettingsService(
           const at = await now(tx);
           if (isExpired(linkExpiresAt(link.createdAt), at))
             return { ok: false as const, code: "LINK_EXPIRED" };
+          if (promise?.status === "cancelled") return { ok: false as const, code: "PROMISE_CANCELLED" };
           if (!promise || promise.status !== "draft")
             return { ok: false as const, code: "NOT_DRAFT" };
 

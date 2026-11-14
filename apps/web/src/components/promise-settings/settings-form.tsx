@@ -97,14 +97,12 @@ export function SettingsForm({ inviteToken, serverNow }: {
         <span aria-current={step === 2 ? "step" : undefined}>2 · 모집 설정</span>
         <span className="ml-auto tabular-nums">{step}/2</span>
       </div>
-      <h2 ref={heading} tabIndex={-1} className="mt-4 text-xl font-bold outline-none">
-        {step === 1 ? "언제 만날까요?" : "몇 명이 함께하나요?"}
+      <h2 ref={heading} tabIndex={-1} className="sr-only">
+        {step === 1 ? "날짜와 시간" : "모집 설정"}
       </h2>
-      <p className="mb-4 mt-2 text-sm leading-6 text-slate-500">
-        {step === 1 ? "기본 설정을 확인하고, 바꾸고 싶은 항목만 눌러 주세요." : "함께할 인원과 응답을 받을 마감 시간을 정해 주세요."}
-      </p>
+      {step === 2 && <p className="mb-4 mt-3 text-sm leading-6 text-slate-500">정원과 응답 마감을 설정해 주세요.</p>}
 
-      <div hidden={step !== 1} className={styles.stepPanel}>
+      <div hidden={step !== 1} className={`${styles.stepPanel} mt-3`}>
         <div className={styles.card}>
           <DateRangePicker
             key={`${state.values.dateRangeStart}:${state.values.dateRangeEnd}`}

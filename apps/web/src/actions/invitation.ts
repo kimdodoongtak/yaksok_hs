@@ -17,7 +17,7 @@ export async function registerHost(
     pin: form.get("pin"),
   });
   if (!result.ok) {
-    if (result.code === "LINK_EXPIRED") redirect(`/p/${inviteToken}`);
+    if ((result.code === "LINK_EXPIRED" || result.code === "PROMISE_CANCELLED")) redirect(`/p/${inviteToken}`);
     const messages: Record<string, string> = {
       INVALID_INPUT:
         "닉네임은 이모지 없이 2~12자, PIN은 숫자 4자리로 입력해 주세요.",
@@ -51,7 +51,7 @@ export async function abandonDraft(
     inviteToken,
     jar.get(cookie.name)?.value,
   );
-  if (!result.ok && result.code === "LINK_EXPIRED")
+  if (!result.ok && (result.code === "LINK_EXPIRED" || result.code === "PROMISE_CANCELLED"))
     redirect(`/p/${inviteToken}`);
   if (!result.ok && result.code !== "DRAFT_EXPIRED")
     return {

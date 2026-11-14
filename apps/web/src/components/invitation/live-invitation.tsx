@@ -4,15 +4,18 @@ import type { InvitationView } from "@/lib/invitation/service";
 import { RegistrationForm } from "./registration-form";
 import { AbandonForm } from "./abandon-form";
 import { SettingsForm } from "@/components/promise-settings/settings-form";
+import { AccessPanel, ParticipantControls } from "@/components/participant-access/access-panel";
 import { ReadyInvitation } from "@/components/promise-settings/ready-invitation";
 export function LiveInvitation({
   inviteToken,
   initialView,
   animateInvitation = false,
+  pinChanged = false,
 }: {
   inviteToken: string;
   initialView: InvitationView;
   animateInvitation?: boolean;
+  pinChanged?: boolean;
 }) {
   const [view, setView] = useState(initialView);
   const [offline, setOffline] = useState(false);
@@ -79,11 +82,8 @@ export function LiveInvitation({
       )}
       {view.state === "host" && (
         <>
-          <h1 className="text-2xl font-bold tracking-tight text-[#243047]">약속 설정</h1>
-          <p className="mt-2 text-sm text-slate-600">{view.nickname}님, 약속을 설정해 주세요.</p>
-          <p className="mt-1 text-xs leading-5 text-slate-500">
-            방장 등록 후 10분 동안 초안이 유지돼요.
-          </p>
+          <h1 className="text-xl font-bold text-[#243047]">약속 설정</h1>
+          <p className="mt-1 text-xs text-slate-500">{view.nickname}님, 약속을 설정해 주세요.</p>
           {view.warning && (
             <p
               role="status"
@@ -93,7 +93,9 @@ export function LiveInvitation({
             </p>
           )}
           <SettingsForm inviteToken={inviteToken} serverNow={view.serverNow} />
+          <p className="mt-3 text-center text-xs leading-5 text-slate-500">방장 등록 후 10분 동안 초안이 유지돼요.</p>
           <AbandonForm inviteToken={inviteToken} />
+          <ParticipantControls inviteToken={inviteToken} />
         </>
       )}
       {view.state === "waiting" && (
@@ -111,7 +113,10 @@ export function LiveInvitation({
         <h1 className="text-xl font-bold">취소된 약속입니다.</h1>
       )}
       {view.state === "ready" && (
-        <ReadyInvitation inviteToken={inviteToken} settings={view.settings} animate={animateInvitation} />
+        <>
+          {(!view.access || view.settings) && <ReadyInvitation inviteToken={inviteToken} settings={view.settings} animate={animateInvitation} />}
+          {view.access && <AccessPanel key={view.access.kind} inviteToken={inviteToken} view={view.access} pinChanged={pinChanged} hostTicket={Boolean(view.settings)} />}
+        </>
       )}
     </>
   );

@@ -1,5 +1,5 @@
 import { cookies } from "next/headers";
-import { invitationService } from "@/lib/invitation/runtime";
+import { readInvitationPage } from "@/lib/participant-access/runtime";
 import { sessionCookie, validInviteToken } from "@/lib/invitation/cookie";
 export const runtime = "nodejs";
 export async function GET(
@@ -12,7 +12,7 @@ export async function GET(
     return Response.json({ state: "invalid" }, { headers });
   const jar = await cookies();
   try {
-    const view = await invitationService.readInvitation(
+    const view = await readInvitationPage(
       inviteToken,
       jar.get(sessionCookie(inviteToken, new Date(0)).name)?.value,
     );

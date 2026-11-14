@@ -53,7 +53,7 @@ export async function startCollection(
   });
 
   if (!result.ok) {
-    if (result.code === "LINK_EXPIRED" || result.code === "DRAFT_EXPIRED")
+    if (result.code === "LINK_EXPIRED" || result.code === "DRAFT_EXPIRED" || result.code === "PROMISE_CANCELLED")
       redirect(`/p/${inviteToken}`);
     if (result.code === "NOT_DRAFT") redirect(`/p/${inviteToken}/settings`);
     if (result.code === "INVALID_INPUT") {

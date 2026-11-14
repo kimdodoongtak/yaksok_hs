@@ -1,0 +1,24 @@
+.panel { color: #243047; }
+.panel h1 { font-size: 20px; font-weight: 700; line-height: 1.4; overflow-wrap: anywhere; }
+.description { margin-top: 8px; color: #70809b; font-size: 14px; line-height: 1.8; }
+.modes { display: flex; gap: 6px; padding: 4px; margin-top: 16px; border-radius: 8px; background: #f5f7fc; }
+.modes button { flex: 1; min-height: 44px; border-radius: 6px; color: #70809b; font-size: 14px; }
+.modes button[aria-pressed="true"] { background: #e7edff; color: #4261df; font-weight: 600; }
+.form { display: grid; gap: 20px; margin-top: 16px; color: #243047; }
+.form label { display: block; font-size: 14px; font-weight: 600; }
+.form input { width: 100%; min-width: 0; height: 46px; margin-top: 8px; padding: 0 10px; border: 1px solid #dce3f1; border-radius: 8px; background: white; font-size: 16px; }
+.form input::placeholder { color: #9aa7bb; }
+.help { margin-top: 8px; color: #70809b; font-size: 12px; line-height: 1.8; }
+.primary { min-height: 46px; padding: 12px; border-radius: 8px; background: #4261df; color: white; font-size: 14px; font-weight: 600; }
+.primary:hover { background: #324fca; }
+.form button:disabled, .controls button:disabled { opacity: .5; }
+.panel :is(button, input):focus-visible, .controls :is(button, input):focus-visible { outline: 2px solid #4261df; outline-offset: 3px; }
+.error { padding: 12px; background: #fff3f3; border-radius: 8px; color: #a52b36; font-size: 13px; line-height: 1.7; }
+.notice { margin-top: 16px; padding: 12px; border-radius: 8px; background: #e7edff; color: #324fca; font-size: 13px; line-height: 1.7; }
+.memberCard { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; margin-top: 28px; padding: 20px 16px; border: 1px solid #dce3f1; border-radius: 10px; }
+.memberCard > span:first-child { font-size: 12px; color: #70809b; }
+.memberCard strong { font-size: 16px; overflow-wrap: anywhere; }
+.badge { margin-left: auto; padding: 5px 8px; border-radius: 5px; background: #e7edff; color: #4261df; font-size: 11px; }
+.controls { margin-top: 24px; border-top: 1px solid #dce3f1; padding-top: 12px; }
+.controlRow { display: flex; justify-content: space-between; gap: 12px; }
+.controlRow button { min-height: 44px; padding: 8px; color: #70809b; font-size: 13px; }

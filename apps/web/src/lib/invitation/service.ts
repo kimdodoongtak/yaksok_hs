@@ -36,6 +36,7 @@ export type InvitationView =
     }
   | {
       state: "ready";
+      access?: import("../participant-access/view").ParticipantView;
       settings?: Pick<PromiseSettingsDefaults, "dateRangeStart" | "dateRangeEnd" | "dailyStart" | "dailyEnd" | "durationMinutes">;
     }
   | {
@@ -90,6 +91,7 @@ export function createInvitationService(
         const { link, promise, at } = locked;
         if (isExpired(linkExpiresAt(link.createdAt), at))
           return { ok: false, code: "LINK_EXPIRED" };
+        if (promise?.status === "cancelled") return { ok: false as const, code: "PROMISE_CANCELLED" };
         if (!promise || promise.status !== "draft")
           return { ok: false, code: "NOT_DRAFT" };
         const session = sessionToken
@@ -142,6 +144,7 @@ export function createInvitationService(
         const candidateAt = await now();
         if (isExpired(linkExpiresAt(candidateLink.createdAt), candidateAt))
           return { ok: false, code: "LINK_EXPIRED" };
+        if (candidateLink.promise?.status === "cancelled") return { ok: false, code: "PROMISE_CANCELLED" };
         if (
           candidateLink.promise &&
           (candidateLink.promise.status !== "draft" ||
@@ -160,6 +163,7 @@ export function createInvitationService(
           const { link, promise: existing, at } = locked;
           if (isExpired(linkExpiresAt(link.createdAt), at))
             return { ok: false as const, code: "LINK_EXPIRED" };
+          if (existing?.status === "cancelled") return { ok: false as const, code: "PROMISE_CANCELLED" };
           if (existing) {
             if (
               existing.status !== "draft" ||

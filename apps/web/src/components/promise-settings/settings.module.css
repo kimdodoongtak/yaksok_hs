@@ -3,7 +3,7 @@
   --settings-pale: #e7edff;
   --settings-border: #dce3f1;
   --settings-muted: #70809b;
-  margin-top: 28px;
+  margin-top: 16px;
   color: #243047;
 }
 
@@ -15,19 +15,12 @@
 .stepProgress { display: flex; align-items: center; gap: 10px; font-size: 12px; color: var(--settings-muted); }
 .stepProgress [aria-current="step"] { color: var(--settings-blue); font-weight: 700; }
 .stepPanel[hidden] { display: none; }
-.stepActions { display: flex; gap: 12px; margin-top: 24px; }
+.stepActions { display: flex; gap: 12px; margin-top: 16px; }
 .stepActions > button { flex: 1; }
 .previous { min-height: 46px; border: 1px solid var(--settings-border); border-radius: 8px; background: white; font-size: 14px; font-weight: 600; }
 .previous:disabled { opacity: .5; }
-.settingDisclosure { border-bottom: 1px solid var(--settings-border); padding-bottom: 16px; }
-.settingDisclosure:last-child { border: 0; padding-bottom: 0; }
-.settingSummary { position: relative; display: flex; flex-direction: column; gap: 6px; padding: 6px 24px 6px 0; cursor: pointer; list-style: none; }
-.settingSummary::-webkit-details-marker { display: none; }
-.settingSummary::after { content: "⌄"; position: absolute; right: 2px; top: 14px; color: var(--settings-blue); }
-.settingDisclosure[open] > .settingSummary::after { content: "⌃"; }
-.settingSummary:focus-visible { outline: 2px solid var(--settings-blue); outline-offset: 4px; border-radius: 4px; }
 .summaryValue { font-size: 16px; font-weight: 600; color: var(--settings-blue); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
-.timeSection { padding: 20px 0; margin-bottom: 14px; border-bottom: 1px solid var(--settings-border); }
+.timeSection { padding: 12px 0; margin-bottom: 14px; border-bottom: 1px solid var(--settings-border); }
 .review { margin-top: 20px; padding: 16px; border-radius: 8px; background: var(--settings-pale); font-size: 14px; line-height: 1.8; }
 .ticketSection { margin-top: 28px; }
 .ticket { --ticket-stub-width: 52px; position: relative; display: grid; grid-template-columns: minmax(0, 1fr) var(--ticket-stub-width); overflow: hidden; background: #fffdf8; color: #35567f; border: 1px solid #dce3ed; border-radius: 4px; box-shadow: 0 3px 8px #24304708; }
@@ -94,19 +87,19 @@
 
 .input::-webkit-date-and-time-value { text-align: left; }
 
-.timeRange { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: end; gap: 6px; margin-top: 12px; }
-.timeSeparator { align-self: end; display: grid; height: 98px; place-items: center; color: #94a3b8; }
-.timeBox { display: flex; align-items: center; justify-content: space-between; gap: 2px; min-width: 0; padding: 4px 6px; border: 1px solid var(--settings-border); border-radius: 8px; background: white; }
+.timeRange { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: end; gap: 6px; margin-top: 8px; }
+.timeSeparator { align-self: end; display: grid; height: 66px; place-items: center; color: #94a3b8; }
+.timeBox { display: flex; align-items: center; justify-content: space-between; gap: 2px; min-width: 0; padding: 2px 6px; border: 1px solid var(--settings-border); border-radius: 8px; background: white; }
 .timeValue { display: block; min-width: 0; margin-inline-start: 4px; font-size: 22px; font-weight: 600; font-variant-numeric: tabular-nums; line-height: 1.2; letter-spacing: -.03em; }
 .timeArrows { display: flex; flex-direction: column; flex-shrink: 0; }
-.timeArrow { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 6px; color: var(--settings-blue); }
+.timeArrow { display: grid; place-items: center; width: 44px; height: 30px; border-radius: 6px; color: var(--settings-blue); }
 .timeArrow:hover { background: var(--settings-pale); }
 .timeArrow:disabled { color: #c4ccda; background: transparent; }
-.durationBox { display: grid; grid-template-columns: minmax(0, 1fr) 44px; align-items: start; gap: 12px; margin-top: 12px; }
+.durationBox { display: grid; grid-template-columns: minmax(0, 1fr) 44px; align-items: start; gap: 12px; margin-top: 8px; }
 .durationBox > .timeArrows { padding-top: 2px; }
 .flipDisplay { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; min-width: 0; }
 .flipUnit { min-width: 0; text-align: center; }
-.flipFace { position: relative; display: grid; place-items: center; height: 92px; border: 1px solid var(--settings-border); border-radius: 8px; background: linear-gradient(#f7f8fb 50%, #fff 50%); box-shadow: 0 2px 3px #2430470a; font-size: clamp(40px, 12vw, 64px); line-height: 1; font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: -.04em; }
+.flipFace { position: relative; display: grid; place-items: center; height: 64px; border: 1px solid var(--settings-border); border-radius: 8px; background: linear-gradient(#f7f8fb 50%, #fff 50%); box-shadow: 0 2px 3px #2430470a; font-size: clamp(36px, 10vw, 48px); line-height: 1; font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: -.04em; }
 .flipFace::after { content: ""; position: absolute; top: 50%; left: 0; right: 0; height: 1px; background: #dce3f199; }
 .flipCaption { display: block; margin-top: 8px; font-size: 12px; color: var(--settings-muted); }
 .timeBox[data-invalid="true"], .durationBox[data-invalid="true"] { border-color: #b91c1c; }
@@ -166,3 +159,13 @@
   .timeValue { font-size: 19px; }
   .timeBox { padding-inline: 4px; }
 }
+
+.dateSection { padding-bottom: 14px; border-bottom: 1px solid var(--settings-border); }
+.dateHeading { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 4px; }
+.calendarTrigger { min-height: 44px; padding: 8px; color: var(--settings-blue); font-size: 12px; border-radius: 6px; }
+.calendarTrigger:hover { background: var(--settings-pale); }
+.calendarDialog { position: fixed; inset: 0; width: min(420px, calc(100vw - 24px)); max-height: calc(100dvh - 24px); margin: auto; padding: 16px; overflow-y: auto; border: 1px solid var(--settings-border); border-radius: 12px; background: white; color: #243047; }
+.calendarDialog::backdrop { background: #24304766; }
+.dialogHeading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.calendarDialog .summaryValue { margin-top: 8px; font-size: 14px; }
+.calendarDialog .calendar { margin-top: 12px; }

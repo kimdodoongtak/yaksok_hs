@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useRef, useState } from "react";
 import type { PromiseSettingsFormState } from "@/actions/promise-settings";
 import styles from "./settings.module.css";
 
@@ -40,6 +40,8 @@ export function DateRangePicker({
   initialEnd: string;
   errors: PromiseSettingsFormState["fieldErrors"];
 }) {
+  const dialog = useRef<HTMLDialogElement>(null);
+  const dialogTitle = useId();
   const today = kstDateString(new Date(serverNow));
   const calendarLimit = addCalendarMonths(today, 3);
   const initialMonth = initialStart ? initialStart.slice(0, 7) : today.slice(0, 7);
@@ -78,12 +80,11 @@ export function DateRangePicker({
   }
 
   return (
-    <details className={styles.settingDisclosure} open={Boolean(errors.dateRangeStart || errors.dateRangeEnd) || undefined}>
-      <summary className={styles.settingSummary}>
+    <section aria-label="약속 날짜" className={styles.dateSection}>
+      <div className={styles.dateHeading}>
         <span className="text-sm font-semibold">약속 날짜</span>
-        <span className={styles.summaryValue}>{start.replaceAll("-", ".")} → {end ? end.replaceAll("-", ".") : "종료일 선택"}</span>
-      </summary>
-      <div className="pt-4">
+        <button type="button" className={styles.calendarTrigger} onClick={() => dialog.current?.showModal()}>달력에서 선택</button>
+      </div>
       <div className={`${styles.dateInputs} grid grid-cols-2 gap-3`}>
         <div>
           <label htmlFor="dateRangeStart" className="text-sm text-slate-600">
@@ -130,6 +131,13 @@ export function DateRangePicker({
         </div>
       </div>
 
+      <dialog ref={dialog} aria-labelledby={dialogTitle} className={styles.calendarDialog}>
+        <div className={styles.dialogHeading}>
+          <h3 id={dialogTitle} className="font-semibold">날짜 범위 선택</h3>
+          <button type="button" className={styles.monthButton} aria-label="달력 닫기" onClick={() => dialog.current?.close()}>×</button>
+        </div>
+        <p className={styles.help}>시작일과 종료일을 차례로 선택해 주세요.</p>
+        <p className={styles.summaryValue}>{start.replaceAll("-", ".")} → {end ? end.replaceAll("-", ".") : "종료일 선택"}</p>
       <div className={styles.calendar}>
         <div className="mb-2 flex items-center gap-2">
           <button
@@ -198,7 +206,8 @@ export function DateRangePicker({
       <p className={styles.help}>
         오늘부터 달력 3개월 이내, 최대 90일까지 선택할 수 있어요.
       </p>
-      </div>
-    </details>
+      <button type="button" disabled={!start || !end} className={`${styles.submit} mt-4 w-full`} onClick={() => dialog.current?.close()}>선택 완료</button>
+      </dialog>
+    </section>
   );
 }

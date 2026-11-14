@@ -67,7 +67,6 @@ test("시작일을 바꾸면 기본 마감이 따라가고 직접 편집한 마�
   await page.getByLabel("닉네임").fill("마감방장");
   await page.getByLabel("PIN").fill("1234");
   await page.getByRole("button", { name: "방장으로 시작하기" }).click();
-  await page.getByText("약속 날짜", { exact: true }).click();
   await page.getByLabel("시작일", { exact: true }).fill(kstDate(14));
   await page.getByLabel("종료일", { exact: true }).fill(kstDate(40));
   await page.getByRole("button", { name: "다음", exact: true }).click();
@@ -88,8 +87,6 @@ test("시작일을 바꾸면 기본 마감이 따라가고 직접 편집한 마�
   await expect(page.getByText("정원은 방장을 포함해 2~30명으로 입력해 주세요.")).toBeVisible();
   await expect(deadline).toHaveValue(customDeadline);
   await page.getByRole("button", { name: "이전", exact: true }).click();
-  // 서버 오류 뒤 날짜 입력기가 재마운트되어 요약 상태로 돌아간다.
-  await page.getByText("약속 날짜", { exact: true }).click();
   await page.getByLabel("시작일", { exact: true }).fill(kstDate(16));
   await page.getByRole("button", { name: "다음", exact: true }).click();
   await expect(deadline).toHaveValue(customDeadline);
@@ -108,11 +105,10 @@ test("단계별 오류를 복구하고 수정한 입력을 유지한다", async 
   await page.getByLabel("닉네임").fill("단계방장");
   await page.getByLabel("PIN").fill("1234");
   await page.getByRole("button", { name: "방장으로 시작하기" }).click();
-  await page.getByText("약속 날짜", { exact: true }).click();
   await page.getByLabel("시작일").fill(kstDate(-1));
   await page.getByRole("button", { name: "다음", exact: true }).click();
   await expect(page.getByText("시작일은 KST 기준 오늘 이후 날짜로 선택해 주세요.")).toBeVisible();
-  await expect(page.getByRole("heading", { name: "언제 만날까요?" })).toBeVisible();
+  await expect(page.getByLabel("시작일", { exact: true })).toBeVisible();
   await page.getByLabel("시작일").fill(kstDate(0));
   await page.getByRole("button", { name: "다음", exact: true }).click();
   await page.getByRole("button", { name: "정원 늘리기" }).click();
@@ -126,7 +122,7 @@ test("단계별 오류를 복구하고 수정한 입력을 유지한다", async 
     (element as HTMLInputElement).value = "0";
   });
   await page.getByRole("button", { name: "모집 시작", exact: true }).click();
-  await expect(page.getByRole("heading", { name: "언제 만날까요?" })).toBeFocused();
+  await expect(page.getByRole("heading", { name: "날짜와 시간" })).toBeFocused();
   await expect(page.getByText("소요 시간은 하루 시간 범위 안에서 30분 단위로 입력해 주세요.")).toBeVisible();
   await page.getByRole("button", { name: "소요 시간 30분 늘리기" }).click();
   await page.getByRole("button", { name: "다음", exact: true }).click();
@@ -148,7 +144,7 @@ test("방장이 모바일 설정을 완료하면 세션이 연장되고 초대 �
   await page.getByRole("button", { name: "방장으로 시작하기" }).click();
 
   await expect(page.getByRole("heading", { name: "약속 설정" })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "언제 만날까요?" })).toBeVisible();
+  await expect(page.getByLabel("시작일", { exact: true })).toBeVisible();
   await expect(page.getByRole("button", { name: "모집 시작", exact: true })).toHaveCount(0);
   await expect(page.getByRole("grid", { name: "날짜 범위 달력" })).not.toBeVisible();
   await expect(page.getByRole("button", { name: "소요 시간 30분 늘리기" })).toBeVisible();
@@ -160,7 +156,7 @@ test("방장이 모바일 설정을 완료하면 세션이 연장되고 초대 �
   }
   await page.setViewportSize({ width: 393, height: 852 });
   await page.getByRole("button", { name: "다음", exact: true }).click();
-  await expect(page.getByRole("heading", { name: "몇 명이 함께하나요?" })).toBeFocused();
+  await expect(page.getByRole("heading", { name: "모집 설정" })).toBeFocused();
   const participantLimit = page.getByRole("spinbutton", {
     name: "정원",
     exact: true,
@@ -176,7 +172,7 @@ test("방장이 모바일 설정을 완료하면 세션이 연장되고 초대 �
   await participantLimit.fill("5");
   await expect(page.getByText("최대 30명")).toBeVisible();
   await expect(page.getByLabel("응답 마감")).toHaveValue(`${kstDate(7)}T23:59`);
-  await page.getByRole("heading", { name: "몇 명이 함께하나요?" }).focus();
+  await page.getByRole("heading", { name: "모집 설정" }).focus();
   await page.evaluate(() => window.scrollTo(0, 0));
   const submitBounds = await page.getByRole("button", { name: "모집 시작", exact: true }).boundingBox();
   expect(submitBounds!.y + submitBounds!.height).toBeLessThanOrEqual(852);
@@ -188,7 +184,6 @@ test("방장이 모바일 설정을 완료하면 세션이 연장되고 초대 �
   }
   await page.setViewportSize({ width: 393, height: 852 });
   await page.getByRole("button", { name: "이전", exact: true }).click();
-  await page.getByText("약속 날짜", { exact: true }).click();
   await expect(page.getByLabel("시작일")).toHaveValue(kstDate(0));
   await expect(page.getByLabel("종료일")).toHaveValue(addCalendarMonth(kstDate(0)));
   const dailyStart = page.locator('[name="dailyStart"]');
@@ -237,6 +232,7 @@ test("방장이 모바일 설정을 완료하면 세션이 연장되고 초대 �
   for (let slot = 0; slot < 3; slot++) await durationUp.click();
   await expect(durationValue).toHaveValue("120");
   await expect(page.getByText("한국 시간(KST) 기준이에요.")).toHaveCount(0);
+  await page.getByRole("button", { name: "달력에서 선택" }).click();
   const calendar = page.getByRole("grid", { name: "날짜 범위 달력" });
   await expect(calendar).toBeVisible();
   await expect(calendar.locator('[aria-current="date"]')).toHaveCount(1);
@@ -261,6 +257,7 @@ test("방장이 모바일 설정을 완료하면 세션이 연장되고 초대 �
   await page.setViewportSize({ width: 393, height: 852 });
   await calendar.locator(`[aria-label="${kstDate(1)} 선택"]`).click();
   await calendar.locator(`[aria-label="${kstDate(2)} 선택"]`).click();
+  await page.getByRole("button", { name: "선택 완료", exact: true }).click();
   await expect(page.getByLabel("시작일")).toHaveValue(kstDate(1));
   await expect(page.getByLabel("종료일")).toHaveValue(kstDate(2));
   await page.screenshot({
@@ -355,4 +352,36 @@ test("방장이 모바일 설정을 완료하면 세션이 연장되고 초대 �
   await context.clearCookies();
   await page.reload();
   await expect(ticket).toHaveCount(0);
+});
+
+test("설정 진입 시 날짜·시간·소요 시간과 다음 버튼이 첫 화면에 보인다", async ({ page }) => {
+  const link = await fixture();
+  await page.setViewportSize({ width: 393, height: 700 });
+  await page.goto(`/p/${link.inviteToken}`);
+  await page.getByLabel("닉네임").fill("화면방장");
+  await page.getByLabel("PIN").fill("1234");
+  await page.getByRole("button", { name: "방장으로 시작하기" }).click();
+  await expect(page.getByLabel("시작일", { exact: true })).toBeVisible();
+  await expect(page.getByLabel("종료일", { exact: true })).toBeVisible();
+  expect(await page.evaluate(() => window.scrollY)).toBe(0);
+  for (const control of [
+    page.getByLabel("시작일", { exact: true }),
+    page.getByLabel("종료일", { exact: true }),
+    page.getByRole("button", { name: "하루 시작 30분 늘리기" }),
+    page.getByRole("button", { name: "하루 종료 30분 늘리기" }),
+    page.getByRole("button", { name: "소요 시간 30분 늘리기" }),
+    page.getByRole("button", { name: "다음", exact: true }),
+  ]) {
+    const bounds = await control.boundingBox();
+    expect(bounds).not.toBeNull();
+    expect(bounds!.y).toBeGreaterThanOrEqual(0);
+    expect(bounds!.y + bounds!.height).toBeLessThanOrEqual(700);
+  }
+  await page.screenshot({ path: "test-results/settings-first-viewport-393x700.png", fullPage: true });
+  const calendarButton = page.getByRole("button", { name: "달력에서 선택" });
+  await calendarButton.click();
+  await expect(page.getByRole("dialog", { name: "날짜 범위 선택" })).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("dialog")).not.toBeVisible();
+  await expect(calendarButton).toBeFocused();
 });
