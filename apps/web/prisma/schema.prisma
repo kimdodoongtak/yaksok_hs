@@ -48,6 +48,7 @@ model Participant {
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
   promise PromiseRecord @relation(fields:[promiseId], references:[id], onDelete:Restrict)
   sessions ParticipantSession[]
+  availableSlots ParticipantAvailableSlot[]
   @@unique([promiseId, normalizedNickname])
   @@map("participants")
 }
@@ -71,4 +72,13 @@ model AuthAttempt {
   promise PromiseRecord? @relation(fields: [promiseId], references: [id], onDelete: Cascade)
   @@index([expiresAt])
   @@map("auth_attempts")
+}
+
+model ParticipantAvailableSlot {
+  id String @id @default(uuid()) @db.Uuid
+  participantId String @map("participant_id") @db.Uuid
+  slotStartAt DateTime @map("slot_start_at") @db.Timestamptz(3)
+  participant Participant @relation(fields: [participantId], references: [id], onDelete: Restrict)
+  @@unique([participantId, slotStartAt])
+  @@map("participant_available_slots")
 }

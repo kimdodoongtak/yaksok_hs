@@ -1,4 +1,5 @@
 import "server-only";
+import { requireParticipantSession } from "./session";
 import type { ParticipantView } from "./view";
 import type { PromiseSettingsDefaults } from "../promise-settings/policy";
 import type { Prisma, PrismaClient, Participant } from "../../generated/prisma/client";
@@ -15,18 +16,8 @@ export function createParticipantAccessService(db: PrismaClient, clock?: () => D
     const [row] = await tx.$queryRaw<{ now: Date }[]>`SELECT clock_timestamp() AS now`;
     return row.now;
   }
-  async function requireSession(tx: Prisma.TransactionClient, input: SessionInput) {
-    await tx.$queryRaw`SELECT p.id FROM promises p JOIN promise_links l ON l.id = p.promise_link_id WHERE l.invite_token = ${input.inviteToken} FOR UPDATE OF p`;
-    const link = await tx.promiseLink.findUnique({ where: { inviteToken: input.inviteToken }, include: { promise: true } });
-    const at = await now(tx);
-    if (!link) return { ok: false as const, code: "INVALID_LINK" };
-    if (linkExpiresAt(link.createdAt) <= at) return { ok: false as const, code: "LINK_EXPIRED" };
-    if (link.promise?.status === "cancelled") return { ok: false as const, code: "PROMISE_CANCELLED" };
-    if (link.promise?.status === "draft" && draftExpiresAt(link.promise.createdAt) <= at) return { ok: false as const, code: "DRAFT_EXPIRED" };
-    const session = input.sessionToken ? await tx.participantSession.findUnique({ where: { sessionTokenHash: tokenHash(input.sessionToken) }, include: { participant: true } }) : null;
-    if (!link.promise || !session || session.expiresAt <= at || session.participant.promiseId !== link.promise.id || session.participant.status !== "active") return { ok: false as const, code: "UNAUTHORIZED" };
-    return { ok: true as const, link, promise: link.promise, session, at };
-  }
+  const requireSession = (tx: Prisma.TransactionClient, input: SessionInput) =>
+    requireParticipantSession(tx, input, () => now(tx));
   async function checkPin(tx: Prisma.TransactionClient, promiseId: string, nickname: string, pin: string, member: Participant | null, at: Date, expiresAt: Date): Promise<{ ok: true } | AccessFailure> {
     const keyHash = tokenHash(JSON.stringify(["account", promiseId, nickname]));
     const attempt = await tx.authAttempt.findUnique({ where: { keyHash } });

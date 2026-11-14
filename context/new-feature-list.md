@@ -10,7 +10,7 @@
 | 1 | 001-invitation-and-host | 초대 링크 접근과 방장 등록 | [스펙](features/001-invitation-and-host-spec.md) | 000 — 000의 Next.js·Prisma 연결 기반이 필요하다 | 완료 — 2026-11-13 |
 | 2 | 002-promise-settings | 약속 설정과 모집 시작 | [스펙](features/002-promise-settings-spec.md) | 001 — 001의 draft 약속, 방장 세션, 만료 검사와 마이그레이션이 필요하다. | 완료 — 2026-11-14 |
 | 3 | 003-participant-access | 참여자 등록과 약속별 재인증 | [스펙](features/003-participant-access-spec.md) | 002 — 002의 collecting 약속과 001의 인증·정규화·세션 기반을 사용한다. | 완료 — 2026-11-14 R1 보완·최종 검증 후 사용자 완료 요청 반영 |
-| 4 | 004-availability | 가능 시간 선택과 제출 | [스펙](features/004-availability-spec.md) | 003 — 003의 참여자 인증과 002의 약속 범위·마감이 필요하다. | 초안 |
+| 4 | 004-availability | 가능 시간 선택과 제출 | [스펙](features/004-availability-spec.md) | 003 — 003의 참여자 인증과 002의 약속 범위·마감이 필요하다. | 완료 — 2026-11-14 |
 | 5 | 005-status-and-candidates | 마감과 시간 후보 조회 | [스펙](features/005-status-and-candidates-spec.md) | 004 — 004에서 저장한 제출 상태·슬롯과 공통 마감 판정을 사용한다. | 초안 |
 | 6 | 006-confirmation | 방장 일정 확정과 결과 공유 | [스펙](features/006-confirmation-spec.md) | 005 — 005의 마감 판정·후보 계산을 확정 시 같은 트랜잭션에서 재사용한다. | 확인 필요 |
 | 7 | 007-rescheduling | 설정 변경과 재조율 | [스펙](features/007-rescheduling-spec.md) | 006 — 006까지의 상태·확정 필드와 004의 응답 버전이 있어야 재조율 결과를 검증할 수 있다. | 확인 필요 |

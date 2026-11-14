@@ -42,7 +42,7 @@
 | 1 | [001-invitation-and-host](features/001-invitation-and-host-spec.md) | 초대 링크 접근과 방장 등록 | REQ-001~006, REQ-026~027 | 신규 화면안 | 000 — 000의 Next.js·Prisma 연결 기반이 필요하다 | 완료 — 2026-11-13 |
 | 2 | [002-promise-settings](features/002-promise-settings-spec.md) | 약속 설정과 모집 시작 | REQ-007~008, REQ-029 | DOC-003 일부 + 신규 화면안 | 001 — 001의 draft 약속, 방장 세션, 만료 검사와 마이그레이션이 필요하다. | 완료 — 2026-11-14 |
 | 3 | [003-participant-access](features/003-participant-access-spec.md) | 참여자 등록과 약속별 재인증 | REQ-005~006, REQ-009~010, REQ-032~033, REQ-035 | 신규 화면안 | 002 — 002의 collecting 약속과 001의 인증·정규화·세션 기반을 사용한다. | 진행 중 — 2026-11-14 구현·회귀 검증, 검토 전 |
-| 4 | [004-availability](features/004-availability-spec.md) | 가능 시간 선택과 제출 | REQ-011~014, REQ-029, REQ-034 | DOC-003 일부 + 신규 화면안 | 003 — 003의 참여자 인증과 002의 약속 범위·마감이 필요하다. | 초안 |
+| 4 | [004-availability](features/004-availability-spec.md) | 가능 시간 선택과 제출 | REQ-011~014, REQ-029, REQ-034 | DOC-003 일부 + 신규 화면안 | 003 — 003의 참여자 인증과 002의 약속 범위·마감이 필요하다. | 완료 — 2026-11-14 |
 | 5 | [005-status-and-candidates](features/005-status-and-candidates-spec.md) | 마감과 시간 후보 조회 | REQ-015~017, REQ-029, REQ-034 | DOC-003 일부 + 신규 화면안 | 004 — 004에서 저장한 제출 상태·슬롯과 공통 마감 판정을 사용한다. | 초안 |
 | 6 | [006-confirmation](features/006-confirmation-spec.md) | 방장 일정 확정과 결과 공유 | REQ-018~019, REQ-029 | 신규 화면안 | 005 — 005의 마감 판정·후보 계산을 확정 시 같은 트랜잭션에서 재사용한다. | 확인 필요 |
 | 7 | [007-rescheduling](features/007-rescheduling-spec.md) | 설정 변경과 재조율 | REQ-020~021, REQ-027, REQ-034 | DOC-003 일부 + 신규 화면안 | 006 — 006까지의 상태·확정 필드와 004의 응답 버전이 있어야 재조율 결과를 검증할 수 있다. | 확인 필요 |
