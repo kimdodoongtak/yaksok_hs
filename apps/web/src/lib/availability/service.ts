@@ -4,7 +4,7 @@ import type { SessionInput } from "../participant-access/service";
 import { requireParticipantSession } from "../participant-access/session";
 import { normalizeSlots } from "./policy";
 import type { AvailabilitySnapshot, AvailabilityResult } from "./view";
-function settingsOf(p: PromiseRecord): AvailabilitySnapshot["settings"] | null {
+export function settingsOf(p: PromiseRecord): AvailabilitySnapshot["settings"] | null {
   if (!p.dateRangeStart || !p.dateRangeEnd || p.dailyStartMinute === null || p.dailyEndMinute === null || p.durationMinutes === null || !p.votingDeadlineAt || p.participantLimit === null) return null;
   return {dateRangeStart:p.dateRangeStart.toISOString().slice(0,10),dateRangeEnd:p.dateRangeEnd.toISOString().slice(0,10),dailyStartMinute:p.dailyStartMinute,dailyEndMinute:p.dailyEndMinute,durationMinutes:p.durationMinutes,votingDeadlineAt:p.votingDeadlineAt.toISOString(),participantLimit:p.participantLimit};
 }

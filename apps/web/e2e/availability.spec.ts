@@ -221,7 +221,7 @@ test("모바일 사이드바를 닫으면 선택을 유지하며 PC에서는 정
   const first=page.getByRole("button",{name:`${f.start} 09:00`,exact:true});await first.click();
   const menu=page.getByRole("button",{name:"약속 정보 열기",exact:true});
   await menu.click();const dialog=page.getByRole("dialog",{name:"약속 정보",exact:true});
-  await expect(dialog).toBeVisible();await expect(dialog.getByText("테스트친구",{exact:true})).toBeVisible();
+  await expect(dialog).toBeVisible();await expect(dialog.getByRole("button",{name:"테스트친구",exact:true})).toBeVisible();
   await page.screenshot({path:"test-results/availability-sidebar-393.png",fullPage:true});
   await page.keyboard.press("Escape");await expect(dialog).not.toBeVisible();await expect(menu).toBeFocused();
   await menu.click();
@@ -351,4 +351,139 @@ test("축소해도 부분 선택을 보존하고 2시간 묶음·마지막 짧�
   for(const width of [320,393,1280]){await page.setViewportSize({width,height:width===1280?800:852});expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);await page.screenshot({path:`test-results/availability-zoom-${width}.png`,fullPage:true});}
   await page.getByRole("button",{name:"선택 제출",exact:true}).click();await expect(page.getByRole("status")).toContainText("제출했어요");
   expect((await db.participantAvailableSlot.findMany({where:{participantId:f.member.id},orderBy:{slotStartAt:"asc"}})).map(row=>row.slotStartAt.toISOString())).toEqual(["09:00","09:30","10:00","10:30","23:00","23:30"].map(time=>f.slot(time)));
+});
+
+test("이번 주 반복은 미제출 시간을 복사하고 한 번에 되돌리며 명시적으로 제출한다",async({page,context})=>{
+  const f=await fixture(context);
+  await page.setViewportSize({width:393,height:852});
+  await page.goto(f.path);
+  const repeat=page.getByRole("button",{name:"이번 주 반복",exact:true});
+  await expect(repeat).toBeDisabled();
+  await page.getByRole("button",{name:"30분",exact:true}).click();
+  await page.getByRole("button",{name:`${f.start} 09:30`,exact:true}).click();
+  await page.getByRole("button",{name:`${f.start} 11:00`,exact:true}).click();
+  await page.getByRole("button",{name:"1시간",exact:true}).click();
+  await repeat.click();
+  const dialog=page.getByRole("dialog",{name:"이번 주 반복",exact:true});
+  await expect(dialog).toBeVisible();
+  await expect(dialog.getByText("09:30 ~ 10:00, 11:00 ~ 11:30",{exact:true})).not.toBeVisible();
+  await dialog.locator("summary").focus();await page.keyboard.press("Enter");
+  await expect(dialog.getByText("09:30 ~ 10:00, 11:00 ~ 11:30",{exact:true})).toBeVisible();
+  await page.keyboard.press("Enter");
+  await expect(dialog.getByText("09:30 ~ 10:00, 11:00 ~ 11:30",{exact:true})).not.toBeVisible();
+  const apply=dialog.getByRole("button",{name:"적용",exact:true});
+  const all=dialog.getByRole("radio",{name:"전체 선택",exact:true});
+  const custom=dialog.getByRole("radio",{name:"직접 선택",exact:true});
+  await expect(all).toBeChecked();await expect(dialog.getByRole("checkbox")).toHaveCount(0);
+  await expect(apply).toBeEnabled();
+  await custom.check();await expect(apply).toBeDisabled();
+  await dialog.getByRole("checkbox").first().check();
+  await expect(dialog).toContainText("1개 주에 1시간 추가");
+  await all.check();await expect(dialog.getByRole("checkbox")).toHaveCount(0);
+  await expect(dialog).toContainText("2개 주에 2시간 추가");
+  await custom.check();await expect(dialog.getByRole("checkbox").first()).toBeChecked();
+  await dialog.getByRole("checkbox").first().uncheck();await expect(apply).toBeDisabled();
+  await all.focus();await page.keyboard.press("Space");
+  await expect(dialog).toContainText("09:30 ~ 10:00");
+  await expect(dialog).toContainText("11:00 ~ 11:30");
+  await expect(dialog).toContainText("2개 주에 2시간 추가");
+  for(const width of [320,393,1280]){
+    await page.setViewportSize({width,height:width===1280?800:852});
+    const box=await dialog.boundingBox();expect(box).not.toBeNull();
+    expect(box!.x).toBeGreaterThanOrEqual(0);expect(box!.x+box!.width).toBeLessThanOrEqual(width);
+    await expect(apply).toBeInViewport();
+    await page.screenshot({path:`test-results/availability-repeat-${width}.png`,fullPage:true});
+  }
+  await apply.click();await expect(dialog).not.toBeVisible();
+  expect(await db.participantAvailableSlot.count({where:{participantId:f.member.id}})).toBe(0);
+  const nextDay=new Date(new Date(`${f.start}T00:00:00Z`).getTime()+7*86400000).toISOString().slice(0,10);
+  await page.getByRole("button",{name:"다음 주",exact:true}).click();
+  const target=page.getByRole("button",{name:`${nextDay} 09:00–10:00`,exact:true});
+  await expect(target).toHaveAttribute("aria-pressed","mixed");
+  await page.getByRole("button",{name:"되돌리기",exact:true}).click();
+  await expect(target).toHaveAttribute("aria-pressed","false");
+  await page.getByRole("button",{name:"복구하기",exact:true}).click();
+  await expect(target).toHaveAttribute("aria-pressed","mixed");
+  await repeat.click();
+  await expect(dialog.getByRole("checkbox")).toHaveCount(0);
+  await expect(apply).toBeDisabled();await expect(dialog).toContainText("이미 선택된 시간이거나 추가할 미래 시간이 없어요");
+  await page.keyboard.press("Escape");await expect(dialog).not.toBeVisible();await expect(repeat).toBeFocused();
+  await page.getByRole("button",{name:"되돌리기",exact:true}).click();
+  await expect(target).toHaveAttribute("aria-pressed","false");
+  await page.getByRole("button",{name:"복구하기",exact:true}).click();
+  await page.getByRole("button",{name:"선택 제출",exact:true}).click();
+  await expect(page.getByRole("status")).toContainText("제출했어요");
+  expect(await db.participantAvailableSlot.count({where:{participantId:f.member.id}})).toBe(6);
+  await page.reload();await page.getByRole("button",{name:"다음 주",exact:true}).click();
+  await expect(target).toHaveAttribute("aria-pressed","mixed");
+});
+
+test("이번 주 반복 창은 서버 응답·설정 변경과 마감 때 닫혀 오래된 입력을 적용하지 않는다",async({page,context})=>{
+  const f=await fixture(context);await page.goto(f.path);
+  await page.getByRole("button",{name:`${f.start} 09:00–10:00`,exact:true}).click();
+  const repeat=page.getByRole("button",{name:"이번 주 반복",exact:true});
+  const dialog=page.getByRole("dialog",{name:"이번 주 반복",exact:true});
+  await repeat.click();await expect(dialog).toBeVisible();
+  await db.$transaction(async tx=>{
+    await tx.participantAvailableSlot.create({data:{participantId:f.member.id,slotStartAt:new Date(f.slot("09:30"))}});
+    await tx.participant.update({where:{id:f.member.id},data:{availabilityVersion:1,availabilitySubmittedAt:new Date()}});
+  });
+  await page.evaluate(()=>window.dispatchEvent(new Event("focus")));
+  await expect(page.getByRole("status")).toContainText("다른 기기");await expect(dialog).not.toBeVisible();
+  await repeat.click();await expect(dialog).toBeVisible();
+  await db.promiseRecord.update({where:{id:f.promise.id},data:{durationMinutes:150}});
+  await page.evaluate(()=>window.dispatchEvent(new Event("focus")));
+  await expect(page.getByRole("status")).toContainText("약속 설정이 변경");await expect(dialog).not.toBeVisible();
+  await repeat.click();await expect(dialog).toBeVisible();
+  await db.promiseRecord.update({where:{id:f.promise.id},data:{status:"closed"}});
+  await page.evaluate(()=>window.dispatchEvent(new Event("focus")));
+  await expect(page.getByRole("status")).toContainText("응답이 마감");await expect(dialog).not.toBeVisible();
+  await expect(repeat).toBeDisabled();
+});
+
+test("이번 주 반복은 모바일에서 보고 있는 주를 기준으로 삼고 취소하면 선택을 보존한다",async({browser})=>{
+  const context=await browser.newContext({viewport:{width:393,height:852},hasTouch:true,isMobile:true});
+  try {
+    const f=await fixture(context),page=await context.newPage();
+    const second=new Date(new Date(`${f.start}T00:00:00Z`).getTime()+7*86400000).toISOString().slice(0,10);
+    await db.participantAvailableSlot.createMany({data:[{participantId:f.member.id,slotStartAt:new Date(f.slot("09:30"))},{participantId:f.member.id,slotStartAt:new Date(f.slot("13:30",second))}]});
+    await db.participant.update({where:{id:f.member.id},data:{availabilityVersion:1,availabilitySubmittedAt:new Date()}});
+    await page.goto(`http://127.0.0.1:3100${f.path}`);
+    await page.getByRole("button",{name:"다음 주",exact:true}).tap();
+    const repeat=page.getByRole("button",{name:"이번 주 반복",exact:true});await repeat.tap();
+    const dialog=page.getByRole("dialog",{name:"이번 주 반복",exact:true});
+    await expect(dialog.getByRole("combobox")).toHaveCount(0);
+    await dialog.locator("summary").tap();
+    await expect(dialog).toContainText("13:30 ~ 14:00");await expect(dialog).not.toContainText("09:30 ~ 10:00");
+    await dialog.getByRole("radio",{name:"직접 선택",exact:true}).tap();
+    await dialog.getByRole("checkbox").first().tap();
+    await expect(dialog.getByRole("checkbox").first()).toBeChecked();
+    await dialog.getByRole("radio",{name:"전체 선택",exact:true}).tap();
+    await expect(dialog.getByRole("checkbox")).toHaveCount(0);
+    await dialog.getByRole("button",{name:"취소",exact:true}).tap();await expect(dialog).not.toBeVisible();
+    await expect(page.getByRole("button",{name:"되돌리기",exact:true})).toBeDisabled();
+    expect(await db.participantAvailableSlot.count({where:{participantId:f.member.id}})).toBe(2);
+    await repeat.tap();await expect(dialog).toContainText("13:30 ~ 14:00");
+    await expect(dialog.getByRole("radio",{name:"전체 선택",exact:true})).toBeChecked();
+    await expect(dialog.getByRole("button",{name:"적용",exact:true})).toBeEnabled();
+    await dialog.getByRole("button",{name:"이번 주 반복 닫기",exact:true}).tap();
+    await expect(page.getByRole("button",{name:`${second} 13:00–14:00`,exact:true})).toHaveAttribute("aria-pressed","mixed");
+  } finally {await context.close();}
+});
+
+test("이번 주 반복은 빈 주를 기준으로 삼지 않고 대상 주가 없으면 안내한다",async({page,context})=>{
+  const f=await fixture(context);await page.goto(f.path);
+  const source=page.getByRole("button",{name:`${f.start} 09:00–10:00`,exact:true});await source.click();
+  const repeat=page.getByRole("button",{name:"이번 주 반복",exact:true});await expect(repeat).toBeEnabled();
+  await page.getByRole("button",{name:"다음 주",exact:true}).click();await expect(repeat).toBeDisabled();
+  await page.getByRole("button",{name:"이전 주",exact:true}).click();await expect(repeat).toBeEnabled();
+  await db.promiseRecord.update({where:{id:f.promise.id},data:{dateRangeEnd:new Date(f.start)}});
+  await page.evaluate(()=>window.dispatchEvent(new Event("focus")));
+  await expect(page.getByRole("status")).toContainText("약속 설정이 변경");
+  await source.click();await repeat.click();
+  const dialog=page.getByRole("dialog",{name:"이번 주 반복",exact:true});
+  await expect(dialog).toContainText("반복할 다른 주가 없어요");
+  await expect(dialog.getByRole("checkbox")).toHaveCount(0);
+  await expect(dialog.getByRole("button",{name:"전체 선택",exact:true})).toHaveCount(0);
+  await expect(dialog.getByRole("button",{name:"적용",exact:true})).toBeDisabled();
 });
