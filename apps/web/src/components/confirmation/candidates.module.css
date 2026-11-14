@@ -3,7 +3,7 @@
 .header { display: flex; align-items: center; justify-content: space-between; min-height: 44px; gap: 12px; }
 .header a { font-size: 14px; font-weight: 700; color: #4261df; }
 .header > span { font-size: 12px; padding: 6px 10px; border-radius: 6px; color: #4261df; background: #e7edff; }
-.navigation { display: flex; justify-content: flex-end; margin: 4px 0 12px; }
+.navigation { display: flex; flex-wrap: wrap; gap: 20px; justify-content: space-between; margin: 4px 0 12px; }
 .navigation a { display: flex; align-items: center; gap: 10px; min-height: 44px; font-size: 13px; font-weight: 600; color: #4261df; }
 .feedback,.memberNotice { font-size: 13px; line-height: 1.7; color: #53617a; margin: 12px 0; }
 .feedback button { color: #4261df; min-height: 44px; text-decoration: underline; }

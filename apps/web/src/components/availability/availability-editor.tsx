@@ -62,7 +62,7 @@ export function AvailabilityEditor({inviteToken,initial}:{inviteToken:string;ini
     if(next.participantId!==previous.participantId || next.version<previous.version)return;
     if(force || changedSettings || changedVersion || next.status!==previous.status){
       cancelDrag();setDraft(new Set(next.slots));setHistory([]);setFuture([]);setConfirmClear(false);setRepeatWeek(null);setConfirmClose(false);
-      if(!force)setMessage(changedSettings?"약속 설정이 변경됐어요. 최신 선택을 불러왔어요.":changedVersion?"다른 기기에서 응답이 변경됐어요. 최신 선택을 불러왔어요.":"응답이 마감됐어요. 제출한 시간만 확인할 수 있어요.");
+      if(!force)setMessage(changedSettings?(next.submittedAt===null?"약속 설정이 변경됐어요. 가능 시간을 확인하고 다시 제출해 주세요.":"약속 설정이 변경됐어요. 최신 선택을 불러왔어요."):changedVersion?"다른 기기에서 응답이 변경됐어요. 최신 선택을 불러왔어요.":"응답이 마감됐어요. 제출한 시간만 확인할 수 있어요.");
     }
     if(changedSettings)setWeek(current=>current<weekStart(next.settings.dateRangeStart)||current>next.settings.dateRangeEnd?weekStart(next.settings.dateRangeStart):current);
     latest.current=next;setSnapshot(next);

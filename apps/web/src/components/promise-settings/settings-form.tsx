@@ -13,18 +13,20 @@ const firstStepFields: PromiseSettingsField[] = [
   "dateRangeStart", "dateRangeEnd", "dailyStart", "dailyEnd", "durationMinutes",
 ];
 
-export function SettingsForm({ inviteToken, serverNow }: {
+export function SettingsForm({ inviteToken, serverNow, initialValues, submitSettings }: {
   inviteToken: string;
   serverNow: string;
+  initialValues?: PromiseSettingsFormState["values"];
+  submitSettings?: (data:FormData)=>Promise<PromiseSettingsFormState>;
 }) {
-  const defaults = defaultPromiseSettings(new Date(serverNow));
+  const defaults = initialValues ?? defaultPromiseSettings(new Date(serverNow));
   const initialState: PromiseSettingsFormState = { message: null, fieldErrors: {}, values: defaults };
   const [step, setStep] = useState<1 | 2>(1);
   const [errors, setErrors] = useState<PromiseSettingsFormState["fieldErrors"]>({});
   const [message, setMessage] = useState<string | null>(null);
   const [review, setReview] = useState(defaults);
   const [deadline, setDeadline] = useState(defaults.votingDeadline);
-  const deadlineEdited = useRef(false);
+  const deadlineEdited = useRef(Boolean(initialValues));
   const form = useRef<HTMLFormElement>(null);
   const heading = useRef<HTMLHeadingElement>(null);
 
@@ -38,7 +40,7 @@ export function SettingsForm({ inviteToken, serverNow }: {
 
   const [state, action, pending] = useActionState(
     async (previous: PromiseSettingsFormState, data: FormData) => {
-      const result = await startCollection(inviteToken, previous, data);
+      const result = submitSettings ? await submitSettings(data) : await startCollection(inviteToken, previous, data);
       setErrors(result.fieldErrors);
       setMessage(result.message);
       setDeadline(result.values.votingDeadline);
@@ -171,12 +173,12 @@ export function SettingsForm({ inviteToken, serverNow }: {
         ) : (
           <>
             <button type="button" disabled={pending} onClick={() => goTo(1)} className={styles.previous}>이전</button>
-            <button type="submit" disabled={pending} className={styles.submit}>{pending ? "시작 중…" : "모집 시작"}</button>
+            <button type="submit" disabled={pending} className={styles.submit}>{pending ? (submitSettings ? "처리 중…" : "시작 중…") : submitSettings ? "변경 내용 확인" : "모집 시작"}</button>
           </>
         )}
       </div>
       <p className="mt-3 text-center text-xs text-slate-500">
-        {step === 1 ? "다음 단계에서 정원과 응답 마감을 정해요." : "모집을 시작하면 초대 링크를 공유할 수 있어요."}
+        {step === 1 ? "다음 단계에서 정원과 응답 마감을 정해요." : submitSettings ? "다음 화면에서 변경 영향을 확인할 수 있어요." : "모집을 시작하면 초대 링크를 공유할 수 있어요."}
       </p>
     </form>
   );

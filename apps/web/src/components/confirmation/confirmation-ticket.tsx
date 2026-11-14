@@ -68,6 +68,7 @@ export function ConfirmationTicket({inviteToken,initial}:{inviteToken:string;ini
     <p className={styles.help}>이 약속에 참여한 사람만 로그인 후 볼 수 있어요.</p>
     {copied&&<p role="status" className={styles.help}>결과 링크를 복사했어요.</p>}
     {manual&&<div className={styles.manual}><p role="status">자동 복사가 안 돼요. 아래 링크를 직접 복사해 주세요.</p><input aria-label="결과 링크" value={manual} readOnly onFocus={event=>event.target.select()}/></div>}
+    {snapshot.role==="host"&&<Link className={styles.back} href={`/p/${inviteToken}/settings/edit`}>재조율하기</Link>}
     <Link className={styles.back} href={`/p/${inviteToken}`}>참여 정보</Link>
   </main></div>;
 }

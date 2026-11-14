@@ -21,6 +21,7 @@ export function AvailabilitySidebar({snapshot,inviteToken,participants,onSelect,
     <div className={styles.participants}>{participants?.map(member=><button key={member.id} type="button" aria-label={member.nickname} aria-pressed={selectedId===member.id} onClick={()=>onSelect?.(member.id)}><strong>{member.nickname}</strong><span>{member.role==="host"?"방장":member.id===snapshot.participantId?"나":""}</span></button>)}</div>
     <h3 className={styles.myHeading}>내 참여 정보</h3>
     <div className={styles.myCard}><div><strong>{snapshot.nickname}</strong><span>{snapshot.role==="host"?"방장":"참여자"}</span></div><p>{snapshot.submittedAt?"응답 제출 완료":"응답 대기"}</p></div>
+    {snapshot.role==="host"&&<Link href={`/p/${inviteToken}/settings/edit`} className={styles.infoLink}>{snapshot.status==="collecting"?"설정 변경":"재조율하기"}</Link>}
     <Link href={`/p/${inviteToken}`} className={styles.infoLink}>{snapshot.role==="host"?"초대 링크 · 참여 정보":"참여 정보 보기"}</Link>
   </div>;
 }
