@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { closeCollection } from "@/actions/promise-status";
 import { heatLegend } from "./heatmap-scale";
 import { HeatmapCell } from "./heatmap-cell";
-import { CandidateList } from "./candidate-list";
+import Link from "next/link";
 import { submitAvailability } from "@/actions/availability";
 import type { AvailabilityResult, AvailabilitySnapshot } from "@/lib/availability/view";
 import { addDays, durationLabel, localDay, slotAt, timeLabel, weekStart } from "./calendar";
@@ -31,10 +31,9 @@ export function AvailabilityEditor({inviteToken,initial}:{inviteToken:string;ini
   },[]);
   const [week,setWeek]=useState(()=>weekStart(initial.settings.dateRangeStart));
   const [view,setView]=useState("mine");
-  const [candidateLimit,setCandidateLimit]=useState(5);
   const [confirmClose,setConfirmClose]=useState(false);
   const closeDialog=useRef<HTMLDialogElement>(null);
-  const overview=useOverview(inviteToken,snapshot.participantId,week,["mine","all"].includes(view)?undefined:view,candidateLimit,JSON.stringify(settingsRevision(snapshot)));
+  const overview=useOverview(inviteToken,snapshot.participantId,week,["mine","all"].includes(view)?undefined:view,5,JSON.stringify(settingsRevision(snapshot)));
   const [message,setMessage]=useState("");
   const [pending,setPending]=useState(false);
   const [sidebarOpen,setSidebarOpen]=useState(false);
@@ -55,7 +54,9 @@ export function AvailabilityEditor({inviteToken,initial}:{inviteToken:string;ini
   const selected=[...draft].sort();
   const dirty=JSON.stringify(selected)!==JSON.stringify(snapshot.slots);
   const applySnapshot=useCallback((next:AvailabilitySnapshot,force=false)=>{
+    if(next.status==="confirmed"){router.replace(`/p/${inviteToken}/result`);return;}
     const previous=latest.current;
+    if(next.status==="closed"&&previous.status!=="closed"){cancelDrag();setConfirmClose(false);setRepeatWeek(null);setConfirmClear(false);router.replace(`/p/${inviteToken}/candidates`);return;}
     const changedSettings=JSON.stringify(previous.settings)!==JSON.stringify(next.settings);
     const changedVersion=previous.version!==next.version;
     if(next.participantId!==previous.participantId || next.version<previous.version)return;
@@ -65,7 +66,7 @@ export function AvailabilityEditor({inviteToken,initial}:{inviteToken:string;ini
     }
     if(changedSettings)setWeek(current=>current<weekStart(next.settings.dateRangeStart)||current>next.settings.dateRangeEnd?weekStart(next.settings.dateRangeStart):current);
     latest.current=next;setSnapshot(next);
-  },[cancelDrag]);
+  },[cancelDrag,inviteToken,router]);
   useEffect(()=>{
     let reading=false,disposed=false;
     const controller=new AbortController();
@@ -115,7 +116,7 @@ export function AvailabilityEditor({inviteToken,initial}:{inviteToken:string;ini
     busy.current=true;epoch.current++;setPending(true);cancelDrag();
     try {
       const result=await closeCollection(inviteToken,snapshot.participantId);
-      if(result.ok){applySnapshot({...latest.current,status:"closed"},true);overview.refresh();setMessage("응답을 마감했어요.");}
+      if(result.ok){router.replace(`/p/${inviteToken}/candidates`);}
       else if(["UNAUTHORIZED","LINK_EXPIRED","PROMISE_CANCELLED","INVALID_LINK"].includes(result.code))router.replace(`/p/${inviteToken}`);
       else setMessage(result.code==="FORBIDDEN"?"현재 방장만 마감할 수 있어요.":"마감하지 못했어요. 다시 시도해 주세요.");
     } catch {setMessage("마감하지 못했어요. 다시 시도해 주세요.");}
@@ -187,7 +188,7 @@ export function AvailabilityEditor({inviteToken,initial}:{inviteToken:string;ini
       }
       if(result.ok){overview.refresh();setMessage(result.snapshot.slots.length?"가능 시간을 제출했어요.":"가능한 시간 없음으로 제출했어요.");}
       else if(result.code==="AVAILABILITY_VERSION_CONFLICT")setMessage("다른 기기에서 응답이 변경됐어요. 최신 선택을 불러왔어요.");
-      else if(result.code==="VOTING_CLOSED")setMessage("응답이 마감됐어요. 제출한 시간만 확인할 수 있어요.");
+      else if(result.code==="VOTING_CLOSED")router.replace(`/p/${inviteToken}/candidates`);
       else if(["UNAUTHORIZED","LINK_EXPIRED","PROMISE_CANCELLED","DRAFT_EXPIRED","INVALID_LINK","NOT_AVAILABLE"].includes(result.code))router.replace(`/p/${inviteToken}`);
       else setMessage("제출하지 못했어요. 선택은 유지돼요. 다시 시도해 주세요.");
     } catch {setMessage("제출하지 못했어요. 선택은 유지돼요. 다시 시도해 주세요.");}
@@ -197,9 +198,9 @@ export function AvailabilityEditor({inviteToken,initial}:{inviteToken:string;ini
     <header className={styles.header}>
       <div className={styles.headingRow}>
         <button type="button" className={styles.menuButton} aria-label="약속 정보 열기" aria-expanded={sidebarOpen} aria-controls="availability-drawer" onClick={()=>setSidebarOpen(true)}><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
-        <div><h1>가능 시간 입력</h1><p>{snapshot.nickname} · {snapshot.submittedAt?"제출 완료":"미제출"}{dirty?" · 수정 중":""}</p></div>
+        <div><h1>{closed?"응답 시간표":"가능 시간 입력"}</h1><p>{snapshot.nickname} · {snapshot.submittedAt?"제출 완료":"미제출"}{dirty?" · 수정 중":""}</p></div>
       </div>
-      <span className={styles.viewBadge}>{closed?"마감":"모집 중"}</span>
+      <div className={styles.headerAction}>{closed?<Link href={`/p/${inviteToken}/candidates`}>후보 보기</Link>:snapshot.role==="host"?<button type="button" disabled={pending} onClick={()=>setConfirmClose(true)}>응답 마감</button>:<span className={styles.viewBadge}>모집 중</span>}</div>
     </header>
     <div className={styles.workspace}>
       <aside className={styles.sidebar} aria-label="약속 정보"><AvailabilitySidebar snapshot={snapshot} inviteToken={inviteToken} {...participantProps}/></aside>
@@ -240,7 +241,7 @@ export function AvailabilityEditor({inviteToken,initial}:{inviteToken:string;ini
     <div className={styles.legend}>{view!=="mine"?<span>{view==="all"?<span className={styles.heatLegend} role="group" aria-label="색상별 가능 인원"><span>0명</span><span className={styles.heatRamp} aria-hidden="true"><i data-heat="0"/>{heatLegend(overview.data?.participants.length??0).map(item=><i key={item.level} data-heat={item.level}/>)}</span><span>{overview.data?.participants.length??"–"}명</span></span>:"제출된 시간 · 읽기 전용"}</span>:<><span><i/>선택한 시간</span><span><i/>선택 불가</span>{stepMinutes>30 && <span className={styles.partialLegend}><i/>일부 선택</span>}</>}</div>
     <footer className={styles.footer} hidden={view!=="mine"}><button type="button" className={styles.repeatButton} disabled={pending||closed||!selected.some(slot=>localDay(slot)>=week && localDay(slot)<addDays(week,7))} onClick={openRepeat}>이번 주 반복</button><button type="button" className={styles.resetButton} disabled={pending||closed||!futureSlots.length} onClick={()=>setConfirmClear(true)}>초기화</button><button type="button" disabled={pending||closed} onClick={submit}>{pending?"제출 중…":"선택 제출"}</button></footer>
     <p role="status" className={styles.notice}>{message}</p>
-    {closed && snapshot.status==="closed" ? <CandidateList data={overview.data} loading={overview.loading} onMore={()=>setCandidateLimit(value=>Math.min(4320,value+5))}/> : !closed && snapshot.role==="host" ? <div className={styles.closeSection}><span>응답을 다 모았다면</span><button type="button" disabled={pending} onClick={()=>setConfirmClose(true)}>모집 마감</button></div> : null}
+
       </section>
     </div>
     <dialog id="availability-drawer" ref={drawer} className={styles.drawer} aria-label="약속 정보" onClose={()=>setSidebarOpen(false)} onClick={event=>{if(event.target===event.currentTarget){const box=event.currentTarget.getBoundingClientRect();if(event.clientX>box.right || event.clientX<box.left)setSidebarOpen(false);}}}>

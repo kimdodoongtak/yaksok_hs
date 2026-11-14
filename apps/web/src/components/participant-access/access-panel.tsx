@@ -54,7 +54,7 @@ export function AccessPanel({ inviteToken, view, pinChanged = false, hostTicket 
       <p className={styles.description}>{view.status === "collecting" ? "참여가 완료됐습니다." : view.status === "confirmed" ? "약속이 확정됐어요." : "참여 모집이 마감됐어요."}</p>
       <div className={styles.memberCard}><span>{view.role === "host" ? "방장" : "참여자"}</span><strong>{view.nickname}</strong><span className={styles.badge}>참여 완료</span></div>
     </>}
-    <Link href={`/p/${inviteToken}/availability`} className="mt-4 block rounded-lg bg-[#e7edff] px-4 py-3 text-center text-sm font-semibold text-[#4261df]">{view.status === "collecting" ? "가능 시간 입력" : "내 응답 확인"}</Link>
+    <Link href={`/p/${inviteToken}/${view.status === "confirmed" ? "result" : view.status === "closed" ? "candidates" : "availability"}`} className="mt-4 block rounded-lg bg-[#e7edff] px-4 py-3 text-center text-sm font-semibold text-[#4261df]">{view.status === "collecting" ? "가능 시간 입력" : view.status === "confirmed" ? "확정 결과 보기" : "시간 후보 보기"}</Link>
     <ParticipantControls inviteToken={inviteToken} />
   </div>;
   const activeMode = view.registration === "open" ? mode : "login";

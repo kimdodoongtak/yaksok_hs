@@ -139,7 +139,9 @@ test("마감 뒤 조회는 읽기 전용이고 취소·세션 만료 시 약속 
   const f=await fixture(context);await page.goto(f.path);await page.getByRole("button",{name:"30분",exact:true}).click();
   await page.getByRole("button",{name:`${f.start} 09:00`,exact:true}).click();
   await db.promiseRecord.update({where:{id:f.promise.id},data:{votingDeadlineAt:new Date(Date.now()-1000)}});
-  await expect(page.getByRole("button",{name:"선택 제출",exact:true})).toBeDisabled({timeout:12000});
+  await expect(page).toHaveURL(`/p/${f.link.inviteToken}/candidates`,{timeout:12000});
+  await page.getByRole("link",{name:"응답 시간표 보기",exact:true}).click();
+  await expect(page.getByRole("button",{name:"선택 제출",exact:true})).toBeDisabled();
   expect((await db.promiseRecord.findUniqueOrThrow({where:{id:f.promise.id}})).status).toBe("collecting");
   await db.participantSession.deleteMany({where:{participantId:f.member.id}});
   await db.promiseRecord.update({where:{id:f.promise.id},data:{status:"cancelled",cancelledAt:new Date()}});
@@ -437,7 +439,8 @@ test("이번 주 반복 창은 서버 응답·설정 변경과 마감 때 닫혀
   await repeat.click();await expect(dialog).toBeVisible();
   await db.promiseRecord.update({where:{id:f.promise.id},data:{status:"closed"}});
   await page.evaluate(()=>window.dispatchEvent(new Event("focus")));
-  await expect(page.getByRole("status")).toContainText("응답이 마감");await expect(dialog).not.toBeVisible();
+  await expect(page).toHaveURL(`/p/${f.link.inviteToken}/candidates`);await expect(dialog).not.toBeVisible();
+  await page.getByRole("link",{name:"응답 시간표 보기",exact:true}).click();
   await expect(repeat).toBeDisabled();
 });
 

@@ -13,7 +13,7 @@
 | 4 | 004-availability | 가능 시간 선택과 제출 | [스펙](features/004-availability-spec.md) | 003 — 003의 참여자 인증과 002의 약속 범위·마감이 필요하다. | 완료 — 2026-11-14 |
 | 4a | 004a-availability-repeat | 가능 시간 한 주 반복 | [스펙](features/004a-availability-repeat-spec.md) | 004 — 기존 로컬 선택·되돌리기·제출 기반 재사용. 사용자 요청으로 005보다 먼저 진행 | 완료 |
 | 5 | 005-status-and-candidates | 마감과 시간 후보 조회 | [스펙](features/005-status-and-candidates-spec.md) | 004 — 004에서 저장한 제출 상태·슬롯과 공통 마감 판정을 사용한다. | 완료 — 2026-11-15 |
-| 6 | 006-confirmation | 방장 일정 확정과 결과 공유 | [스펙](features/006-confirmation-spec.md) | 005 — 005의 마감 판정·후보 계산을 확정 시 같은 트랜잭션에서 재사용한다. | 확인 필요 |
+| 6 | 006-confirmation | 방장 일정 확정과 결과 공유 | [스펙](features/006-confirmation-spec.md) | 005 — 005의 마감 판정·후보 계산을 확정 시 같은 트랜잭션에서 재사용한다. | 완료 — 2026-11-15 |
 | 7 | 007-rescheduling | 설정 변경과 재조율 | [스펙](features/007-rescheduling-spec.md) | 006 — 006까지의 상태·확정 필드와 004의 응답 버전이 있어야 재조율 결과를 검증할 수 있다. | 확인 필요 |
 | 8 | 008-participant-management | 탈퇴·내보내기와 방장 승계 | [스펙](features/008-participant-management-spec.md) | 006 — 006까지의 상태별 참석자·후보 결과와 세션이 필요하다 | 초안 |
 | 9 | 009-cancellation | 약속 취소와 접근 차단 | [스펙](features/009-cancellation-spec.md) | 008 — 008의 마지막 방장 탈퇴에서도 사용하는 약속 취소·세션 만료 서비스를 재사용한다. | 확인 필요 |

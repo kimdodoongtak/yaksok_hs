@@ -72,16 +72,24 @@ test("방장이 확인 후 마감하면 전체 기간 후보 5개와 더 보기�
     await db.participant.update({where:{id:member.id},data:{availabilitySubmittedAt:new Date()}});
     await db.participantAvailableSlot.createMany({data:times.map(time=>({participantId:member.id,slotStartAt:new Date(f.slot(time,nextWeek))}))});
   }
-  await page.goto(f.path);
+  await page.setViewportSize({width:393,height:700});await page.goto(f.path);
+  const closeButton=page.getByRole("button",{name:"응답 마감",exact:true});
+  await expect(closeButton).toBeInViewport();
+  expect((await closeButton.boundingBox())!.y).toBeLessThan(100);
+  await page.evaluate(()=>window.scrollTo(0,document.body.scrollHeight));
+  await expect(closeButton).toBeInViewport();
+  expect((await closeButton.boundingBox())!.y).toBeLessThan(100);
+  for(const width of [320,393,1280]){await page.setViewportSize({width,height:700});expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);await page.screenshot({path:`test-results/close-header-${width}.png`,fullPage:true});}
   await expect(page.getByRole("heading",{name:"가능한 약속 시간",exact:true})).toHaveCount(0);
-  await page.getByRole("button",{name:"모집 마감",exact:true}).click();
+  await page.getByRole("button",{name:"응답 마감",exact:true}).click();
   const dialog=page.getByRole("dialog",{name:"응답을 마감할까요?",exact:true});await expect(dialog).toBeVisible();
   await dialog.getByRole("button",{name:"취소",exact:true}).click();
   expect((await db.promiseRecord.findUniqueOrThrow({where:{id:f.promise.id}})).status).toBe("collecting");
-  await page.getByRole("button",{name:"모집 마감",exact:true}).click();
+  await page.getByRole("button",{name:"응답 마감",exact:true}).click();
   await dialog.getByRole("button",{name:"마감하기",exact:true}).click();
   await expect(page.getByRole("heading",{name:"가능한 약속 시간",exact:true})).toBeVisible();
-  await expect(page.getByRole("button",{name:"선택 제출",exact:true})).toBeDisabled();
+  await expect(page).toHaveURL(`/p/${f.link.inviteToken}/candidates`);
+  await expect(page.getByLabel("주별 가능 시간",{exact:true})).toHaveCount(0);
   const candidates=page.getByRole("list",{name:"시간 후보",exact:true});await expect(candidates.getByRole("listitem")).toHaveCount(5);
   await page.getByRole("button",{name:"후보 더 보기",exact:true}).click();
   await expect(candidates.getByRole("listitem")).toHaveCount(6);
@@ -105,7 +113,8 @@ test("연결 실패·재시도와 후보 없음 상태를 표시하고 GET은 �
   await page.unroute(`**/p/${f.link.inviteToken}/overview?*`);
   await page.getByRole("button",{name:"다시 불러오기",exact:true}).click();
   await expect(page.getByText("함께 가능한 시간이 없어요.",{exact:true})).toBeVisible();
-  await expect(page.getByRole("button",{name:"선택 제출",exact:true})).toBeDisabled();
+  await expect(page).toHaveURL(`/p/${f.link.inviteToken}/candidates`);
+  await expect(page.getByLabel("주별 가능 시간",{exact:true})).toHaveCount(0);
   expect((await db.promiseRecord.findUniqueOrThrow({where:{id:f.promise.id}})).status).toBe("collecting");
 });
 test("주와 보기 전환은 스크롤·내 입력을 유지하고 늦은 이전 주 조회를 무시한다",async({page,context})=>{
