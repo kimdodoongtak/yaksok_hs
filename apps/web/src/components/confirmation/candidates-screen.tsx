@@ -1,4 +1,5 @@
 "use client";
+import { JourneyHeader } from "@/components/ui/journey-header";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -17,7 +18,7 @@ export function CandidatesScreen({inviteToken,participantId,firstDay}:{inviteTok
     else if(status&&status!=="closed")router.replace(`/p/${inviteToken}/availability`);
   },[status,inviteToken,router]);
   return <main className={styles.page}><div className={styles.content}>
-    <header className={styles.header}><Link href={`/p/${inviteToken}`}>약속 잡기</Link><span>응답 마감</span></header>
+    <JourneyHeader stage={2} href={`/p/${inviteToken}`}/>
     <div className={styles.navigation}><Link href={`/p/${inviteToken}/availability?view=responses`}>응답 시간표 보기 <span aria-hidden="true">↗</span></Link>{host&&<Link href={`/p/${inviteToken}/settings/edit`}>재조율하기</Link>}</div>
     {overview.loading&&<p className={styles.feedback} role="status">시간 정보 불러오는 중…</p>}
     {overview.error&&<p className={styles.feedback} role="status">시간 정보를 불러오지 못했어요. <button type="button" onClick={overview.refresh}>다시 불러오기</button></p>}

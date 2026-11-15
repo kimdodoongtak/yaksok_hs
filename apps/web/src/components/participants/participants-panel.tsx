@@ -1,4 +1,7 @@
 "use client";
+import { AnimalAvatar } from "@/components/ui/animal-avatar";
+import { StatusStamp } from "@/components/ui/status-stamp";
+import { JourneyHeader } from "@/components/ui/journey-header";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -9,7 +12,7 @@ import { CancelPromiseButton } from "@/components/promise-status/cancel-promise-
 import { LiveInvitation } from "@/components/invitation/live-invitation";
 import styles from "./participants.module.css";
 type Choice = { kind: "leave"; expectedRole: string; expectedSuccessorId: string | null; successorNickname?: string } | { kind: "remove"; targetParticipantId: string; nickname: string };
-export function ParticipantsPanel({ inviteToken, initial }: { inviteToken: string; initial: ManagementSnapshot }) {
+export function ParticipantsPanel({ inviteToken, initial, returnHref }: { inviteToken: string; initial: ManagementSnapshot; returnHref: string }) {
   const router = useRouter(), dialog = useRef<HTMLDialogElement>(null);
   const [snapshot, setSnapshot] = useState(initial), latest = useRef(initial);
   const [choice, setChoice] = useState<Choice | null>(null), [pending, setPending] = useState(false);
@@ -77,17 +80,17 @@ export function ParticipantsPanel({ inviteToken, initial }: { inviteToken: strin
   const cancelling = choice?.kind === "leave" && choice.expectedRole === "host" && !choice.expectedSuccessorId;
   return <main className={styles.page}><section className={styles.content}>
     {done ? <div className={styles.complete}>
-      <span className={styles.completeIcon} aria-hidden="true">✓</span>
+      <StatusStamp kind={done.outcome === "cancelled" ? "cancelled" : "left"}/>
       <h1>{done.outcome === "cancelled" ? "약속이 취소됐어요" : "약속에서 나왔어요"}</h1>
       <p>{done.successorNickname ? `${done.successorNickname}님이 방장을 이어받았어요.` : done.outcome === "cancelled" ? "마지막 참여자가 나가 약속이 종료됐어요." : "이 약속의 참여가 종료됐어요."}</p>
       <Link className={styles.back} href="/">홈으로</Link>
     </div> : <>
-      <header className={styles.header}><Link href={`/p/${inviteToken}`}>← 약속으로</Link><span>{snapshot.status === "collecting" ? "모집 중" : snapshot.status === "confirmed" ? "확정" : "응답 마감"}</span></header>
-      <div className={styles.title}><h1>참여자</h1><span>{snapshot.participants.length}명</span></div>
+      <JourneyHeader href={`/p/${inviteToken}`}/>
+      <div className={styles.title}><Link className={styles.returnLink} href={returnHref} aria-label="이전 화면으로"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m14 6-6 6 6 6"/></svg></Link><h1>참여자</h1><span>{snapshot.participants.length}명</span></div>
       {message && <p role="status" className={styles.notice}>{message}</p>}
       {offline && <p role="status" className={styles.notice}>최신 정보를 불러오지 못했어요. 잠시 후 다시 확인할게요.</p>}
-      <ul className={styles.list}>{snapshot.participants.map(member => <li key={member.id}>
-        <span className={styles.avatar} aria-hidden="true">{Array.from(member.nickname)[0]}</span>
+      <ul className={styles.list}>{snapshot.participants.map((member,index) => <li key={member.id}>
+        <AnimalAvatar index={index} size={40}/>
         <div className={styles.person}><strong>{member.nickname}</strong><span>{member.role === "host" ? "방장" : "참여자"}{member.id === snapshot.participantId ? " · 나" : ""}</span></div>
         {snapshot.role === "host" && snapshot.status === "collecting" && member.id !== snapshot.participantId && <button type="button" className={styles.remove} aria-label={`${member.nickname} 내보내기`} disabled={pending} onClick={() => { setError(""); setChoice({ kind: "remove", targetParticipantId: member.id, nickname: member.nickname }); }}>내보내기</button>}
       </li>)}</ul>

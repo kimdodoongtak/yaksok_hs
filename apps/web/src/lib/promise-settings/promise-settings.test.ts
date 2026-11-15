@@ -18,7 +18,7 @@ const validInput: PromiseSettingsInput = {
 };
 
 describe("약속 설정 입력 정책", () => {
-  it("시작일 기준 기본 마감은 월말·연말·윤년을 넘어 정확히 7일 뒤 23:59다", () => {
+  it("오늘 기준 기본 마감은 월말·연말·윤년을 넘어 정확히 7일 뒤 23:59다", () => {
     expect(defaultVotingDeadline("2026-11-28")).toBe("2026-12-05T23:59");
     expect(defaultVotingDeadline("2026-12-28")).toBe("2027-01-04T23:59");
     expect(defaultVotingDeadline("2027-02-25")).toBe("2027-03-04T23:59");

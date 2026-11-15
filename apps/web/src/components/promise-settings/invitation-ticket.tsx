@@ -49,7 +49,7 @@ export function InvitationTicket({ settings, animate }: {
             </div>
           </dl>
           <div className={styles.ticketFooter}>
-            <p className={styles.ticketNote}>우리의 다음 만남을<br />기다리며.</p>
+            <p className={styles.ticketNote}>SEE YOU SOON<br />가능한 시간을 함께 정해요.</p>
             <p className={`${styles.ticketStamp} ${animate ? styles.stampEnter : ""}`}>초대 준비 완료</p>
           </div>
         </div>

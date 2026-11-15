@@ -1,4 +1,5 @@
 "use client";
+import { JourneyHeader } from "@/components/ui/journey-header";
 import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useState } from "react";
@@ -42,7 +43,7 @@ export function ConfirmationTicket({inviteToken,initial}:{inviteToken:string;ini
     catch {setCopied(false);setManual(url);}
   }
   return <div className={styles.canvas}><main className={styles.page}>
-    <header className={styles.header}><Link href={`/p/${inviteToken}`}>약속 잡기</Link><span>확정 결과</span></header>
+    <JourneyHeader stage={3} href={`/p/${inviteToken}`}/>
     {offline&&<div role="status" className={styles.notice}><p>최신 결과를 확인하지 못했어요.</p><button type="button" onClick={()=>setRefreshId(value=>value+1)}>다시 불러오기</button></div>}
     <article className={styles.ticket}>
       <div className={styles.coverShadow}><div className={styles.ticketCover}>
@@ -69,7 +70,7 @@ export function ConfirmationTicket({inviteToken,initial}:{inviteToken:string;ini
     {copied&&<p role="status" className={styles.help}>결과 링크를 복사했어요.</p>}
     {manual&&<div className={styles.manual}><p role="status">자동 복사가 안 돼요. 아래 링크를 직접 복사해 주세요.</p><input aria-label="결과 링크" value={manual} readOnly onFocus={event=>event.target.select()}/></div>}
     {snapshot.role==="host"&&<Link className={styles.back} href={`/p/${inviteToken}/settings/edit`}>재조율하기</Link>}
-    <Link className={styles.back} href={`/p/${inviteToken}/participants`}>참여자 · 나가기</Link>
+    <Link className={styles.back} href={`/p/${inviteToken}/participants?from=result`}>참여자 · 나가기</Link>
     <Link className={styles.back} href={`/p/${inviteToken}`}>참여 정보</Link>
   </main></div>;
 }

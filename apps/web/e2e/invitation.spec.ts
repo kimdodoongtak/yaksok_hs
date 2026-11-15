@@ -41,7 +41,7 @@ test("초대 조회 뒤 명시적으로 등록하면 안전한 세션으로 설�
   const link = await fixture();
   await page.goto(`/p/${link.inviteToken}`);
   await expect(
-    page.getByRole("heading", { name: "약속을 시작해 볼까요?" }),
+    page.getByRole("heading", { name: "방장 등록" }),
   ).toBeVisible();
   expect(
     await db.promiseRecord.count({ where: { promiseLinkId: link.id } }),
@@ -79,6 +79,8 @@ test("잘못된 입력과 늦은 선점을 안내하고 타인의 초안 참여�
   expect(
     await db.promiseRecord.count({ where: { promiseLinkId: link.id } }),
   ).toBe(0);
+  const statePath = `**/p/${link.inviteToken}/state`;
+  await page.route(statePath, route => route.abort());
   const rivalContext = await browser.newContext();
   try {
     const rival = await rivalContext.newPage();
@@ -93,6 +95,7 @@ test("잘못된 입력과 늦은 선점을 안내하고 타인의 초안 참여�
     await expect(page.getByRole("main").getByRole("alert")).toContainText(
       "다른 사람이 먼저 방장으로 등록했어요.",
     );
+    await page.unroute(statePath);
     await page.reload();
     await expect(
       page.getByRole("heading", { name: "방장이 약속을 준비하고 있어요" }),
@@ -133,12 +136,28 @@ test("열어 둔 설정 화면은 서버의 8분 경고·10분 만료를 반영�
     where: { id: link.id },
     data: { createdAt: new Date("2020-01-01") },
   });
-  await expect(page.getByRole("main")).toHaveText("만료된 약속입니다");
+  await expect(page.getByRole("heading")).toHaveText("만료된 약속입니다");
+  await expect(page.getByRole("main").getByRole("link")).toHaveCount(0);
+  await expect(page.getByRole("main").getByRole("button")).toHaveCount(0);
+  // 새 도장과 로고는 장식이다. 공개 본문에는 여전히 만료 안내만 남는다.
+  expect(await page.getByRole("main").evaluate(element => {
+    const copy = element.cloneNode(true) as HTMLElement;
+    copy.querySelectorAll('[aria-hidden="true"]').forEach(node => node.remove());
+    return copy.textContent?.trim();
+  })).toBe("만료된 약속입니다");
   expect(
     await db.promiseRecord.count({ where: { promiseLinkId: link.id } }),
   ).toBe(1);
   await page.reload();
-  await expect(page.getByRole("main")).toHaveText("만료된 약속입니다");
+  await expect(page.getByRole("heading")).toHaveText("만료된 약속입니다");
+  await expect(page.getByRole("main").getByRole("link")).toHaveCount(0);
+  await expect(page.getByRole("main").getByRole("button")).toHaveCount(0);
+  // 새 도장과 로고는 장식이다. 공개 본문에는 여전히 만료 안내만 남는다.
+  expect(await page.getByRole("main").evaluate(element => {
+    const copy = element.cloneNode(true) as HTMLElement;
+    copy.querySelectorAll('[aria-hidden="true"]').forEach(node => node.remove());
+    return copy.textContent?.trim();
+  })).toBe("만료된 약속입니다");
   await expect(page.getByRole("textbox")).toHaveCount(0);
 });
 
@@ -154,7 +173,7 @@ test("방장이 초안에서 나가면 세션을 지우고 같은 링크에서 �
   await expect(page).toHaveURL(/\/settings$/);
   await page.getByRole("button", { name: "초안 나가기" }).click();
   await expect(
-    page.getByRole("heading", { name: "약속을 시작해 볼까요?" }),
+    page.getByRole("heading", { name: "방장 등록" }),
   ).toBeVisible();
   expect(
     await db.promiseRecord.count({ where: { promiseLinkId: link.id } }),
@@ -172,7 +191,7 @@ test("등록 요청 중 중복 클릭을 막고 모바일 화면이 넘치지 �
   await page.setViewportSize({ width: 320, height: 800 });
   await page.goto(`/p/${link.inviteToken}`);
   await expect(
-    page.getByRole("heading", { name: "약속을 시작해 볼까요?" }),
+    page.getByRole("heading", { name: "방장 등록" }),
   ).toBeVisible();
   expect(
     await page.evaluate(

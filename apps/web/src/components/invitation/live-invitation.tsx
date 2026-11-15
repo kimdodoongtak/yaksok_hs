@@ -1,4 +1,6 @@
 "use client";
+import { JourneyHeader } from "@/components/ui/journey-header";
+import { StatusStamp } from "@/components/ui/status-stamp";
 import { useEffect, useRef, useState } from "react";
 import type { InvitationView } from "@/lib/invitation/service";
 import { RegistrationForm } from "./registration-form";
@@ -58,11 +60,13 @@ export function LiveInvitation({
       document.removeEventListener("visibilitychange", visible);
     };
   }, [inviteToken, initialView.state]);
-  if (view.state === "cancelled") return <h1 className="text-xl font-bold">취소된 약속입니다.</h1>;
-  if (view.state === "expired")
-    return <h1 className="text-xl font-bold">만료된 약속입니다</h1>;
+  if (["cancelled", "expired", "invalid"].includes(view.state)) {
+    const kind = view.state as "cancelled" | "expired" | "invalid";
+    return <><JourneyHeader href={null}/><div className="terminal-state"><StatusStamp kind={kind}/><h1>{kind === "cancelled" ? "취소된 약속입니다." : kind === "expired" ? "만료된 약속입니다" : "유효하지 않은 초대 링크입니다."}</h1></div></>;
+  }
   return (
     <>
+      <JourneyHeader stage={view.state === "ready" ? view.access?.kind === "participant" ? view.access.status === "confirmed" ? 3 : view.access.status === "closed" ? 2 : 1 : 1 : 0}/>
       {offline && (
         <p role="status" className="mb-4 text-sm text-red-700">
           연결을 확인하고 있어요. 잠시 후 다시 시도해 주세요.
@@ -70,10 +74,10 @@ export function LiveInvitation({
       )}
       {(view.state === "available" || view.state === "draft-expired") && (
         <>
-          <p className="mb-3 text-sm font-semibold text-slate-500">약속 잡기</p>
+          <p className="mb-3 text-xs font-semibold text-[#e92520]">STEP 1 · 방장 등록</p>
           <h1 className="text-2xl font-bold tracking-tight">
             {view.state === "available"
-              ? "약속을 시작해 볼까요?"
+              ? "방장 등록"
               : "작성 시간이 만료됐어요"}
           </h1>
           <p className="mt-3 text-sm leading-6 text-slate-600">
@@ -86,7 +90,7 @@ export function LiveInvitation({
       )}
       {view.state === "host" && (
         <>
-          <h1 className="text-xl font-bold text-[#243047]">약속 설정</h1>
+          <h1 className="text-xl font-bold text-[#181916]">약속 설정</h1>
           <p className="mt-1 text-xs text-slate-500">{view.nickname}님, 약속을 설정해 주세요.</p>
           {view.warning && (
             <p

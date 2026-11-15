@@ -7,7 +7,7 @@ export function RegistrationForm({ inviteToken }: { inviteToken: string }) {
     { message: null },
   );
   return (
-    <form action={action} className="mt-8 space-y-5">
+    <form action={action} className="registration-form mt-6 space-y-5">
       <div>
         <label htmlFor="nickname" className="block text-sm font-semibold">
           닉네임

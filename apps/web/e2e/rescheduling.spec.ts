@@ -1,3 +1,4 @@
+import { selectDeadline } from "./settings-calendar";
 import { test, expect, type BrowserContext } from "@playwright/test";
 import { PrismaClient } from "../src/generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
@@ -41,7 +42,7 @@ test("확정 재조율은 영향 안내 후 저장하고 다른 열린 결과 �
  await expect(page.getByRole("heading",{name:"재조율",exact:true})).toBeVisible();
  await page.getByRole("button",{name:"하루 종료 30분 늘리기",exact:true}).click();
  await page.getByRole("button",{name:"다음",exact:true}).click();
- await page.getByLabel("응답 마감",{exact:true}).fill(`${f.start}T08:00`);
+ await selectDeadline(page, `${f.start}T23:59`);
  await page.getByRole("button",{name:"변경 내용 확인",exact:true}).click();
  const dialog=page.getByRole("dialog",{name:"변경 내용을 적용할까요?",exact:true});
  await expect(dialog).toContainText("모든 참여자가 가능 시간을 다시 제출해야 해요.");await expect(dialog).toContainText("기존 확정 시간은 해제돼요.");
@@ -113,7 +114,7 @@ for(const changedAfterDialog of [false,true])test(`오래된 설정의 영향이
 });
 test("확인 창 이후 약속이 확정되면 확정 해제를 다시 안내한다",async({page,context})=>{
  const f=await fixture(context);await page.goto(`/p/${f.link.inviteToken}/settings/edit`);
- await page.getByRole("button",{name:"다음",exact:true}).click();await page.getByLabel("응답 마감",{exact:true}).fill(`${f.start}T08:00`);await page.getByRole("button",{name:"변경 내용 확인",exact:true}).click();
+ await page.getByRole("button",{name:"다음",exact:true}).click();await selectDeadline(page, `${f.start}T23:59`);await page.getByRole("button",{name:"변경 내용 확인",exact:true}).click();
  const dialog=page.getByRole("dialog");await expect(dialog).not.toContainText("기존 확정 시간은 해제돼요.");
  await db.promiseRecord.update({where:{id:f.promise.id},data:{status:"confirmed",confirmedStartAt:new Date(f.slot("09:00"))}});
  await dialog.getByRole("button",{name:"재조율 시작",exact:true}).click();await expect(dialog).toContainText("기존 확정 시간은 해제돼요.");

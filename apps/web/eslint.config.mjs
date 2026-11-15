@@ -6,6 +6,8 @@ export default defineConfig([
   ...nextVitals,
   ...nextTypeScript,
   globalIgnores([
+    "design-previews/**",
+    "design-backups/**",
     ".next/**",
     ".next-browser/**",
     "test-results/**",

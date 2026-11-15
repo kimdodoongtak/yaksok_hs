@@ -4,6 +4,8 @@ import { createPortal } from "react-dom";
 import type { OverviewSnapshot } from "@/lib/candidates/view";
 import type { Candidate } from "@/lib/candidates/policy";
 import { slotAt, timeLabel } from "./calendar";
+import { AnimalAvatar } from "@/components/ui/animal-avatar";
+import { samePeople } from "./heatmap-blocks";
 import { heatLevel } from "./heatmap-scale";
 import styles from "./availability.module.css";
 
@@ -40,10 +42,10 @@ function SlotPeople({id,held,day,data}:{id:string;held:HeldSlot;day:string;data:
   },[held,data]);
   if(!people.length)return null;
   return createPortal(<div ref={popup} id={id} role="tooltip" aria-label="선택한 참여자" className={styles.slotPeople} data-layout={people.length<=4?"inline":people.length<=12?"two":"three"}>
-    <ul>{people.map(person=><li key={person.id}>{person.nickname}</li>)}</ul>
+    <ul>{people.map(person=><li key={person.id}><AnimalAvatar index={data.participants.findIndex(member=>member.id===person.id)} size={26}/><span>{person.nickname}</span></li>)}</ul>
   </div>,document.body);
 }
-export function HeatmapCell({day,minute,stepMinutes,endMinute,valid,data,all}:{day:string;minute:number;stepMinutes:number;endMinute:number;valid:boolean;data?:OverviewSnapshot;all:boolean}){
+export function HeatmapCell({day,minute,stepMinutes,endMinute,startMinute,valid,data,all}:{day:string;minute:number;stepMinutes:number;endMinute:number;startMinute:number;valid:boolean;data?:OverviewSnapshot;all:boolean}){
   const [held,setHeld]=useState<HeldSlot|null>(null);
   const tooltipId=useId(),holding=held!==null;
   useEffect(()=>{
@@ -58,13 +60,23 @@ export function HeatmapCell({day,minute,stepMinutes,endMinute,valid,data,all}:{d
   const start=slotAt(day,minute),end=new Date(new Date(start).getTime()+parts.length*1800000).toISOString();
   const candidates=all&&valid?data?.weekCandidates.filter(candidate=>candidate.startAt>=start&&candidate.startAt<end) ?? []:[];
   const first=candidates[0],time=first?candidateTime(first):null;
+  // Position the caption within the candidate's occupied part of this display row.
+  const rowStart=new Date(start).getTime(),rowEnd=new Date(end).getTime();
+  const captionStart=first?new Date(first.startAt).getTime():rowStart;
+  const captionEnd=first?Math.min(new Date(first.endAt).getTime(),rowEnd):rowEnd;
+  const captionStyle={
+    top:`calc(${(captionStart-rowStart)/(rowEnd-rowStart)*100}% + 2px)`,
+    height:`calc(${(captionEnd-captionStart)/(rowEnd-rowStart)*100}% - 4px)`,
+  };
   return <div className={styles.readCell} style={{minHeight:stepMinutes===120?72:44}}>
     {parts.map(part=>{
       const slot=slotAt(day,part),count=data?.heatmap[slot] ?? 0,total=data?.participants.length ?? 0;
       const available=data?.selected?.slots.includes(slot),interactive=all&&valid&&count>0;
+      const people=data?.slotParticipantIndexes[slot];
+      const connects=(adjacent:number)=>adjacent>=startMinute&&adjacent<endMinute&&(all?samePeople(people,data?.slotParticipantIndexes[slotAt(day,adjacent)]):Boolean(available&&data?.selected?.slots.includes(slotAt(day,adjacent))));
       const label=all?`${day} ${timeLabel(part)} 가능 ${count}명 / 전체 ${total}명`:`${day} ${timeLabel(part)} ${available?"가능":"선택 없음"}`;
       return <span key={part} role={interactive?"button":"img"} tabIndex={interactive?0:undefined} aria-label={data&&valid?label:undefined} aria-describedby={held?.part===part?tooltipId:undefined}
-        data-heat={data?(all?heatLevel(count,total):available?2:0):0} data-outside={!valid}
+        data-heat={data?(all?heatLevel(count,total):available?2:0):0} data-outside={!valid} data-connected-before={connects(part-30)} data-connected-after={connects(part+30)}
         onPointerDown={event=>{
           if(!interactive||!event.isPrimary||event.button!==0)return;
           event.currentTarget.focus({preventScroll:true});event.currentTarget.setPointerCapture(event.pointerId);
@@ -80,7 +92,7 @@ export function HeatmapCell({day,minute,stepMinutes,endMinute,valid,data,all}:{d
         onKeyUp={event=>{if(event.key==="Enter"||event.key===" "){event.preventDefault();setHeld(null);}}}
       >{data&&valid&&!all&&available?"✓":""}</span>;
     })}
-    {first&&time&&<div className={styles.heatCandidate} role="img" aria-label={`${day} ${time.start}–${time.end} ${first.count}명 · 후보 ${candidates.length}개`}>
+    {first&&time&&<div className={styles.heatCandidate} style={captionStyle} role="img" aria-label={`${day} ${time.start}–${time.end} ${first.count}명 · 후보 ${candidates.length}개`}>
       <span className={styles.candidateCaption}><strong>{first.count}명</strong>{time.start.endsWith(":00")&&time.end.endsWith(":00")?<span className={styles.wholeHours}>{time.start.slice(0,2)}–{time.end.slice(0,2)}</span>:<span>{time.start}<br/>~{time.end}</span>}</span>
     </div>}
     {held&&all&&valid&&data&&<SlotPeople id={tooltipId} held={held} day={day} data={data}/>}

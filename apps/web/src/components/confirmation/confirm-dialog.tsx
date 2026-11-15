@@ -23,7 +23,8 @@ export function ConfirmDialog({inviteToken,participantId,candidate,onClose,onInv
   }
   return <dialog ref={dialog} className={styles.dialog} aria-labelledby="confirm-title" aria-busy={pending} onCancel={event=>{event.preventDefault();if(!busy.current)onClose();}}>
     <h2 id="confirm-title">이 시간으로 확정할까요?</h2>
-    <div className={styles.summary}><p>{resultDate(candidate.startAt)}</p><strong>{resultTime(candidate.startAt,candidate.endAt)}</strong><span>참석 가능 {candidate.count}명</span></div>
+    <div className={styles.summary}><div className={styles.passHeader} aria-hidden="true">BOARDING PASS <span>약속행</span></div><p>{resultDate(candidate.startAt)}</p><strong>{resultTime(candidate.startAt,candidate.endAt)}</strong><span>참석 가능 {candidate.count}명</span></div>
+    <p className={styles.confirmHelp}>확정된 시간은 참여자 모두에게 표시돼요.<br/>일정을 바꾸려면 다시 조율할 수 있어요.</p>
     <div className={styles.actions}><button type="button" data-cancel disabled={pending} onClick={onClose}>취소</button><button type="button" disabled={pending} onClick={confirm}>{pending?"확정 중…":"확정하기"}</button></div>
     {error&&<p role="alert" className={styles.error}>{error}</p>}
   </dialog>;

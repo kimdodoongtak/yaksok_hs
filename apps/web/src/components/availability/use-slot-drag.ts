@@ -53,14 +53,18 @@ export function useSlotDrag(
     current.selection = next;
     setDraft(next);
   }
+  function visibleBottom(container: HTMLDivElement) {
+    const footer = container.parentElement?.querySelector<HTMLElement>("footer:not([hidden])");
+    return Math.min(container.getBoundingClientRect().bottom, window.innerHeight, footer?.getBoundingClientRect().top ?? Infinity);
+  }
   function paintPoint() {
     const current = drag.current, container = grid.current;
     if (!current || !container) return;
     const box = container.getBoundingClientRect();
     if (current.x < box.left || current.x >= box.right) return;
-    const header = container.querySelector<HTMLElement>("[data-day-heading]");
+    const header = container.parentElement?.querySelector<HTMLElement>("[data-calendar-controls]");
     const top = header?.getBoundingClientRect().bottom ?? box.top;
-    const y = Math.max(top + 1, Math.min(box.bottom - 2, current.y));
+    const y = Math.max(top + 1, Math.min(visibleBottom(container) - 2, current.y));
     const cell = document.elementFromPoint(current.x, y)?.closest<HTMLButtonElement>("button[data-day][data-minute]");
     if (cell && container.contains(cell)) paint(cell.dataset.day!, Number(cell.dataset.minute));
   }
@@ -68,10 +72,10 @@ export function useSlotDrag(
     const current = drag.current, container = grid.current;
     if (!current || !container) return;
     const box = container.getBoundingClientRect();
-    const top = container.querySelector<HTMLElement>("[data-day-heading]")?.getBoundingClientRect().bottom ?? box.top;
+    const top = container.parentElement?.querySelector<HTMLElement>("[data-calendar-controls]")?.getBoundingClientRect().bottom ?? box.top;
     if (current.x >= box.left && current.x <= box.right) {
-      if (current.y > box.bottom - 28) container.scrollTop += 7;
-      else if (current.y < top + 20) container.scrollTop -= 7;
+      if (current.y > visibleBottom(container) - 28) window.scrollBy(0, 7);
+      else if (current.y < top + 20) window.scrollBy(0, -7);
     }
     paintPoint();
     frame.current = requestAnimationFrame(animate);

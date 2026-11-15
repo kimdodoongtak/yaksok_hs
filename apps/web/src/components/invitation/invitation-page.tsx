@@ -9,8 +9,8 @@ export async function InvitationPage({ inviteToken, animateInvitation = false, p
     ? await readInvitationPage(inviteToken, session)
     : { state: "invalid" as const };
   return (
-    <main className={`flex min-h-dvh justify-center bg-[#f5f6f8] px-4 text-slate-900 sm:px-6 ${view.state === "host" ? "items-start py-4 sm:py-6" : "items-center py-8 sm:py-12"}`}>
-      <section className={view.state === "host" ? "w-full max-w-xl" : view.state === "ready" && view.settings ? "w-full max-w-md" : view.state === "ready" && view.access ? "w-full max-w-xl rounded-xl border border-[#dce3f1] bg-white p-4 min-[480px]:p-5" : "w-full max-w-md rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-9"}>
+    <main className="app-entry">
+      <section className="entry-content">
         <LiveInvitation
           key={`${inviteToken}:${view.state}:${view.state === "ready" && view.access?.kind === "participant" ? view.access.nickname : "anonymous"}:${pinChanged}`}
           inviteToken={inviteToken}

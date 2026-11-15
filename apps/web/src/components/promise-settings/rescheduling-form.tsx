@@ -1,4 +1,5 @@
 "use client";
+import { JourneyHeader } from "@/components/ui/journey-header";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -44,8 +45,8 @@ export function ReschedulingForm({inviteToken,initial}:{inviteToken:string;initi
   }catch{setError("연결하지 못했어요. 다시 시도해 주세요.");}
   finally{busy.current=false;setSaving(false);}
  }
- return <main className="min-h-dvh bg-[#f5f6f8] px-4 py-4 text-[#243047] sm:px-6 sm:py-6"><section className="mx-auto w-full max-w-xl">
-  <header className="flex items-center justify-between gap-4"><h1 className="text-lg font-semibold">{mode==="reset"?"설정 변경":"재조율"}</h1><Link href={`/p/${inviteToken}/availability`} className="text-sm text-[#4261df]">돌아가기</Link></header>
+ return <main className="app-entry"><section><JourneyHeader stage={mode === "reset" ? 1 : 2} href={`/p/${inviteToken}`}/>
+  <header className="flex items-center justify-between gap-4"><h1 className="text-lg font-semibold">{mode==="reset"?"설정 변경":"재조율"}</h1><Link href={`/p/${inviteToken}/availability`} className="text-sm text-[#e92520]">돌아가기</Link></header>
   <SettingsForm inviteToken={inviteToken} serverNow={initial.serverNow} initialValues={values} submitSettings={stage}/>
   <dialog ref={dialog} className={styles.changeDialog} aria-labelledby="change-title" onCancel={event=>{event.preventDefault();if(!busy.current&&staged)finish();}}>
    <h2 id="change-title">변경 내용을 적용할까요?</h2>

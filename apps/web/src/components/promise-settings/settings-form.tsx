@@ -2,7 +2,8 @@
 
 import { useActionState, useRef, useState } from "react";
 import { startCollection, type PromiseSettingsFormState } from "@/actions/promise-settings";
-import { defaultPromiseSettings, defaultVotingDeadline, validatePromiseSettings, type PromiseSettingsField } from "@/lib/promise-settings/policy";
+import { defaultPromiseSettings, validatePromiseSettings, type PromiseSettingsField } from "@/lib/promise-settings/policy";
+import { DeadlinePicker } from "./deadline-picker";
 import { DateRangePicker } from "./date-range-picker";
 import { DurationPicker } from "./duration-picker";
 import { DailyTimePicker } from "./daily-time-picker";
@@ -26,7 +27,6 @@ export function SettingsForm({ inviteToken, serverNow, initialValues, submitSett
   const [message, setMessage] = useState<string | null>(null);
   const [review, setReview] = useState(defaults);
   const [deadline, setDeadline] = useState(defaults.votingDeadline);
-  const deadlineEdited = useRef(Boolean(initialValues));
   const form = useRef<HTMLFormElement>(null);
   const heading = useRef<HTMLHeadingElement>(null);
 
@@ -72,10 +72,6 @@ export function SettingsForm({ inviteToken, serverNow, initialValues, submitSett
       goTo(1);
       return;
     }
-    if (!deadlineEdited.current) {
-      values.votingDeadline = defaultVotingDeadline(values.dateRangeStart);
-      setDeadline(values.votingDeadline);
-    }
     setReview(values);
     goTo(2);
   }
@@ -85,7 +81,7 @@ export function SettingsForm({ inviteToken, serverNow, initialValues, submitSett
       ref={form}
       action={action}
       noValidate
-      className={styles.form}
+      className={`${styles.form} settings-flow`}
       onSubmit={(event) => {
         if (step === 1) {
           event.preventDefault();
@@ -136,25 +132,15 @@ export function SettingsForm({ inviteToken, serverNow, initialValues, submitSett
             initialValue={state.values.participantLimit}
             error={errors.participantLimit}
           />
-          <div className="mt-4">
-            <label htmlFor="votingDeadline" className="block text-sm font-semibold">응답 마감</label>
-            <input
-              id="votingDeadline"
-              name="votingDeadline"
-              type="datetime-local"
-              required
-              value={deadline}
-              onChange={(event) => {
-                deadlineEdited.current = true;
-                setDeadline(event.target.value);
-              }}
-              aria-describedby={errors.votingDeadline ? "votingDeadline-error" : undefined}
-              className={styles.input}
-            />
-            {errors.votingDeadline && (
-              <p id="votingDeadline-error" role="alert" className="mt-2 text-sm text-red-700">{errors.votingDeadline}</p>
-            )}
-          </div>
+          <DeadlinePicker
+            value={deadline}
+            serverNow={serverNow}
+            error={errors.votingDeadline}
+            rangeEnd={review.dateRangeEnd}
+            onChange={(value) => {
+              setDeadline(value);
+            }}
+          />
         </div>
         <div className={styles.review}>
           <p className="mb-2 text-sm font-semibold">선택한 약속 조건</p>

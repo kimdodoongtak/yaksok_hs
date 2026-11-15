@@ -102,8 +102,8 @@ function parseKstDateTime(value: unknown): Date | null {
   return new Date(date.getTime() + (hour * 60 + minute) * 60_000 - KST_MS);
 }
 
-export function defaultVotingDeadline(startDate: string): string {
-  const start = parseDate(startDate);
+export function defaultVotingDeadline(todayDate: string): string {
+  const start = parseDate(todayDate);
   if (!start) return "";
   return `${formatDate(new Date(start.getTime() + 7 * DAY_MS))}T23:59`;
 }

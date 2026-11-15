@@ -1,5 +1,6 @@
 "use client";
-import { useCallback, useEffect, useRef, useState, type KeyboardEvent } from "react";
+import { JourneyHeader, JourneyProgress } from "@/components/ui/journey-header";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, type KeyboardEvent } from "react";
 import { useRouter } from "next/navigation";
 import { closeCollection } from "@/actions/promise-status";
 import { heatLegend } from "./heatmap-scale";
@@ -11,6 +12,7 @@ import { addDays, durationLabel, localDay, slotAt, timeLabel, weekStart } from "
 import { useSlotDrag } from "./use-slot-drag";
 import { AvailabilitySidebar } from "./availability-sidebar";
 import { useOverview } from "./use-overview";
+import { DeadlineCountdown } from "./deadline-countdown";
 import { EditButton } from "./edit-button";
 import { RepeatDialog } from "./repeat-dialog";
 import styles from "./availability.module.css";
@@ -45,6 +47,13 @@ export function AvailabilityEditor({inviteToken,initial}:{inviteToken:string;ini
   const busy=useRef(false);
   const epoch=useRef(0);
   const grid=useRef<HTMLDivElement>(null);
+  const controls=useRef<HTMLDivElement>(null);
+  useLayoutEffect(()=>{
+    const node=controls.current;if(!node)return;
+    const measure=()=>node.parentElement?.style.setProperty("--calendar-controls-height",`${node.offsetHeight}px`);
+    measure();const observer=new ResizeObserver(measure);observer.observe(node);
+    return ()=>observer.disconnect();
+  },[]);
   const {settings}=snapshot;
   const days=Array.from({length:7},(_,i)=>addDays(week,i));
   const minutes=Array.from({length:Math.ceil((settings.dailyEndMinute-settings.dailyStartMinute)/stepMinutes)},(_,i)=>settings.dailyStartMinute+i*stepMinutes);
@@ -53,6 +62,7 @@ export function AvailabilityEditor({inviteToken,initial}:{inviteToken:string;ini
   const {start: startDrag, cancelDrag, handlers: dragHandlers}=useSlotDrag(grid,draft,setDraft,editable,()=>setMessage(""),remember,stepMinutes);
   const selected=[...draft].sort();
   const dirty=JSON.stringify(selected)!==JSON.stringify(snapshot.slots);
+  const submitted=Boolean(snapshot.submittedAt)&&!dirty;
   const applySnapshot=useCallback((next:AvailabilitySnapshot,force=false)=>{
     if(next.status==="confirmed"){router.replace(`/p/${inviteToken}/result`);return;}
     const previous=latest.current;
@@ -140,9 +150,12 @@ export function AvailabilityEditor({inviteToken,initial}:{inviteToken:string;ini
   }
   function zoom(value:number){
     cancelDrag(true);
-    const top=grid.current?.scrollTop ?? 0;
+    const top=Math.max(0,(controls.current?.getBoundingClientRect().bottom??0)-(grid.current?.getBoundingClientRect().top??0));
+    const nextOffset=top/(stepMinutes===120?78:50)*stepMinutes/value*(value===120?78:50);
     setStepMinutes(value);
-    requestAnimationFrame(()=>{if(grid.current)grid.current.scrollTop=top*stepMinutes/value;});
+    if(top>0)requestAnimationFrame(()=>{
+      if(grid.current&&controls.current)window.scrollTo({top:window.scrollY+grid.current.getBoundingClientRect().top-controls.current.getBoundingClientRect().bottom+nextOffset});
+    });
   }
   const futureSlots=selected.filter(slot=>slot>snapshot.serverNow);
   const weekSlots=futureSlots.filter(slot=>localDay(slot)>=week && localDay(slot)<addDays(week,7));
@@ -177,7 +190,7 @@ export function AvailabilityEditor({inviteToken,initial}:{inviteToken:string;ini
     target?.focus();
   }
   async function submit(){
-    if(busy.current || closed)return;
+    if(busy.current || closed || submitted)return;
     busy.current=true;epoch.current++;
     setPending(true);cancelDrag();setMessage("");
     try {
@@ -195,22 +208,26 @@ export function AvailabilityEditor({inviteToken,initial}:{inviteToken:string;ini
     finally {busy.current=false;setPending(false);}
   }
   return <main className={styles.page}><div className={styles.shell}>
+    <div className={styles.topBar}>
+      <JourneyHeader href={`/p/${inviteToken}`}/>
+      <DeadlineCountdown deadline={settings.votingDeadlineAt} serverNow={snapshot.serverNow} closed={closed}/>
+      <div className={styles.headerAction}>{closed?<Link href={`/p/${inviteToken}/candidates`}>후보 보기</Link>:snapshot.role==="host"?<button type="button" disabled={pending} onClick={()=>setConfirmClose(true)}>응답 마감</button>:<span className={styles.viewBadge}>모집 중</span>}</div>
+    </div>
     <header className={styles.header}>
+      <JourneyProgress stage={closed ? 2 : 1}/>
       <div className={styles.headingRow}>
         <button type="button" className={styles.menuButton} aria-label="약속 정보 열기" aria-expanded={sidebarOpen} aria-controls="availability-drawer" onClick={()=>setSidebarOpen(true)}><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
-        <div><h1>{closed?"응답 시간표":"가능 시간 입력"}</h1><p>{snapshot.nickname} · {snapshot.submittedAt?"제출 완료":"미제출"}{dirty?" · 수정 중":""}</p></div>
+        <div><h1>{closed?"응답 시간표":"가능 시간 입력"}</h1><p>{snapshot.nickname} · {dirty?"수정 중 · 미제출":snapshot.submittedAt?"제출 완료":"미제출"}</p></div>
       </div>
-      <div className={styles.headerAction}>{closed?<Link href={`/p/${inviteToken}/candidates`}>후보 보기</Link>:snapshot.role==="host"?<button type="button" disabled={pending} onClick={()=>setConfirmClose(true)}>응답 마감</button>:<span className={styles.viewBadge}>모집 중</span>}</div>
     </header>
     <div className={styles.workspace}>
       <aside className={styles.sidebar} aria-label="약속 정보"><AvailabilitySidebar snapshot={snapshot} inviteToken={inviteToken} {...participantProps}/></aside>
       <section className={styles.panel} aria-label="가능 시간 선택">
+    <div className={styles.calendarControls} ref={controls} data-calendar-controls>
     <div className={styles.viewSwitch} role="group" aria-label="시간 보기">
       <button type="button" aria-pressed={view==="mine"} onClick={()=>changeView("mine")}>내 시간</button>
       <button type="button" aria-pressed={view==="all"} onClick={()=>changeView("all")}>전체 시간</button>
     </div>
-    {overview.error && <p className={styles.loadNotice} aria-live="polite">시간 정보를 불러오지 못했어요. <button type="button" onClick={overview.refresh}>다시 불러오기</button></p>}
-    {overview.loading && <p className={styles.loadNotice} aria-live="polite">시간 정보 불러오는 중…</p>}
     <div className={styles.toolbar}>
       <button type="button" aria-label="이전 주" disabled={week<=weekStart(settings.dateRangeStart)} onClick={()=>setWeek(addDays(week,-7))}>‹</button>
       <div className={styles.weekHeading} aria-live="polite"><span>{week.slice(0,4)}년{week.slice(0,4)!==days[6].slice(0,4)?` – ${days[6].slice(0,4)}년`:""}</span><strong>{Number(week.slice(5,7))}월 {Number(week.slice(8))}일 ~ {week.slice(0,7)!==days[6].slice(0,7)?`${Number(days[6].slice(5,7))}월 `:""}{Number(days[6].slice(8))}일</strong></div>
@@ -224,13 +241,20 @@ export function AvailabilityEditor({inviteToken,initial}:{inviteToken:string;ini
     </EditButton></div>
       <div className={styles.zoomControls} role="group" aria-label="한 칸의 시간">{[30,60,120].map(value=><button key={value} type="button" disabled={pending} aria-pressed={stepMinutes===value} onClick={()=>zoom(value)}>{durationLabel(value)}</button>)}</div>
     </div>
-    <p className={styles.help}>{view==="all"?`${closed?"집계":"임시 집계"} · 전체 ${overview.data?.participants.length ?? "–"}명`:view!=="mine"?`${overview.participants?.find(member=>member.id===view)?.nickname ?? "참여자"} · 읽기 전용`:closed?"응답이 마감됐어요. 제출한 시간만 확인할 수 있어요.":"드래그로 선택 · 왼쪽 시간대를 밀어 스크롤"}</p>
-    <div className={styles.scroll} ref={grid} aria-label="주별 가능 시간" {...dragHandlers}>
-      <div className={styles.grid}>
+    <div className={styles.help} aria-live="polite">
+      {overview.error ? <span>시간 정보를 불러오지 못했어요. <button type="button" onClick={overview.refresh}>다시 불러오기</button></span>
+        : overview.loading ? <span>시간 정보 불러오는 중…</span>
+        : <span>{view==="all"?`${closed?"집계":"임시 집계"} · 전체 ${overview.data?.participants.length ?? "–"}명`:view!=="mine"?`${overview.participants?.find(member=>member.id===view)?.nickname ?? "참여자"} · 읽기 전용`:closed?"응답이 마감됐어요. 제출한 시간만 확인할 수 있어요.":"드래그로 선택 · 왼쪽 시간대를 밀어 스크롤"}</span>}
+    </div>
+    <div className={styles.dayHeaders}>
         <div className={styles.corner}/>{days.map((day,index)=><div className={styles.day} key={day} data-day-heading><span>{["일","월","화","수","목","금","토"][index]}</span><strong data-today={day===localDay(snapshot.serverNow)}>{Number(day.slice(8))}</strong></div>)}
+    </div>
+    </div>
+    <div className={styles.scroll} ref={grid} aria-label="주별 가능 시간" {...dragHandlers}>
+      <div className={styles.grid} style={{gridAutoRows:stepMinutes===120?78:50}}>
         {minutes.map(minute=><div className={styles.row} key={minute}>
           <div className={styles.time}>{stepMinutes>30 ? <span className={styles.timeRange}>{compactTimeLabel(minute)} ~ {compactTimeLabel(Math.min(minute+stepMinutes,settings.dailyEndMinute))}</span> : timeLabel(minute)}</div>
-          {days.map(day=>{if(view!=="mine")return <HeatmapCell key={day} day={day} minute={minute} stepMinutes={stepMinutes} endMinute={settings.dailyEndMinute} valid={day>=settings.dateRangeStart&&day<=settings.dateRangeEnd} data={overview.data} all={view==="all"}/>;
+          {days.map(day=>{if(view!=="mine")return <HeatmapCell key={day} day={day} minute={minute} stepMinutes={stepMinutes} endMinute={settings.dailyEndMinute} startMinute={settings.dailyStartMinute} valid={day>=settings.dateRangeStart&&day<=settings.dateRangeEnd} data={overview.data} all={view==="all"}/>;
           const active=cellState(day,minute),enabled=cellMinutes(minute).some(m=>editable(day,m));return <button key={day} type="button" className={styles.slot} style={{minHeight:stepMinutes===120?72:44}} data-day={day} data-minute={minute} data-hour={minute%60===0} data-block-start={active===true && cellState(day,minute-stepMinutes)!==true} data-block-end={active===true && cellState(day,minute+stepMinutes)!==true} aria-label={`${day} ${timeLabel(minute)}${stepMinutes>30?`–${timeLabel(Math.min(minute+stepMinutes,settings.dailyEndMinute))}`:""}`} aria-pressed={active} disabled={!enabled}
             onPointerDown={event=>startDrag(event,day,minute)}
             onClick={event=>{if(event.detail===0)toggle(day,minute);}}
@@ -239,7 +263,7 @@ export function AvailabilityEditor({inviteToken,initial}:{inviteToken:string;ini
       </div>
     </div>
     <div className={styles.legend}>{view!=="mine"?<span>{view==="all"?<span className={styles.heatLegend} role="group" aria-label="색상별 가능 인원"><span>0명</span><span className={styles.heatRamp} aria-hidden="true"><i data-heat="0"/>{heatLegend(overview.data?.participants.length??0).map(item=><i key={item.level} data-heat={item.level}/>)}</span><span>{overview.data?.participants.length??"–"}명</span></span>:"제출된 시간 · 읽기 전용"}</span>:<><span><i/>선택한 시간</span><span><i/>선택 불가</span>{stepMinutes>30 && <span className={styles.partialLegend}><i/>일부 선택</span>}</>}</div>
-    <footer className={styles.footer} hidden={view!=="mine"}><button type="button" className={styles.repeatButton} disabled={pending||closed||!selected.some(slot=>localDay(slot)>=week && localDay(slot)<addDays(week,7))} onClick={openRepeat}>이번 주 반복</button><button type="button" className={styles.resetButton} disabled={pending||closed||!futureSlots.length} onClick={()=>setConfirmClear(true)}>초기화</button><button type="button" disabled={pending||closed} onClick={submit}>{pending?"제출 중…":"선택 제출"}</button></footer>
+    <footer className={styles.footer} hidden={view!=="mine"}><button type="button" className={styles.repeatButton} disabled={pending||closed||!selected.some(slot=>localDay(slot)>=week && localDay(slot)<addDays(week,7))} onClick={openRepeat}>이번 주 반복</button><button type="button" className={styles.resetButton} disabled={pending||closed||!futureSlots.length} onClick={()=>setConfirmClear(true)}>초기화</button><button type="button" disabled={pending||closed||submitted} data-submitted={submitted} onClick={submit}>{pending?"제출 중…":submitted?<><span aria-hidden="true">✓ </span>제출 완료</>:"선택 제출"}</button></footer>
     <p role="status" className={styles.notice}>{message}</p>
 
       </section>
@@ -251,7 +275,7 @@ export function AvailabilityEditor({inviteToken,initial}:{inviteToken:string;ini
     <dialog ref={closeDialog} className={styles.confirmDialog} aria-labelledby="close-title" onCancel={()=>{if(!pending)setConfirmClose(false);}} onClose={event=>{if(!event.currentTarget.open)setConfirmClose(false);}}>
       <h2 id="close-title">응답을 마감할까요?</h2>
       <p>마감하면 새로 참여하거나 시간을 수정할 수 없어요.{dirty && <> 아직 제출하지 않은 내 선택은 반영되지 않아요.</>}</p>
-      <div><button type="button" data-cancel disabled={pending} onClick={()=>setConfirmClose(false)}>취소</button><button type="button" disabled={pending} onClick={closeVoting}>{pending?"마감 중…":"마감하기"}</button></div>
+      <div className={styles.closeActions}><button type="button" data-cancel disabled={pending} onClick={()=>setConfirmClose(false)}>취소</button><button type="button" className={styles.closeConfirm} disabled={pending} onClick={closeVoting}>{pending?"마감 중…":"마감하기"}</button></div>
     </dialog>
     {repeatWeek && <RepeatDialog slots={draft} settings={settings} now={snapshot.serverNow} sourceWeek={repeatWeek} onApply={applyRepeat} onClose={()=>setRepeatWeek(null)}/> }
     <dialog ref={clearDialog} className={styles.confirmDialog} aria-labelledby="clear-title" aria-describedby="clear-description" onCancel={()=>setConfirmClear(false)} onClose={()=>setConfirmClear(false)}>

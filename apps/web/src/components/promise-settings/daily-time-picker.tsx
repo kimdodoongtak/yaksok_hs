@@ -53,7 +53,7 @@ export function DailyTimePicker({ initialStart, initialEnd, errors }: {
           );
         })}
       </div>
-      <p className={styles.help}>화살표로 30분씩 조절해요.</p>
+      <p className="sr-only">화살표로 30분씩 조절해요.</p>
       {fields.map(({ name }) => errors[name] && (
         <p key={name} id={`${name}-error`} role="alert" className="mt-2 text-sm text-red-700">{errors[name]}</p>
       ))}

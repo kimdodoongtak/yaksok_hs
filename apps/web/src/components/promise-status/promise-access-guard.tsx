@@ -29,6 +29,6 @@ export function PromiseAccessGuard({ inviteToken, participantId, children }: { i
     window.addEventListener("focus", visible); document.addEventListener("visibilitychange", visible);
     return () => { controller.abort(); clearInterval(timer); window.removeEventListener("focus", visible); document.removeEventListener("visibilitychange", visible); };
   }, [inviteToken, participantId, router]);
-  if (terminal) return <main className="grid min-h-dvh place-items-center bg-[#f5f6f8] p-6"><h1 className="text-xl font-bold">{terminal === "PROMISE_CANCELLED" ? "취소된 약속입니다." : terminal === "LINK_EXPIRED" ? "만료된 약속입니다" : "약속 상태를 확인하고 있어요."}</h1></main>;
-  return <>{offline && <p role="status" className="bg-[#e7edff] px-4 py-3 text-sm text-[#3554ac]">최신 상태를 확인하지 못했어요. 연결되면 다시 확인할게요.</p>}{children}</>;
+  if (terminal) return <main className="grid min-h-dvh place-items-center bg-[#f4f1ea] p-6"><h1 className="text-xl font-bold">{terminal === "PROMISE_CANCELLED" ? "취소된 약속입니다." : terminal === "LINK_EXPIRED" ? "만료된 약속입니다" : "약속 상태를 확인하고 있어요."}</h1></main>;
+  return <>{offline && <p role="status" className="bg-[#fce4e0] px-4 py-3 text-sm text-[#cc201b]">최신 상태를 확인하지 못했어요. 연결되면 다시 확인할게요.</p>}{children}</>;
 }

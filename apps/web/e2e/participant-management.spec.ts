@@ -147,3 +147,27 @@ test("조회 복구 시 실패 안내를 지우고 기존 상태 변경 안내�
   await recover();
   await expect(changed).toBeVisible();
 });
+
+test("참여자 관리에서 내보내기·새로고침 후에도 들어온 화면으로 돌아간다",async({page,context})=>{
+  const f=await fixture(context),invite=`/p/${f.link.inviteToken}`,availability=`${invite}/availability`;
+  await page.setViewportSize({width:393,height:852});await page.goto(availability);
+  await page.getByRole("button",{name:"약속 정보 열기",exact:true}).click();
+  await page.getByRole("dialog",{name:"약속 정보",exact:true}).getByRole("link",{name:"참여자 관리",exact:true}).click();
+  const back=page.getByRole("link",{name:"이전 화면으로",exact:true});
+  await expect(back).toBeVisible();await expect(back).toHaveAttribute("href",availability);
+  await page.getByRole("button",{name:"다음방장 내보내기",exact:true}).click();
+  await page.getByRole("dialog").getByRole("button",{name:"내보내기",exact:true}).click();
+  await expect(page.getByRole("button",{name:"다음방장 내보내기",exact:true})).toHaveCount(0);
+  await page.reload();await back.click();await expect(page).toHaveURL(availability);
+  await expect(page.getByRole("heading",{name:"가능 시간 입력",exact:true})).toBeVisible();
+  await page.goto(invite);await page.getByRole("link",{name:"참여자 관리",exact:true}).click();
+  await back.click();await expect(page).toHaveURL(invite);
+  await db.promiseRecord.update({where:{id:f.promise.id},data:{status:"confirmed",confirmedStartAt:new Date(Date.now()+86400000)}});
+  await page.goto(`${invite}/result`);await page.getByRole("link",{name:"참여자 · 나가기",exact:true}).click();
+  await back.click();await expect(page).toHaveURL(`${invite}/result`);
+  await expect(page.getByRole("heading",{name:"약속 확정",exact:true})).toBeVisible();
+  for(const suffix of ["","?from=https%3A%2F%2Fexample.com"]){
+    await page.goto(`${f.path}${suffix}`);await expect(back).toHaveAttribute("href",invite);
+  }
+  await page.screenshot({path:"test-results/participants-back-393.png",fullPage:true});
+});

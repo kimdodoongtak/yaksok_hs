@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import type { InvitationView } from "@/lib/invitation/service";
 import { InvitationTicket } from "./invitation-ticket";
+import actionStyles from "@/components/ui/invitation-actions.module.css";
 
 export function ReadyInvitation({ inviteToken, settings, animate = false }: {
   inviteToken: string;
@@ -33,7 +34,7 @@ export function ReadyInvitation({ inviteToken, settings, animate = false }: {
 
   return (
     <>
-      <h1 className="text-2xl font-bold tracking-tight text-[#243047]">약속이 준비됐어요</h1>
+      <h1 className="text-2xl font-bold tracking-tight text-[#181916]">약속이 준비됐어요</h1>
       <p className="mt-3 text-sm leading-6 text-slate-600">
         아래 링크를 친구들에게 보내 가능 시간을 받아 보세요.
       </p>
@@ -41,7 +42,7 @@ export function ReadyInvitation({ inviteToken, settings, animate = false }: {
       <button
         type="button"
         onClick={copy}
-        className="mt-6 w-full rounded-lg bg-[#4261df] px-4 py-3 text-sm font-semibold text-white hover:bg-[#324fca]"
+        className={`${actionStyles.action} ${actionStyles.secondary} mt-6`}
       >
         {copied ? "복사했어요" : "초대 링크 복사"}
       </button>

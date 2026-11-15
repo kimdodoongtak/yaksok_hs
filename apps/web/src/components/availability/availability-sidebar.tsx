@@ -1,4 +1,5 @@
 "use client";
+import { AnimalAvatar } from "@/components/ui/animal-avatar";
 import Link from "next/link";
 import type { OverviewSnapshot } from "@/lib/candidates/view";
 import type { AvailabilitySnapshot } from "@/lib/availability/view";
@@ -18,8 +19,8 @@ export function AvailabilitySidebar({snapshot,inviteToken,participants,onSelect,
       <div><dt>정원</dt><dd>{settings.participantLimit}명</dd></div>
     </dl>
     <h3 className={styles.myHeading}>참여자{participants ? ` ${participants.length}명` : ""}</h3>
-    <div className={styles.participants}>{participants?.map(member=><button key={member.id} type="button" aria-label={member.nickname} aria-pressed={selectedId===member.id} onClick={()=>onSelect?.(member.id)}><strong>{member.nickname}</strong><span>{member.role==="host"?"방장":member.id===snapshot.participantId?"나":""}</span></button>)}</div>
-    <Link href={`/p/${inviteToken}/participants`} className={styles.infoLink}>{snapshot.role==="host"?"참여자 관리":"참여자 · 나가기"}</Link>
+    <div className={styles.participants}><button type="button" aria-label="전체 일정" aria-pressed={selectedId==="all"} onClick={()=>onSelect?.("all")}><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="3"/><path d="M8 3v4m8-4v4M4 10h16"/></svg><strong>전체 일정</strong><span className={styles.responseCheck} aria-hidden="true">{selectedId==="all"?"✓":""}</span></button>{participants?.map((member,index)=><button key={member.id} type="button" aria-label={member.nickname} aria-pressed={selectedId===member.id} onClick={()=>onSelect?.(member.id)}><AnimalAvatar index={index}/><strong>{member.nickname}</strong><span>{member.role==="host"?"방장":member.id===snapshot.participantId?"나":""}</span><span aria-hidden="true" className={styles.responseCheck}>{selectedId===member.id ? "✓" : ""}</span></button>)}</div>
+    <Link href={`/p/${inviteToken}/participants?from=availability`} className={styles.infoLink}>{snapshot.role==="host"?"참여자 관리":"참여자 · 나가기"}</Link>
     <h3 className={styles.myHeading}>내 참여 정보</h3>
     <div className={styles.myCard}><div><strong>{snapshot.nickname}</strong><span>{snapshot.role==="host"?"방장":"참여자"}</span></div><p>{snapshot.submittedAt?"응답 제출 완료":"응답 대기"}</p></div>
     {snapshot.role==="host"&&<Link href={`/p/${inviteToken}/settings/edit`} className={styles.infoLink}>{snapshot.status==="collecting"?"설정 변경":"재조율하기"}</Link>}

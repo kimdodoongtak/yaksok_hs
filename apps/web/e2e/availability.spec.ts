@@ -203,16 +203,19 @@ test("모바일 손가락 드래그로 연속 시간을 선택·해제하고 가
     await client.send("Input.dispatchTouchEvent",{type:"touchCancel",touchPoints:[]});
     for(const time of ["09:00","09:30","10:00","10:30"])await expect(cell(time)).toHaveAttribute("aria-pressed","false");
     const grid=page.getByLabel("주별 가능 시간"),box=await grid.boundingBox();if(!box)throw new Error("시간표 없음");
-    const axisX=box.x+18,axisY=box.y+box.height-60;
+    const footer=await page.locator("footer").boundingBox();
+    const visibleBottom=Math.min(box.y+box.height,page.viewportSize()!.height,footer!.y);
+    const axisX=box.x+18,axisY=visibleBottom-60;
     await client.send("Input.dispatchTouchEvent",{type:"touchStart",touchPoints:[{x:axisX,y:axisY}]});
     for(let i=1;i<=6;i++)await client.send("Input.dispatchTouchEvent",{type:"touchMove",touchPoints:[{x:axisX,y:axisY-i*24}]});
     await client.send("Input.dispatchTouchEvent",{type:"touchEnd",touchPoints:[]});
-    await expect.poll(()=>grid.evaluate(el=>el.scrollTop)).toBeGreaterThan(30);
+    await expect.poll(()=>page.evaluate(()=>window.scrollY)).toBeGreaterThan(30);
     await expect(grid.locator('button[aria-pressed="true"]')).toHaveCount(0);
-    await grid.evaluate(el=>{el.scrollTop=0;});
+    await page.evaluate(()=>window.scrollTo(0,0));
+    await expect.poll(()=>page.evaluate(()=>window.scrollY)).toBe(0);
     await client.send("Input.dispatchTouchEvent",{type:"touchStart",touchPoints:[{x,y}]});
-    await client.send("Input.dispatchTouchEvent",{type:"touchMove",touchPoints:[{x,y:box.y+box.height-8}]});
-    await expect.poll(()=>grid.evaluate(el=>el.scrollTop)).toBeGreaterThan(30);
+    await client.send("Input.dispatchTouchEvent",{type:"touchMove",touchPoints:[{x,y:visibleBottom-8}]});
+    await expect.poll(()=>page.evaluate(()=>window.scrollY)).toBeGreaterThan(30);
     await client.send("Input.dispatchTouchEvent",{type:"touchEnd",touchPoints:[]});
     await page.getByRole("button",{name:"선택 제출",exact:true}).tap();
     await expect(page.getByRole("status")).toContainText("제출했어요");
@@ -224,12 +227,17 @@ test("모바일 사이드바를 닫으면 선택을 유지하며 PC에서는 정
   const menu=page.getByRole("button",{name:"약속 정보 열기",exact:true});
   await menu.click();const dialog=page.getByRole("dialog",{name:"약속 정보",exact:true});
   await expect(dialog).toBeVisible();await expect(dialog.getByRole("button",{name:"테스트친구",exact:true})).toBeVisible();
+  expect((await dialog.boundingBox())!.x).toBe(0);
   await page.screenshot({path:"test-results/availability-sidebar-393.png",fullPage:true});
   await page.keyboard.press("Escape");await expect(dialog).not.toBeVisible();await expect(menu).toBeFocused();
   await menu.click();
   await dialog.getByRole("button",{name:"약속 정보 닫기",exact:true}).click();
   await expect(dialog).not.toBeVisible();
   await expect(first).toHaveAttribute("aria-pressed","true");
+  await menu.click();await dialog.getByRole("button",{name:"전체 일정",exact:true}).click();
+  await expect(dialog).not.toBeVisible();
+  await expect(page.getByRole("button",{name:"전체 시간",exact:true})).toHaveAttribute("aria-pressed","true");
+  await page.getByRole("button",{name:"내 시간",exact:true}).click();await expect(first).toHaveAttribute("aria-pressed","true");
   await page.setViewportSize({width:1280,height:800});
   await expect(menu).not.toBeVisible();await expect(page.getByRole("complementary",{name:"약속 정보",exact:true})).toBeVisible();
   await page.screenshot({path:"test-results/availability-sidebar-1280.png",fullPage:true});
@@ -256,7 +264,10 @@ test("되돌린 드래그를 복구하고 새 선택과 제출 후에는 복구 
   const redo=page.getByRole("button",{name:"복구하기",exact:true});
   await expect(redo).toBeDisabled();
   await cell("09:00").hover();await page.mouse.down();await cell("10:00").hover();await page.mouse.up();
-  await undo.click();await redo.click();
+  for(const time of ["09:00","09:30","10:00"])await expect(cell(time)).toHaveAttribute("aria-pressed","true");
+  await undo.click();
+  for(const time of ["09:00","09:30","10:00"])await expect(cell(time)).toHaveAttribute("aria-pressed","false");
+  await redo.click();
   for(const time of ["09:00","09:30","10:00"])await expect(cell(time)).toHaveAttribute("aria-pressed","true");
   await expect(redo).toBeDisabled();
   await undo.click();await cell("11:00").click();await expect(redo).toBeDisabled();
@@ -489,4 +500,114 @@ test("이번 주 반복은 빈 주를 기준으로 삼지 않고 대상 주가 �
   await expect(dialog.getByRole("checkbox")).toHaveCount(0);
   await expect(dialog.getByRole("button",{name:"전체 선택",exact:true})).toHaveCount(0);
   await expect(dialog.getByRole("button",{name:"적용",exact:true})).toBeDisabled();
+});
+
+test("제출 완료 표시는 변경 전까지 유지하고 수정·되돌리기·실패·재제출 상태를 구분한다",async({page,context})=>{
+  const f=await fixture(context);await page.setViewportSize({width:393,height:852});await page.goto(f.path);
+  const submit=page.getByRole("button",{name:"선택 제출",exact:true}),complete=page.getByRole("button",{name:"제출 완료",exact:true});
+  // 처음에는 선택이 없어도 '가능한 시간 없음'을 제출할 수 있다.
+  await expect(submit).toBeEnabled();await submit.click();
+  await expect(page.getByRole("status")).toContainText("가능한 시간 없음으로 제출했어요");
+  await expect(complete).toBeDisabled();
+  await page.getByRole("button",{name:"다음 주",exact:true}).click();await expect(complete).toBeDisabled();
+  await page.getByRole("button",{name:"이전 주",exact:true}).click();
+  await page.getByRole("button",{name:"30분",exact:true}).click();await expect(complete).toBeDisabled();
+  const cell=page.getByRole("button",{name:`${f.start} 09:00`,exact:true});
+  await cell.click();await expect(submit).toBeEnabled();
+  await page.getByRole("button",{name:"되돌리기",exact:true}).click();await expect(complete).toBeDisabled();
+  await page.getByRole("button",{name:"복구하기",exact:true}).click();await expect(submit).toBeEnabled();
+  await submit.click();await expect(complete).toBeDisabled();
+  await page.reload();await expect(complete).toBeDisabled();
+  await page.screenshot({path:"test-results/availability-submitted-393.png",fullPage:true});
+  await page.getByRole("button",{name:"30분",exact:true}).click();await cell.click();
+  await page.route(`**${f.path}`,route=>route.request().method()==="POST"?route.abort():route.continue());
+  await submit.click();await expect(page.getByRole("status")).toContainText("제출하지 못했어요");
+  await expect(submit).toBeEnabled();await expect(complete).toHaveCount(0);
+  await page.unroute(`**${f.path}`);await submit.click();await expect(complete).toBeDisabled();
+  // 재조율 등으로 응답이 무효화되면 선택이 같아도 다시 제출할 수 있어야 한다.
+  await db.participant.update({where:{id:f.member.id},data:{availabilitySubmittedAt:null,availabilityVersion:{increment:1}}});
+  await page.evaluate(()=>document.dispatchEvent(new Event("visibilitychange")));
+  await expect(submit).toBeEnabled({timeout:12000});
+});
+
+test("모바일에서 상단 소개는 스크롤되고 시간표는 길게 보이며 마감·제출은 접근 가능하다",async({page,context})=>{
+  const f=await fixture(context);await db.promiseRecord.update({where:{id:f.promise.id},data:{dailyEndMinute:1440}});
+  await page.setViewportSize({width:393,height:852});await page.goto(f.path);
+  const grid=page.getByLabel("주별 가능 시간",{exact:true});
+  await page.evaluate(()=>document.fonts.ready);
+  expect((await grid.boundingBox())!.height).toBeGreaterThan(500);
+  await page.evaluate(()=>window.scrollTo(0,document.body.scrollHeight));
+  expect((await page.getByRole("heading",{name:"가능 시간 입력",exact:true}).boundingBox())!.y).toBeLessThan(0);
+  await expect(page.getByRole("button",{name:"응답 마감",exact:true})).toBeInViewport();
+  await expect(page.getByRole("button",{name:"선택 제출",exact:true})).toBeInViewport();
+  await expect(page.locator("[data-day-heading]").first()).toBeInViewport();
+  expect(await grid.evaluate(el=>el.scrollHeight<=el.clientHeight)).toBe(true);
+  const cell=page.getByRole("button",{name:`${f.start} 09:00–10:00`,exact:true});
+  await cell.click();await expect(cell).toHaveAttribute("aria-pressed","true");
+  await page.screenshot({path:"test-results/availability-tall-393.png",fullPage:false});
+});
+
+for(const width of [393,1280]){
+  test(`시간표 가운데와 바깥에서 휠을 굴려도 페이지 하나만 스크롤된다 (${width}px)`,async({page,context})=>{
+    const f=await fixture(context);await db.promiseRecord.update({where:{id:f.promise.id},data:{dailyEndMinute:1440}});
+    await page.setViewportSize({width,height:852});await page.goto(f.path);
+    const grid=page.getByLabel("주별 가능 시간",{exact:true});
+    await page.getByRole("button",{name:`${f.start} 09:00–10:00`,exact:true}).hover();
+    await page.mouse.wheel(0,240);
+    await expect.poll(()=>page.evaluate(()=>window.scrollY)).toBeGreaterThan(150);
+    expect(await grid.evaluate(el=>el.scrollTop)).toBe(0);
+    expect(await grid.evaluate(el=>el.scrollHeight<=el.clientHeight)).toBe(true);
+    const scrolled=await page.evaluate(()=>window.scrollY);
+    await page.mouse.move(4,500);await page.mouse.wheel(0,200);
+    await expect.poll(()=>page.evaluate(()=>window.scrollY)).toBeGreaterThan(scrolled+100);
+    await expect(page.getByRole("button",{name:"다음 주",exact:true})).toBeInViewport();
+    await expect(page.getByRole("button",{name:"응답 마감",exact:true})).toBeInViewport();
+    await expect(page.getByRole("button",{name:"선택 제출",exact:true})).toBeInViewport();
+    // 날짜 헤더는 새 배치에서도 스크롤 중 화면에 남아 있어야 한다.
+    await expect(page.locator("[data-day-heading]").first()).toBeInViewport();
+    await page.screenshot({path:`test-results/availability-page-scroll-${width}.png`});
+  });
+}
+
+for (const role of ["host", "member"] as const) {
+  test(`${role} 시간 입력에 남은 마감 시간을 표시하고 스크롤해도 유지한다`, async ({ page, context }) => {
+    const f = await fixture(context);
+    await db.participant.update({ where: { id: f.member.id }, data: { role } });
+    await db.promiseRecord.update({ where: { id: f.promise.id }, data: { votingDeadlineAt: new Date(Date.now() + (2 * 24 + 3.5) * 3600000) } });
+    await page.setViewportSize({ width: 320, height: 740 });
+    await page.goto(f.path);
+    const timer = page.getByRole("timer", { name: "응답 마감까지 남은 시간" });
+    await expect(timer).toContainText("2일 3시간");
+    await page.evaluate(() => window.scrollTo(0, 400));
+    await expect(timer).toBeInViewport();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    await page.screenshot({ path: `test-results/deadline-remaining-${role}-320.png` });
+    await page.setViewportSize({ width: 393, height: 852 });
+    await page.screenshot({ path: `test-results/deadline-remaining-${role}-393.png` });
+    // 조기 마감 후 읽기 전용 시간표는 미래 기한이 남아도 마감으로 표시한다.
+    await db.promiseRecord.update({ where: { id: f.promise.id }, data: { status: "closed" } });
+    await page.goto(`${f.path}?view=responses`);
+    await expect(timer).toHaveText("응답 마감");
+  });
+}
+
+test("조회 실패 중에도 남은 마감 시간이 흐르고 새 마감을 받으면 갱신한다", async ({ page, context }) => {
+  const f = await fixture(context);
+  await db.promiseRecord.update({ where: { id: f.promise.id }, data: { votingDeadlineAt: new Date(Date.now() + 90000) } });
+  await page.clock.install();
+  await page.route("**/availability/state", route => route.abort());
+  await page.goto(f.path);
+  // SSR 문구만 보이는 시점이 아니라 클라이언트 입력이 연결된 뒤 시간을 진행한다.
+  await page.getByRole("button", { name: "2시간", exact: true }).click();
+  await expect(page.getByRole("button", { name: "2시간", exact: true })).toHaveAttribute("aria-pressed", "true");
+  const timer = page.getByRole("timer", { name: "응답 마감까지 남은 시간" });
+  await expect(timer).toContainText("1분");
+  await page.clock.fastForward(40000);
+  await expect(timer).toContainText("1분 미만");
+  await page.clock.fastForward(60000);
+  await expect(timer).toHaveText("응답 마감");
+  await db.promiseRecord.update({ where: { id: f.promise.id }, data: { votingDeadlineAt: new Date(Date.now() + 3 * 86400000 + 3600000) } });
+  await page.unroute("**/availability/state");
+  await page.evaluate(() => window.dispatchEvent(new Event("focus")));
+  await expect(timer).toContainText("3일");
 });
