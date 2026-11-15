@@ -6,11 +6,11 @@ import { settingsOf } from "../availability/service";
 import { calculateCandidates } from "./policy";
 import type { CloseResult, OverviewResult } from "./view";
 export type OverviewInput = SessionInput & { week?: string; participantId?: string; limit?: number };
-export function createCandidatesService(db: PrismaClient, clock?: () => Date) {
+export function createCandidatesService(db: PrismaClient, clock?: () => Date | Promise<Date>) {
   return {
     async read(input: OverviewInput): Promise<OverviewResult> {
       try { return await db.$transaction(async tx => {
-        const access = await requireParticipantSession(tx, input, clock);
+        const access = await requireParticipantSession(tx, input, clock, {lock:false});
         if (!access.ok) return access;
         const settings = settingsOf(access.promise);
         if (!settings || access.promise.status === "draft") return { ok: false as const, code: "NOT_AVAILABLE" };
@@ -39,7 +39,7 @@ export function createCandidatesService(db: PrismaClient, clock?: () => Date) {
           weekCandidates: ["collecting", "closed"].includes(status) ? calculated.candidates.filter(candidate => inWeek(candidate.startAt)) : [],
           candidates: status === "closed" ? calculated.candidates.slice(0, limit) : [], hasMore: status === "closed" && calculated.candidates.length > limit,
         } };
-      }); } catch { return { ok: false, code: "UNAVAILABLE" }; }
+      },{isolationLevel:"RepeatableRead"}); } catch { return { ok: false, code: "UNAVAILABLE" }; }
     },
     async close(input: SessionInput & { expectedParticipantId?: string }): Promise<CloseResult> {
       try { return await db.$transaction(async tx => {

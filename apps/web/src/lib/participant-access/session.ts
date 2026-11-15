@@ -7,8 +7,11 @@ export async function databaseNow(tx: Prisma.TransactionClient): Promise<Date> {
   const [row] = await tx.$queryRaw<{now: Date}[]>`SELECT clock_timestamp() AS now`;
   return row.now;
 }
-export async function requireParticipantSession(tx: Prisma.TransactionClient, input: SessionInput, clock?: () => Date | Promise<Date>) {
-    await tx.$queryRaw`SELECT p.id FROM promises p JOIN promise_links l ON l.id = p.promise_link_id WHERE l.invite_token = ${input.inviteToken} FOR UPDATE OF p`;
+export async function requireParticipantSession(tx: Prisma.TransactionClient, input: SessionInput, clock?: () => Date | Promise<Date>, options: { lock?: boolean } = {}) {
+    // 쓰기는 기존처럼 직렬화하고, 읽기에서만 RepeatableRead와 함께 잠금을 생략한다.
+    if (options.lock !== false) {
+      await tx.$queryRaw`SELECT p.id FROM promises p JOIN promise_links l ON l.id = p.promise_link_id WHERE l.invite_token = ${input.inviteToken} FOR UPDATE OF p`;
+    }
     const link = await tx.promiseLink.findUnique({ where: { inviteToken: input.inviteToken }, include: { promise: true } });
     const at = clock ? await clock() : await databaseNow(tx);
     if (!link) return { ok: false as const, code: "INVALID_LINK" };

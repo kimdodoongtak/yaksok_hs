@@ -31,6 +31,44 @@ async function fixture(context:BrowserContext){
   const slot=(time:string,dayValue=start)=>new Date(`${dayValue}T${time}:00+09:00`).toISOString();
   return {link,promise,member,start,end,slot,path:`/p/${link.inviteToken}/availability`};
 }
+test("방장과 참여자가 별도 브라우저에서 함께 제출해도 시간 정보와 집계를 불러온다",async({page,context,browser})=>{
+  const f=await fixture(context);
+  const friend=await db.participant.create({data:{promiseId:f.promise.id,nickname:"함께제출",normalizedNickname:"함께제출",role:"member",passwordHash:"unused"}});
+  const sessionToken=newToken(),expiresAt=new Date(Date.now()+7*86400000);
+  await db.participantSession.create({data:{participantId:friend.id,sessionTokenHash:tokenHash(sessionToken),expiresAt}});
+  const friendContext=await browser.newContext({viewport:{width:393,height:852},isMobile:true,hasTouch:true});
+  try {
+    const cookie=sessionCookie(f.link.inviteToken,expiresAt);
+    await friendContext.addCookies([{name:cookie.name,value:sessionToken,domain:"127.0.0.1",path:cookie.path,httpOnly:true,sameSite:"Lax",expires:expiresAt.getTime()/1000}]);
+    const friendPage=await friendContext.newPage();
+    const failed:number[]=[], polls=[0,0];
+    const pages=[page,friendPage];
+    for(const [index,p] of pages.entries())p.on("response",response=>{
+      const path=new URL(response.url()).pathname;
+      if(path.endsWith("/overview") || path.endsWith("/availability/state")){
+        if(response.status()!==200)failed.push(response.status());
+        if(path.endsWith("/availability/state")&&response.status()===200)polls[index]++;
+      }
+    });
+    await Promise.all(pages.map(p=>p.goto(`http://127.0.0.1:3100${f.path}`)));
+    for(const p of pages){
+      await p.getByRole("button",{name:`${f.start} 09:00–10:00`,exact:true}).click();
+      await p.getByRole("button",{name:`${f.start} 10:00–11:00`,exact:true}).click();
+    }
+    await Promise.all(pages.map(p=>p.getByRole("button",{name:"선택 제출",exact:true}).click()));
+    for(const p of pages){
+      await expect(p.getByRole("button",{name:"제출 완료"})).toBeDisabled();
+      await p.getByRole("button",{name:"전체 시간",exact:true}).click();
+      await expect(p.getByLabel(`${f.start} 09:00 가능 2명 / 전체 2명`,{exact:true})).toBeVisible();
+      await expect(p.getByText("시간 정보를 불러오지 못했어요.",{exact:false})).toHaveCount(0);
+    }
+    await expect.poll(()=>polls.every(count=>count>=2),{timeout:15000}).toBe(true);
+    expect(failed).toEqual([]);
+    await Promise.all(pages.map(p=>p.reload()));
+    for(const p of pages)await expect(p.getByRole("button",{name:"제출 완료"})).toBeDisabled();
+    expect(await db.participantAvailableSlot.count({where:{participant:{promiseId:f.promise.id}}})).toBe(8);
+  } finally {await friendContext.close();}
+});
 test("전체 시간과 참여자 시간을 비교해도 내 미제출 선택과 현재 주를 보존한다",async({page,context,request})=>{
   const f=await fixture(context);
   const friend=await db.participant.create({data:{promiseId:f.promise.id,nickname:"친구하나",normalizedNickname:"친구하나",role:"member",passwordHash:"hidden",availabilitySubmittedAt:new Date()}});

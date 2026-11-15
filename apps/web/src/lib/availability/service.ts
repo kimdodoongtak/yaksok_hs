@@ -8,7 +8,7 @@ export function settingsOf(p: PromiseRecord): AvailabilitySnapshot["settings"] |
   if (!p.dateRangeStart || !p.dateRangeEnd || p.dailyStartMinute === null || p.dailyEndMinute === null || p.durationMinutes === null || !p.votingDeadlineAt || p.participantLimit === null) return null;
   return {dateRangeStart:p.dateRangeStart.toISOString().slice(0,10),dateRangeEnd:p.dateRangeEnd.toISOString().slice(0,10),dailyStartMinute:p.dailyStartMinute,dailyEndMinute:p.dailyEndMinute,durationMinutes:p.durationMinutes,votingDeadlineAt:p.votingDeadlineAt.toISOString(),participantLimit:p.participantLimit};
 }
-export function createAvailabilityService(db: PrismaClient, clock?: () => Date) {
+export function createAvailabilityService(db: PrismaClient, clock?: () => Date | Promise<Date>) {
   async function snapshot(tx: Prisma.TransactionClient, participantId: string, promise: PromiseRecord, at: Date): Promise<AvailabilitySnapshot> {
     const member = await tx.participant.findUniqueOrThrow({where:{id:participantId},include:{availableSlots:{orderBy:{slotStartAt:"asc"}}}});
     const settings=settingsOf(promise);
@@ -18,11 +18,11 @@ export function createAvailabilityService(db: PrismaClient, clock?: () => Date) 
   return {
     async read(input: SessionInput): Promise<AvailabilityResult> {
       try { return await db.$transaction(async tx=>{
-        const access=await requireParticipantSession(tx,input,clock);
+        const access=await requireParticipantSession(tx,input,clock,{lock:false});
         if(!access.ok) return access;
         if(access.promise.status === "draft" || !settingsOf(access.promise)) return {ok:false as const,code:"NOT_AVAILABLE"};
         return {ok:true as const,snapshot:await snapshot(tx,access.session.participantId,access.promise,access.at)};
-      }); } catch { return {ok:false,code:"UNAVAILABLE"}; }
+      },{isolationLevel:"RepeatableRead"}); } catch { return {ok:false,code:"UNAVAILABLE"}; }
     },
     async submit(input: SessionInput & {baseVersion: unknown; slots: unknown; expectedParticipantId?: unknown}): Promise<AvailabilityResult> {
       try { return await db.$transaction(async tx=>{

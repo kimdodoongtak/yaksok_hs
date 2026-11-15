@@ -25,8 +25,8 @@ afterAll(async()=>{
 async function fixture(){
   const link=await db.promiseLink.create({data:{inviteToken:newToken(),createdAt:at}});links.push(link.id);
   const promise=await db.promiseRecord.create({data:{promiseLinkId:link.id,status:"collecting",participantLimit:5,dateRangeStart:new Date("2026-11-15"),dateRangeEnd:new Date("2026-11-16"),dailyStartMinute:540,dailyEndMinute:1440,durationMinutes:120,votingDeadlineAt:new Date("2026-11-15T00:00:00Z"),createdAt:at}});
-  const host=await db.participant.create({data:{promiseId:promise.id,nickname:"방장",normalizedNickname:"방장",passwordHash:"unused",role:"host"}});
-  const member=await db.participant.create({data:{promiseId:promise.id,nickname:"참여자",normalizedNickname:"참여자",passwordHash:"unused",role:"member"}});
+  const host=await db.participant.create({data:{promiseId:promise.id,nickname:"방장",normalizedNickname:"방장",passwordHash:"unused",role:"host",createdAt:at}});
+  const member=await db.participant.create({data:{promiseId:promise.id,nickname:"참여자",normalizedNickname:"참여자",passwordHash:"unused",role:"member",createdAt:new Date(at.getTime()+1)}});
   const hostToken=newToken();
   await db.participantSession.create({data:{participantId:host.id,sessionTokenHash:tokenHash(hostToken),expiresAt:new Date("2026-11-22T00:00:00Z")}});
   const sessionToken=newToken();
@@ -34,6 +34,58 @@ async function fixture(){
   return {link,promise,host,member,hostInput:{inviteToken:link.inviteToken,sessionToken:hostToken},input:{inviteToken:link.inviteToken,sessionToken}};
 }
 const first="2026-11-15T00:00:00.000Z", second="2026-11-15T00:30:00.000Z";
+
+it("방장·참여자 시간 조회는 진행 중인 쓰기 잠금을 기다리지 않고 커밋된 상태를 읽는다",async()=>{
+  const f=await fixture();
+  let release!:()=>void, ready!:()=>void;
+  const gate=new Promise<void>(resolve=>{release=resolve;});
+  const locked=new Promise<void>(resolve=>{ready=resolve;});
+  const writing=db.$transaction(async tx=>{
+    await tx.promiseRecord.update({where:{id:f.promise.id},data:{status:"cancelled",cancelledAt:at}});
+    ready();await gate;
+  },{timeout:10000});
+  await locked;
+  const availability=createAvailabilityService(otherDb,()=>at), overview=createCandidatesService(otherDb,()=>at);
+  const reads=Promise.all([availability.read(f.hostInput),availability.read(f.input),overview.read(f.hostInput),overview.read(f.input)]);
+  let timer:ReturnType<typeof setTimeout>|undefined;
+  try {
+    const result=await Promise.race([reads,new Promise<"blocked"> (resolve=>{timer=setTimeout(()=>resolve("blocked"),2000);})]);
+    expect(result,"조회가 다른 요청의 쓰기 잠금을 기다리면 안 된다").not.toBe("blocked");
+    if(result==="blocked")throw new Error("조회 잠금 대기");
+    for(const response of result)expect(response).toMatchObject({ok:true,snapshot:{status:"collecting"}});
+  } finally {
+    clearTimeout(timer);release();await writing;await reads;
+  }
+  for(const input of [f.hostInput,f.input]){
+    expect(await availability.read(input)).toMatchObject({ok:false,code:"PROMISE_CANCELLED"});
+    expect(await overview.read(input)).toMatchObject({ok:false,code:"PROMISE_CANCELLED"});
+  }
+});
+
+it.each(["availability","overview"] as const)("%s 조회 도중 제출이 커밋되어도 설정과 슬롯을 같은 시점으로 반환한다",async kind=>{
+  const f=await fixture();
+  await db.participant.updateMany({where:{promiseId:f.promise.id},data:{availabilitySubmittedAt:at}});
+  await db.participantAvailableSlot.createMany({data:[f.host,f.member].map(member=>({participantId:member.id,slotStartAt:new Date(first)}))});
+  const commitDuringRead=async()=>{
+    await db.$transaction(async tx=>{
+      await tx.promiseRecord.update({where:{id:f.promise.id},data:{durationMinutes:60}});
+      await tx.participantAvailableSlot.deleteMany({where:{participant:{promiseId:f.promise.id}}});
+      await tx.participantAvailableSlot.createMany({data:[f.host,f.member].map(member=>({participantId:member.id,slotStartAt:new Date(second)}))});
+      await tx.participant.updateMany({where:{promiseId:f.promise.id},data:{availabilityVersion:1}});
+    });
+    return at;
+  };
+  const during=kind==="availability"
+    ? await createAvailabilityService(otherDb,commitDuringRead).read(f.input)
+    : await createCandidatesService(otherDb,commitDuringRead).read(f.input);
+  expect(during).toMatchObject({ok:true,snapshot:{settings:{durationMinutes:120},
+    ...(kind==="availability"?{version:0,slots:[first]}:{heatmap:{[first]:2}})}});
+  const after=kind==="availability"
+    ? await createAvailabilityService(otherDb,()=>at).read(f.input)
+    : await createCandidatesService(otherDb,()=>at).read(f.input);
+  expect(after).toMatchObject({ok:true,snapshot:{settings:{durationMinutes:60},
+    ...(kind==="availability"?{version:1,slots:[second]}:{heatmap:{[second]:2}})}});
+});
 
 it("인증한 같은 약속의 active 명단과 제출 슬롯만 공개하며 타인 제출 상태는 숨긴다",async()=>{
   const f=await fixture(), other=await fixture();
