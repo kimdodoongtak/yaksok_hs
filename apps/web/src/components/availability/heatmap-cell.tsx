@@ -68,7 +68,7 @@ export function HeatmapCell({day,minute,stepMinutes,endMinute,startMinute,valid,
     top:`calc(${(captionStart-rowStart)/(rowEnd-rowStart)*100}% + 2px)`,
     height:`calc(${(captionEnd-captionStart)/(rowEnd-rowStart)*100}% - 4px)`,
   };
-  return <div className={styles.readCell} style={{minHeight:stepMinutes===120?72:44}}>
+  return <div className={styles.readCell} style={{minHeight:44}}>
     {parts.map(part=>{
       const slot=slotAt(day,part),count=data?.heatmap[slot] ?? 0,total=data?.participants.length ?? 0;
       const available=data?.selected?.slots.includes(slot),interactive=all&&valid&&count>0;
@@ -93,7 +93,7 @@ export function HeatmapCell({day,minute,stepMinutes,endMinute,startMinute,valid,
       >{data&&valid&&!all&&available?"✓":""}</span>;
     })}
     {first&&time&&<div className={styles.heatCandidate} style={captionStyle} role="img" aria-label={`${day} ${time.start}–${time.end} ${first.count}명 · 후보 ${candidates.length}개`}>
-      <span className={styles.candidateCaption}><strong>{first.count}명</strong>{time.start.endsWith(":00")&&time.end.endsWith(":00")?<span className={styles.wholeHours}>{time.start.slice(0,2)}–{time.end.slice(0,2)}</span>:<span>{time.start}<br/>~{time.end}</span>}</span>
+      <span className={styles.candidateCaption} data-compact={stepMinutes===120}><strong>{first.count}명</strong>{time.start.endsWith(":00")&&time.end.endsWith(":00")?<span className={styles.wholeHours}>{time.start.slice(0,2)}–{time.end.slice(0,2)}</span>:<span>{time.start}<br/>~{time.end}</span>}</span>
     </div>}
     {held&&all&&valid&&data&&<SlotPeople id={tooltipId} held={held} day={day} data={data}/>}
   </div>;

@@ -31,6 +31,13 @@ async function fixture(context:BrowserContext){
   const slot=(time:string,dayValue=start)=>new Date(`${dayValue}T${time}:00+09:00`).toISOString();
   return {link,promise,member,start,end,slot,path:`/p/${link.inviteToken}/availability`};
 }
+test("2시간 보기에서도 시간 칸 높이를 유지한다",async({page,context})=>{
+  const f=await fixture(context);await page.setViewportSize({width:393,height:640});await page.goto(f.path);
+  const cell=()=>page.getByLabel("주별 가능 시간").locator(`button[data-day="${f.start}"]`).first();
+  const before=(await cell().boundingBox())!.height;
+  await page.getByRole("button",{name:"2시간",exact:true}).click();
+  expect((await cell().boundingBox())!.height).toBe(before);
+});
 test("가능 시간을 선택하고 주를 이동한 뒤 제출·재제출·빈 제출한다",async({page,context})=>{
   const f=await fixture(context);
   await page.setViewportSize({width:393,height:852});
@@ -180,7 +187,7 @@ test("로그인 주체가 바뀌면 이전 편집 화면을 닫고 새 참여 �
   await expect(page.getByText("새로그인",{exact:true})).toBeVisible();
   expect((await db.participant.findUniqueOrThrow({where:{id:other.id}})).availabilityVersion).toBe(0);
 });
-test("모바일 손가락 드래그로 연속 시간을 선택·해제하고 가장자리에서 스크롤한다",async({browser})=>{
+test("모바일 손가락 드래그로 연속 시간을 선택·해제하고 시간축에서 스크롤한다",async({browser})=>{
   const context=await browser.newContext({viewport:{width:393,height:852},hasTouch:true,isMobile:true});
   try {
     const f=await fixture(context),page=await context.newPage();await page.goto(`http://127.0.0.1:3100${f.path}`);await page.getByRole("button",{name:"30분",exact:true}).click();
@@ -211,8 +218,19 @@ test("모바일 손가락 드래그로 연속 시간을 선택·해제하고 가
     await client.send("Input.dispatchTouchEvent",{type:"touchEnd",touchPoints:[]});
     await expect.poll(()=>page.evaluate(()=>window.scrollY)).toBeGreaterThan(30);
     await expect(grid.locator('button[aria-pressed="true"]')).toHaveCount(0);
-    await page.evaluate(()=>window.scrollTo(0,0));
-    await expect.poll(()=>page.evaluate(()=>window.scrollY)).toBe(0);
+  } finally {await context.close();}
+});
+test("모바일 드래그 중 가장자리 자동 스크롤과 제출을 유지한다",async({browser})=>{
+  const context=await browser.newContext({viewport:{width:393,height:852},hasTouch:true,isMobile:true});
+  try {
+    const f=await fixture(context),page=await context.newPage();
+    await page.goto(`http://127.0.0.1:3100${f.path}`);await page.getByRole("button",{name:"30분",exact:true}).click();
+    const start=await page.getByRole("button",{name:`${f.start} 09:00`,exact:true}).boundingBox();
+    const grid=await page.getByLabel("주별 가능 시간").boundingBox(),footer=await page.locator("footer").boundingBox();
+    if(!start||!grid||!footer)throw new Error("시간표 없음");
+    const x=start.x+start.width/2,y=start.y+start.height/2;
+    const visibleBottom=Math.min(grid.y+grid.height,page.viewportSize()!.height,footer.y);
+    const client=await context.newCDPSession(page);
     await client.send("Input.dispatchTouchEvent",{type:"touchStart",touchPoints:[{x,y}]});
     await client.send("Input.dispatchTouchEvent",{type:"touchMove",touchPoints:[{x,y:visibleBottom-8}]});
     await expect.poll(()=>page.evaluate(()=>window.scrollY)).toBeGreaterThan(30);
@@ -220,6 +238,90 @@ test("모바일 손가락 드래그로 연속 시간을 선택·해제하고 가
     await page.getByRole("button",{name:"선택 제출",exact:true}).tap();
     await expect(page.getByRole("status")).toContainText("제출했어요");
   } finally {await context.close();}
+});
+for(const width of [320,393])test(`모바일 ${width}px 오른쪽 하단을 밀면 선택을 유지하며 페이지를 스크롤한다`,async({browser})=>{
+  const context=await browser.newContext({viewport:{width,height:852},hasTouch:true,isMobile:true});
+  try {
+    const f=await fixture(context),page=await context.newPage();
+    await page.goto(`http://127.0.0.1:3100${f.path}`);
+    await page.getByRole("button",{name:"30분",exact:true}).click();
+    const grid=page.getByLabel("주별 가능 시간");
+    const lastDay=grid.locator('button[data-minute="540"]').last();
+    await lastDay.tap();
+    await expect(lastDay).toHaveAttribute("aria-pressed","true");
+    const selected=()=>grid.locator('button[aria-pressed="true"]').evaluateAll(cells=>cells.map(cell=>cell.getAttribute("aria-label")));
+    const before=await selected();
+    const client=await context.newCDPSession(page);
+    const footer=await page.locator("footer").boundingBox();
+    if(!footer)throw new Error("하단 버튼 없음");
+    const x=width-30,y=footer.y-70;
+    const initialScroll=await page.evaluate(()=>window.scrollY);
+    await client.send("Input.dispatchTouchEvent",{type:"touchStart",touchPoints:[{x,y}]});
+    for(let i=1;i<=8;i++)await client.send("Input.dispatchTouchEvent",{type:"touchMove",touchPoints:[{x,y:y-i*20}]});
+    await client.send("Input.dispatchTouchEvent",{type:"touchEnd",touchPoints:[]});
+    await expect.poll(selected).toEqual(before);
+    await expect.poll(()=>page.evaluate(()=>window.scrollY)).toBeGreaterThan(initialScroll+30);
+    const heading=await page.locator("[data-day-heading]").last().boundingBox();
+    const cell=await lastDay.boundingBox();
+    expect(Math.abs((heading!.x+heading!.width/2)-(cell!.x+cell!.width/2))).toBeLessThan(1);
+    expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true);
+  } finally {await context.close();}
+});
+test("모바일 상단 정보를 접어도 방장 마감은 밖에서 열고 선택을 보존한다",async({page,context})=>{
+  const f=await fixture(context);
+  await page.setViewportSize({width:393,height:640});await page.goto(f.path);
+  const menu=page.getByRole("button",{name:"약속 정보 열기",exact:true});
+  await expect(menu).toContainText("약속 정보");
+  await expect(menu).toHaveAttribute("aria-expanded","false");
+  const closeButton=page.getByRole("button",{name:"응답 마감",exact:true});
+  await expect(closeButton).toBeInViewport();
+  const first=page.getByRole("button",{name:`${f.start} 09:00–10:00`,exact:true});
+  await first.click();
+  await page.evaluate(()=>window.scrollTo(0,120));
+  const before=await page.evaluate(()=>window.scrollY);
+  await menu.click();
+  const dialog=page.getByRole("dialog",{name:"약속 정보",exact:true});
+  await expect(dialog).toBeVisible();await expect(menu).toHaveAttribute("aria-expanded","true");
+  await expect(dialog.getByRole("link",{name:"약속 잡기"})).toBeVisible();
+  await expect(dialog.getByText("내 참여 정보",{exact:true})).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(dialog).not.toBeVisible();
+  await expect(closeButton).toBeInViewport();await closeButton.click();
+  const confirm=page.getByRole("dialog",{name:"응답을 마감할까요?"});
+  await expect(confirm).toBeVisible();await confirm.getByRole("button",{name:"취소",exact:true}).click();
+  await expect(first).toHaveAttribute("aria-pressed","true");
+  expect(await page.evaluate(()=>window.scrollY)).toBe(before);
+  await db.participant.update({where:{id:f.member.id},data:{role:"member"}});
+  await page.reload();
+  await expect(page.getByRole("button",{name:"응답 마감",exact:true})).toHaveCount(0);
+  await db.promiseRecord.update({where:{id:f.promise.id},data:{status:"closed"}});
+  await page.goto(`${f.path}?view=responses`);
+  await page.screenshot({path:"test-results/availability-closed-393.png"});
+  await page.getByRole("link",{name:"후보 보기",exact:true}).click();
+  await expect(page).toHaveURL(`/p/${f.link.inviteToken}/candidates`);
+});
+for(const width of [320,393])test(`짧은 모바일 ${width}px에서 시간표 중앙과 첫 화면 네 행을 확보한다`,async({page,context})=>{
+  const f=await fixture(context);
+  await page.setViewportSize({width,height:640});await page.goto(f.path);
+  await page.evaluate(()=>document.fonts.ready);
+  const headings=page.locator("[data-day-heading]");
+  const first=(await headings.first().boundingBox())!,last=(await headings.last().boundingBox())!;
+  const view=(await page.getByRole("group",{name:"시간 보기",exact:true}).boundingBox())!;
+  // 마지막 날짜까지 탭과 같은 폭을 쓰며, 스크롤 여백은 페이지 바깥에 둔다.
+  expect(Math.abs(last.x+last.width-(view.x+view.width))).toBeLessThan(1);
+  const grid=(await page.getByLabel("주별 가능 시간").boundingBox())!;
+  expect(Math.abs(grid.x-view.x)).toBeLessThan(1);
+  expect(Math.abs(grid.width-view.width)).toBeLessThan(1);
+  expect(Math.abs(view.x+view.width/2-width/2)).toBeLessThan(1);
+  const footer=(await page.locator("footer").boundingBox())!;
+  const slots=page.getByLabel("주별 가능 시간").locator(`button[data-day="${f.start}"]`);
+  const visibleRows=await slots.evaluateAll((cells,{top,bottom})=>cells.filter(cell=>{const box=cell.getBoundingClientRect();return box.top>=top&&box.bottom<=bottom&&box.height>=44;}).length,{top:first.y+first.height,bottom:footer.y});
+  expect(visibleRows).toBeGreaterThanOrEqual(4);
+  expect(await page.evaluate(()=>window.scrollY)).toBe(0);
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+  await expect(page.getByRole("button",{name:"약속 정보 열기",exact:true})).toBeInViewport();
+  await expect(page.getByRole("button",{name:"선택 제출",exact:true})).toBeInViewport();
+  await page.screenshot({path:`test-results/availability-compact-${width}.png`});
 });
 test("모바일 사이드바를 닫으면 선택을 유지하며 PC에서는 정보를 펼쳐 둔다",async({page,context})=>{
   const f=await fixture(context);await page.setViewportSize({width:393,height:852});await page.goto(f.path);await page.getByRole("button",{name:"30분",exact:true}).click();
@@ -530,15 +632,15 @@ test("제출 완료 표시는 변경 전까지 유지하고 수정·되돌리기
   await expect(submit).toBeEnabled({timeout:12000});
 });
 
-test("모바일에서 상단 소개는 스크롤되고 시간표는 길게 보이며 마감·제출은 접근 가능하다",async({page,context})=>{
+test("모바일에서 상단 정보를 접어도 긴 시간표의 정보·날짜·제출은 접근 가능하다",async({page,context})=>{
   const f=await fixture(context);await db.promiseRecord.update({where:{id:f.promise.id},data:{dailyEndMinute:1440}});
   await page.setViewportSize({width:393,height:852});await page.goto(f.path);
   const grid=page.getByLabel("주별 가능 시간",{exact:true});
   await page.evaluate(()=>document.fonts.ready);
   expect((await grid.boundingBox())!.height).toBeGreaterThan(500);
   await page.evaluate(()=>window.scrollTo(0,document.body.scrollHeight));
-  expect((await page.getByRole("heading",{name:"가능 시간 입력",exact:true}).boundingBox())!.y).toBeLessThan(0);
-  await expect(page.getByRole("button",{name:"응답 마감",exact:true})).toBeInViewport();
+  await expect(page.getByRole("link",{name:"약속 잡기",exact:true})).toHaveCount(0);
+  await expect(page.getByRole("button",{name:"약속 정보 열기",exact:true})).toBeInViewport();
   await expect(page.getByRole("button",{name:"선택 제출",exact:true})).toBeInViewport();
   await expect(page.locator("[data-day-heading]").first()).toBeInViewport();
   expect(await grid.evaluate(el=>el.scrollHeight<=el.clientHeight)).toBe(true);
@@ -561,7 +663,7 @@ for(const width of [393,1280]){
     await page.mouse.move(4,500);await page.mouse.wheel(0,200);
     await expect.poll(()=>page.evaluate(()=>window.scrollY)).toBeGreaterThan(scrolled+100);
     await expect(page.getByRole("button",{name:"다음 주",exact:true})).toBeInViewport();
-    await expect(page.getByRole("button",{name:"응답 마감",exact:true})).toBeInViewport();
+    await expect(page.getByRole("button",{name:width<900?"약속 정보 열기":"응답 마감",exact:true})).toBeInViewport();
     await expect(page.getByRole("button",{name:"선택 제출",exact:true})).toBeInViewport();
     // 날짜 헤더는 새 배치에서도 스크롤 중 화면에 남아 있어야 한다.
     await expect(page.locator("[data-day-heading]").first()).toBeInViewport();

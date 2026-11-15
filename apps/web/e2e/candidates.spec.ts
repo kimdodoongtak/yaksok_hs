@@ -112,12 +112,14 @@ test("방장이 확인 후 마감하면 전체 기간 후보 5개와 더 보기�
   }
   await page.setViewportSize({width:393,height:700});await page.goto(f.path);
   const closeButton=page.getByRole("button",{name:"응답 마감",exact:true});
+  const infoButton=page.getByRole("button",{name:"약속 정보 열기",exact:true});
   await expect(closeButton).toBeInViewport();
-  expect((await closeButton.boundingBox())!.y).toBeLessThan(100);
+  await expect(infoButton).toBeInViewport();
   await page.evaluate(()=>window.scrollTo(0,document.body.scrollHeight));
-  await expect(closeButton).toBeInViewport();
-  expect((await closeButton.boundingBox())!.y).toBeLessThan(100);
+  await expect(infoButton).toBeInViewport();
+  expect((await infoButton.boundingBox())!.y).toBeLessThan(100);
   for(const width of [320,393,1280]){await page.setViewportSize({width,height:700});expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);await page.screenshot({path:`test-results/close-header-${width}.png`,fullPage:true});}
+  await expect(closeButton).toBeInViewport();
   await expect(page.getByRole("heading",{name:"가능한 약속 시간",exact:true})).toHaveCount(0);
   await page.getByRole("button",{name:"응답 마감",exact:true}).click();
   const dialog=page.getByRole("dialog",{name:"응답을 마감할까요?",exact:true});await expect(dialog).toBeVisible();
