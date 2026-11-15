@@ -54,3 +54,13 @@
 - `docker compose exec -T -e INVITATION_BROWSER_TEST=1 tools npm run build`: exit 0, Next.js 16.4.3 / Prisma 7.10.1. 이 변수는 출력 디렉터리만 `.next-browser`로 분리하며 앱 동작·DB 설정을 바꾸지 않는다. 기존 개발 서버의 `.next`와 충돌하지 않도록 브라우저 종료 후 실행했다. Docker 주입 DB는 로컬이다.
 - `git diff --check`, 신규 문서 상대 링크 확인 통과. 변경 범위 검토에서 쓰기 경로의 `requireParticipantSession` 호출은 기본 잠금 유지, 잠금 생략은 두 읽기 서비스에만 적용되는 것을 확인했다.
 - 운영 반영 승인에 따라 수정 파일만 커밋·푸시할 준비를 마쳤다. 새 배포와 변경 후 운영 응답은 아직 미검증이다.
+
+## 운영 반영 확인 — 2026-11-16
+
+- 수정 커밋 `a71297b`를 origin/main에 푸시했다.
+- Vercel 배포 `dpl_FZGyij32VPw61EXNajxci6sqZDCN`: Production / READY / `regions=["sin1"]` / `aliasAssigned=true`. 운영 주소 https://yaksok-hs.vercel.app 에 반영됐다.
+- 동일한 클라이언트·없는 초대 링크 GET을 재측정: 첫 898ms, 연속 163ms·170ms, 모두 HTTP 200 및 무효 링크 안내 확인. 이전 1,813ms / 480ms / 475ms와 비교한 제한된 읽기 표본이며, 생성·제출 6~7초의 개선 수치로 일반화하지 않는다. 홈은 466ms였다.
+- 동적 응답 헤더의 경로가 `icn1::iad1`에서 `icn1::sin1`로 바뀌었다.
+- 새 배포의 요청 로그 35건(UTC 17:26:12~17:31:12 조회, 페이지 누락 없음) 중 `/overview` GET 6건 및 `/availability/state` GET 5건이 모두 HTTP 200이었다. 이 두 경로는 이전 배포에서 반복 503이 관찰된 경로다. 새로운 운영 약속 생성·제출 등 데이터 쓰기는 수행하지 않았으며 실제 사용자 요청의 상태만 집계했다.
+- 전체 회귀: 단위 43개·실제 DB 93개·Chromium 42개·린트·타입·운영 빌드 통과. 배포 뒤 실행 지역·읽기 응답·기존 실패 경로 정상 응답 확인으로 완료했다.
+- 제한: 직접 통제한 방장·참여자 동시 제출은 로컬 Chromium(모바일 설정 포함)에서 검증했다. 실제 iPhone Safari 전체 흐름과 운영 쓰기 지연의 정량 전후 비교는 미검증이다. 관찰한 로그 범위를 넘어 장기 무오류를 보장하지 않는다.

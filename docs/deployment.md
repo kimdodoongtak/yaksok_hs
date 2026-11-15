@@ -47,7 +47,7 @@ Vercel의 Production과 Preview 환경에 값을 각각 설정한다. 로컬 Com
 
 ## Vercel 프로젝트 설정
 
-- Function Region: `sin1` (싱가포르). 기존 Neon 프로젝트의 `aws-ap-southeast-1`과 맞춘다. 2026-11-16 진단 당시 운영은 기본값 `iad1`이었으며 `apps/web/vercel.json`에 명시한 지역은 다음 배포부터 적용된다. [진단·반영 상태](../context/tdd/performance-region.md).
+- Function Region: `sin1` (싱가포르). 기존 Neon 프로젝트의 `aws-ap-southeast-1`과 맞춘다. 2026-11-16 `a71297b` 배포(`dpl_FZGyij32VPw61EXNajxci6sqZDCN`)의 Production READY 및 실제 `sin1` 응답을 확인했다. 기존 운영 기본값은 `iad1`이었다. [진단·반영 상태](../context/tdd/performance-region.md).
 - Framework Preset: Next.js
 - Root Directory: 이 작업폴더를 저장소 루트로 사용하면 `apps/web`. 더 큰 저장소의 하위 폴더에 넣었다면 실제 저장소 루트부터 이 앱까지의 경로를 지정한다.
 - Node.js Version: 24.x (`apps/web/package.json`의 `engines.node`도 24.x)
