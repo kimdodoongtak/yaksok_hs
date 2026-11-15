@@ -41,6 +41,7 @@ export type InvitationView =
     }
   | {
       state: "host";
+      participantId: string;
       nickname: string;
       warning: boolean;
       expiresAt: string;
@@ -252,6 +253,7 @@ export function createInvitationService(
         const expiresAt = draftExpiresAt(link.promise.createdAt);
         return {
           state: "host",
+          participantId: session.participantId,
           nickname: session.participant.nickname,
           warning: at.getTime() >= expiresAt.getTime() - 120000,
           expiresAt: expiresAt.toISOString(),

@@ -1,7 +1,8 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { InvitationView } from "@/lib/invitation/service";
 import { RegistrationForm } from "./registration-form";
+import { CancelPromiseButton } from "@/components/promise-status/cancel-promise-button";
 import { AbandonForm } from "./abandon-form";
 import { SettingsForm } from "@/components/promise-settings/settings-form";
 import { AccessPanel, ParticipantControls } from "@/components/participant-access/access-panel";
@@ -19,6 +20,7 @@ export function LiveInvitation({
 }) {
   const [view, setView] = useState(initialView);
   const [offline, setOffline] = useState(false);
+  const revision = useRef(0);
   useEffect(() => {
     if (initialView.state === "expired" || initialView.state === "invalid")
       return;
@@ -27,6 +29,7 @@ export function LiveInvitation({
     async function refresh() {
       if (running) return;
       running = true;
+      const requestRevision = revision.current;
       try {
         const response = await fetch(`/p/${inviteToken}/state`, {
           cache: "no-store",
@@ -34,12 +37,12 @@ export function LiveInvitation({
         });
         if (!response.ok) throw new Error("상태 조회 실패");
         const next: InvitationView = await response.json();
-        if (!controller.signal.aborted) {
+        if (!controller.signal.aborted && requestRevision === revision.current) {
           setView(next);
           setOffline(false);
         }
       } catch {
-        if (!controller.signal.aborted) setOffline(true);
+        if (!controller.signal.aborted && requestRevision === revision.current) setOffline(true);
       } finally {
         running = false;
       }
@@ -55,6 +58,7 @@ export function LiveInvitation({
       document.removeEventListener("visibilitychange", visible);
     };
   }, [inviteToken, initialView.state]);
+  if (view.state === "cancelled") return <h1 className="text-xl font-bold">취소된 약속입니다.</h1>;
   if (view.state === "expired")
     return <h1 className="text-xl font-bold">만료된 약속입니다</h1>;
   return (
@@ -95,6 +99,7 @@ export function LiveInvitation({
           <SettingsForm inviteToken={inviteToken} serverNow={view.serverNow} />
           <p className="mt-3 text-center text-xs leading-5 text-slate-500">방장 등록 후 10분 동안 초안이 유지돼요.</p>
           <AbandonForm inviteToken={inviteToken} />
+          <CancelPromiseButton key={view.participantId} inviteToken={inviteToken} participantId={view.participantId} draft onCancelled={() => { revision.current++; setOffline(false); setView({ state: "cancelled" }); }} />
           <ParticipantControls inviteToken={inviteToken} />
         </>
       )}
@@ -108,9 +113,6 @@ export function LiveInvitation({
       )}
       {view.state === "invalid" && (
         <h1 className="text-xl font-bold">유효하지 않은 초대 링크입니다.</h1>
-      )}
-      {view.state === "cancelled" && (
-        <h1 className="text-xl font-bold">취소된 약속입니다.</h1>
       )}
       {view.state === "ready" && (
         <>

@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { manageParticipant } from "@/actions/participant-management";
 import type { ManagementResult } from "@/lib/participant-management/service";
 import type { ManagementSnapshot, ManagementViewResult } from "@/lib/participant-management/view";
+import { CancelPromiseButton } from "@/components/promise-status/cancel-promise-button";
+import { LiveInvitation } from "@/components/invitation/live-invitation";
 import styles from "./participants.module.css";
 type Choice = { kind: "leave"; expectedRole: string; expectedSuccessorId: string | null; successorNickname?: string } | { kind: "remove"; targetParticipantId: string; nickname: string };
 export function ParticipantsPanel({ inviteToken, initial }: { inviteToken: string; initial: ManagementSnapshot }) {
@@ -13,6 +15,7 @@ export function ParticipantsPanel({ inviteToken, initial }: { inviteToken: strin
   const [choice, setChoice] = useState<Choice | null>(null), [pending, setPending] = useState(false);
   const [message, setMessage] = useState(""), [error, setError] = useState("");
   const [offline, setOffline] = useState(false);
+  const [cancelled, setCancelled] = useState(false);
   const [done, setDone] = useState<Extract<ManagementResult, { ok: true }> | null>(null);
   const busy = useRef(false), finished = useRef(false), generation = useRef(0);
   const invalidate = useCallback(() => { generation.current++; }, []);
@@ -37,12 +40,12 @@ export function ParticipantsPanel({ inviteToken, initial }: { inviteToken: strin
     } catch { if (request === generation.current && !finished.current) setOffline(true); }
   }, [inviteToken, initial.participantId, router]);
   useEffect(() => {
-    if (done) return;
+    if (done || cancelled) return;
     const timer = setInterval(() => void refresh(), 5000);
     const visible = () => { if (document.visibilityState === "visible") void refresh(); };
     document.addEventListener("visibilitychange", visible);
     return () => { invalidate(); clearInterval(timer); document.removeEventListener("visibilitychange", visible); };
-  }, [refresh, done, invalidate]);
+  }, [refresh, done, cancelled, invalidate]);
   useEffect(() => {
     if (!choice || !dialog.current) return;
     const element = dialog.current; element.showModal(); element.querySelector<HTMLButtonElement>("[data-cancel]")?.focus();
@@ -70,6 +73,7 @@ export function ParticipantsPanel({ inviteToken, initial }: { inviteToken: strin
     } catch { setError("연결하지 못했어요. 다시 시도해 주세요."); }
     finally { busy.current = false; setPending(false); if (reload) void refresh(); }
   }
+  if (cancelled) return <main className={styles.page}><section className={styles.content}><LiveInvitation inviteToken={inviteToken} initialView={{ state: "cancelled" }} /></section></main>;
   const cancelling = choice?.kind === "leave" && choice.expectedRole === "host" && !choice.expectedSuccessorId;
   return <main className={styles.page}><section className={styles.content}>
     {done ? <div className={styles.complete}>
@@ -89,6 +93,7 @@ export function ParticipantsPanel({ inviteToken, initial }: { inviteToken: strin
       </li>)}</ul>
       {snapshot.role === "host" && snapshot.status !== "collecting" && <p className={styles.help}>응답 마감 후에는 참여자를 내보낼 수 없어요.</p>}
       <footer className={styles.footer}><p>나가면 기존 닉네임으로 다시 참여할 수 없어요.</p><button className={styles.leave} type="button" disabled={pending} onClick={leave}>약속 나가기 <span aria-hidden="true">↗</span></button></footer>
+      {snapshot.role === "host" && <CancelPromiseButton inviteToken={inviteToken} participantId={snapshot.participantId} onCancelled={() => { finished.current = true; setCancelled(true); }} />}
     </>}
     <dialog ref={dialog} className={styles.dialog} aria-labelledby="participant-action-title" onCancel={event => { event.preventDefault(); if (!busy.current) setChoice(null); }}>
       <h2 id="participant-action-title">{choice?.kind === "remove" ? "참여자를 내보낼까요?" : "약속에서 나갈까요?"}</h2>

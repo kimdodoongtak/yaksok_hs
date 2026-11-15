@@ -3,8 +3,8 @@
 ## 식별자와 상태
 
 - 스펙 ID: 009-cancellation
-- 상태: 확인 필요
-- 작성 기준: 2026-11-05, 제품 구현·검증 전 초안.
+- 상태: 완료 — 2026-11-15
+- 작성 기준: 2026-11-05 초안, 2026-11-15 불러오기에서 008 완료·기존 구현과 확정 정책을 대조했다. 2026-11-15 명시적 취소 구현과 동작별 RED/GREEN을 진행했다.
 - 요구사항: REQ-025, REQ-027, REQ-035. 흐름: FLOW-014. 식별자는 [분해 계획](../spec-plan.md)의 분석용 ID다.
 
 ## 근거 자료
@@ -35,59 +35,70 @@
 
 ## 수용 기준
 
-- [ ] AC-1: 취소되지 않은 약속의 방장만 약속을 cancelled로 바꾸고 cancelled_at을 기록한다. 일반 참여자·다른 약속 세션은 거절한다.
-- [ ] AC-2: 설정·참여자 role/status·닉네임·PIN 해시·가능 시간·제출 기록·확정 일정을 보존하고 모든 세션을 즉시 만료한다. 취소 동작에서 자식 행을 삭제하지 않는다.
-- [ ] AC-3: draft의 명시적 약속 취소는 상태 전이·보존 규칙을 따른다. draft 나가기·10분 만료 폐기는 001의 물리 삭제 예외로 구분한다.
-- [ ] AC-4: 유효한 취소 링크는 로그인 없이 “취소된 약속입니다”만 표시하고 설정·참여자·입력·결과를 노출하지 않는다. 취소된 약속의 일반 API에는 PROMISE_CANCELLED 오류를 반환하며 HTTP 경계에서는 409다. 2026-11-14 사용자 결정으로 취소 안내·오류는 인증 부재·세션 만료보다 우선한다. 링크 자체가 만료됐다면 기존 정책대로 “만료된 약속입니다”만 표시한다. 상세 상태표는 [003 스펙](003-participant-access-spec.md)의 오류 우선순위를 따른다.
-- [ ] AC-5: 취소된 약속의 신규 참여·탈퇴·투표·확정·재조율·복원을 모두 거절한다. 상태 변경과 경쟁하는 요청도 같은 잠금 기준으로 처리하고 부분 취소를 남기지 않는다.
-- [ ] AC-6: 취소 확인·처리 중·실패·취소 완료를 모바일과 다른 열린 브라우저에서 확인한다.
+- [x] AC-1: 취소되지 않은 약속의 방장만 약속을 cancelled로 바꾸고 cancelled_at을 기록한다. 일반 참여자·다른 약속 세션은 거절한다.
+- [x] AC-2: 설정·참여자 role/status·닉네임·PIN 해시·가능 시간·제출 기록·확정 일정을 보존하고 모든 세션을 즉시 만료한다. 취소 동작에서 자식 행을 삭제하지 않는다.
+- [x] AC-3: draft의 명시적 약속 취소는 상태 전이·보존 규칙을 따른다. draft 나가기·10분 만료 폐기는 001의 물리 삭제 예외로 구분한다.
+- [x] AC-4: 유효한 취소 링크는 로그인 없이 “취소된 약속입니다”만 표시하고 설정·참여자·입력·결과를 노출하지 않는다. 취소된 약속의 일반 API에는 PROMISE_CANCELLED 오류를 반환하며 HTTP 경계에서는 409다. 2026-11-14 사용자 결정으로 취소 안내·오류는 인증 부재·세션 만료보다 우선한다. 링크 자체가 만료됐다면 기존 정책대로 “만료된 약속입니다”만 표시한다. 상세 상태표는 [003 스펙](003-participant-access-spec.md)의 오류 우선순위를 따른다.
+- [x] AC-5: 취소된 약속의 신규 참여·탈퇴·투표·확정·재조율·복원을 모두 거절한다. 상태 변경과 경쟁하는 요청도 같은 잠금 기준으로 처리하고 부분 취소를 남기지 않는다.
+- [x] AC-6: 취소 확인·처리 중·실패·취소 완료를 모바일과 다른 열린 브라우저에서 확인한다.
 
 각 AC의 근거와 확인 방법은 아래 TDD 적용 계획에 대응한다. OPEN 항목이 포함된 AC는 해당 결정 전 완료 처리하지 않는다.
 
 ## 데이터와 인터페이스
 
-제안 Server Action cancelPromise({inviteToken}). 취소 시 promises 상태·시각과 관련 sessions.expires_at만 변경한다. 취소 원인 컬럼이나 자동 삭제 작업은 추가하지 않는다. 취소 안내용 최소 조회와 인증된 상세 조회를 구분한다.
+Server Action `cancelPromise(inviteToken, expectedParticipantId)`. 초대 토큰과 확인 당시 본인 식별값을 받아 쿠키의 세션·약속 소속·서버의 최신 역할을 대조하고 동일 출처를 검증한다. 취소 시 promises 상태·시각과 관련 sessions.expires_at만 변경한다. 취소 원인 컬럼이나 자동 삭제 작업은 추가하지 않는다. 취소 안내용 최소 조회와 인증된 상세 조회를 구분한다.
 
 공통 잠금·서버 시각·오류 계약·DB 테스트 기준은 [분해 계획](../spec-plan.md)의 공통 구현·검증 계약을 따른다. 참여자 인증이 필요한 경계에서는 서버가 약속 소속·세션·현재 역할·상태를 검사한다. 공개 링크 안내와 외부 챗봇은 각 경계의 공개 범위·호출 검증을 적용한다. 다른 참여자의 민감 정보를 오류에 포함하지 않는다.
 
-## 구현 계획
+## 구현 내용
 
-명시적 취소 진입점 → 008 공통 취소 서비스 → 조회 응답 필터링 → 모든 기존 진입점의 취소 차단 회귀 → 안내 UI. 예정 apps/web/src/lib/cancellation/, src/actions/cancellation.ts, src/components/promise-status/.
+명시적 취소 진입점 → 008 공통 취소 트랜잭션 재사용 → 상세 조회의 HTTP 409 계약 정리 → 모든 기존 진입점의 취소 차단·열린 화면 동기화 회귀 → 안내 UI. 구현 파일은 apps/web/src/lib/cancellation/, src/actions/cancellation.ts, src/components/promise-status/에 있다.
+
+방장 참여자 관리 화면과 초안 설정 화면에서 명시적 취소에 접근하게 한다. 초안 나가기는 기존 001 폐기 동작으로 유지하고 취소와 다른 결과임을 확인 창에서 구분한다. 확인 창은 모든 참여자의 접근 종료·복원 불가를 안내하고, 처리 중 중복 실행을 막으며 실패 시 다시 시도할 수 있게 한다. 기존 취소 사실 안내 화면을 재사용한다.
 
 한 동작의 실패 assertion을 실제 확인한 뒤 최소 구현·회귀 검증을 반복한다. 테스트 도구 오류나 DB 연결 실패는 RED로 인정하지 않는다.
 
 ## 검증 계획
 
-- AC별 검증 경계·원본 근거는 아래 표를 따른다. 아직 테스트 파일·제품 기능을 생성하지 않았다.
-- 단위 테스트 예정 명령: 프로젝트 루트에서 docker compose exec tools npm run test -- src/lib/cancellation/cancellation.test.ts.
-- DB 통합 예정 명령: docker compose exec tools npm run test:integration -- src/lib/cancellation/cancellation.integration.test.ts. test:integration은 현재 없으며 001에서 분리 설정을 추가할 계획이다. DB 검증 항목이 없는 AC에 억지로 통합 테스트를 만들지 않는다.
+- AC별 검증 경계·원본 근거는 아래 표를 따른다. 009 전용 서비스·DB 통합 테스트와 e2e/cancellation.spec.ts를 추가했다. 003의 취소 우선순위와 008의 내부 취소 트랜잭션은 이미 구현되어 있으므로 재사용 경계의 사후 회귀와 신규 동작의 RED/GREEN을 구분한다.
+- 단위 회귀 명령: 프로젝트 루트에서 docker compose exec tools npm run test. 권한·상태·원자성은 실제 DB 서비스 경계에서 검증하며 동일한 규칙을 복제하는 별도 단위 테스트는 만들지 않는다. 독립적인 응답 정책 함수를 도입하면 해당 정책의 단위 테스트를 추가한다.
+- DB 통합 명령: docker compose exec tools npm run test:integration -- src/lib/cancellation/cancellation.integration.test.ts. 001부터 사용하는 격리 PostgreSQL 통합 테스트 구성을 재사용한다. DB 검증 항목이 없는 AC에 억지로 통합 테스트를 만들지 않는다.
 - DB 변경이 있으면 전용 테스트 DB 보호 확인 → 로컬 마이그레이션 작성 → Client 생성 → 빈 테스트 DB에 기존 마이그레이션 적용 → 실제 제약·트랜잭션 검증 순서로 진행한다. 운영 적용은 별도 배포 요청 시 db:deploy로만 한다.
 - 격리: TEST_DATABASE_URL과 테스트 DB 이름·로컬 호스트 허용 목록을 검사하고 개발·운영 URL을 거절한다. 동시성은 독립 연결과 동시 시작 장벽을 사용한다. 상세 구성은 분해 계획에 정의한다.
-- 브라우저 동작·오류 복구·모바일을 실제 확인한다. 이미지가 있는 요소는 원본 1280×3042 참고 시트를 사용한다. 제품 화면 검수 크기는 390×844와 1280×800을 제안하며 디자인 원본 크기로 주장하지 않는다.
+- 브라우저 동작·오류 복구·모바일을 실제 확인한다. 이미지가 있는 요소는 원본 1280×3042 참고 시트를 사용한다. 제품 화면 검수 크기는 사용자 기준 393×852·320px·1280×800을 사용하며 디자인 원본 크기로 주장하지 않는다.
 - 최종 검증: 관련 단위·DB·브라우저 회귀, Docker Node.js 24의 npm run lint, npm run typecheck, npm run build. 필요한 검증을 실행하지 못하면 미검증으로 남긴다.
 
 ## 미정 사항
 
-OPEN-10 오류 우선순위는 2026-11-14 사용자 결정으로 확정하여 AC-4에 반영했다. 취소·비로그인, 취소·만료 세션, 취소·링크 만료 조합을 구현 시 검증한다. MVP의 취소·탈퇴 데이터 자동 삭제 없음은 사용자 ERD 우선 결정으로 확정되었으며, 장기 운영 보관 정책은 이후 별도 결정 대상으로 남긴다.
+009 구현을 막는 미정 정책은 없다. OPEN-10 오류 우선순위는 2026-11-14 사용자 결정으로 확정하여 AC-4에 반영했다. 취소·비로그인, 취소·만료 세션, 취소·링크 만료 조합을 DB·HTTP 테스트에서 검증한다. MVP의 취소·탈퇴 데이터 자동 삭제 없음은 사용자 ERD 우선 결정으로 확정되었으며, 장기 운영 보관 정책은 이후 별도 결정 대상으로 남긴다.
 
 OPEN 항목의 제안은 [분해 계획](../spec-plan.md)에 있으며 사용자 확정 전 제품 규칙으로 고정하지 않는다.
 
 ## 결과
 
-모든 AC 미검증. 문서 초안만 작성했으며 앱 구현·DB 변경·RED/GREEN 실행·외부 연동은 수행하지 않았다.
+명시적 취소 서비스·Server Action·확인 UI, 상세 HTTP 409 응답, 열린 설정 편집 화면의 취소 감지, 초안 취소 후 늦은 조회 응답 차단을 구현했다. 스키마·마이그레이션·의존성 추가는 없다. 실행 근거는 [009 TDD 기록](../tdd/009-cancellation.md)에 남긴다. Docker Node.js 24의 전체 단위 23개·실제 PostgreSQL 90개·Chromium 73개·린트·타입 검사·빌드를 통과하고 320/393/1280px 화면을 검수했다. 실제 iPhone Safari·운영 Neon/Vercel은 미검증이다. 정식 검토에서 [R1(P3)](../fixes/009-cancellation-review.md)을 재현했다. 후속 시작 단계에서 기존 공개 안내 컴포넌트를 연결하고 영구 회귀 RED→GREEN으로 R1을 보완했다. 관련 취소·참여자 관리 브라우저 14개를 통과해 AC-4를 충족으로 복원했다. R1을 포함한 최종 전체 테스트도 통과했으며 2026-11-15 사용자 요청으로 완료했다. 완료 단계는 문서 갱신이고 제품 코드 변경·테스트 재실행·커밋·푸시·Notion·운영 배포는 수행하지 않았다.
 
 ## TDD 적용 계획
 
-| AC | TDD 구분·이유 | 공개 경계·수준 | 기대값의 원본 근거 | 예정 테스트 파일 또는 확인 방법 |
+| AC | TDD 구분·이유 | 공개 경계·수준 | 기대값의 원본 근거 | 테스트 파일 또는 확인 방법 |
 | --- | --- | --- | --- | --- |
-| AC-1 | 필수 | 단위·실제 DB | DOC-002 §6.1~6.2·8.2 | src/lib/cancellation/cancellation.test.ts / src/lib/cancellation/cancellation.integration.test.ts |
-| AC-2 | 필수 | 실제 DB | DOC-002 §10·11 | src/lib/cancellation/cancellation.test.ts / src/lib/cancellation/cancellation.integration.test.ts |
-| AC-3 | 필수 | 단위·실제 DB | DOC-002 §4.2·6.1~6.2·10 | src/lib/cancellation/cancellation.test.ts / src/lib/cancellation/cancellation.integration.test.ts |
-| AC-4 | 필수 | 응답 계약·브라우저 | DOC-002 §6.2·11 | src/lib/cancellation/cancellation.test.ts / 해당 기능 브라우저 시나리오 |
-| AC-5 | 필수 | 실제 DB 동시성 | DOC-002 §6.2·8.2·11 | src/lib/cancellation/cancellation.test.ts / src/lib/cancellation/cancellation.integration.test.ts |
-| AC-6 | 동작은 필수, 색상·배치 비교는 비대상 | 브라우저·시각 | DOC-001 §5; DOC-002 §6.2 | src/lib/cancellation/cancellation.test.ts / 해당 기능 브라우저 시나리오 |
+| AC-1 | 필수 | 실제 DB | DOC-002 §6.1~6.2·8.2 | src/lib/cancellation/cancellation.integration.test.ts |
+| AC-2 | 필수 | 실제 DB | DOC-002 §10·11 | src/lib/cancellation/cancellation.integration.test.ts |
+| AC-3 | 필수 | 실제 DB | DOC-002 §4.2·6.1~6.2·10 | src/lib/cancellation/cancellation.integration.test.ts |
+| AC-4 | 필수 | 응답 계약·브라우저 | DOC-002 §6.2·11 | e2e/cancellation.spec.ts 및 관련 HTTP 계약 검사 |
+| AC-5 | 필수 | 실제 DB 동시성 | DOC-002 §6.2·8.2·11 | src/lib/cancellation/cancellation.integration.test.ts |
+| AC-6 | 동작은 필수, 색상·배치 비교는 비대상 | 브라우저·시각 | DOC-001 §5; DOC-002 §6.2 | e2e/cancellation.spec.ts 및 관련 HTTP 계약 검사 |
 
-- 실제 실행 기록은 구현 시작 시 context/tdd/009-cancellation.md에 작성한다. 현재는 기록 파일을 만들지 않는다.
+- 실제 RED/GREEN과 사후 회귀는 [context/tdd/009-cancellation.md](../tdd/009-cancellation.md)에 구분해 기록했다.
 - 공개 경계는 데이터 읽기·변경 서비스와 사용자 조작이다. 구현 내부 구조를 복제하는 테스트를 만들지 않는다.
-- 브라우저 자동화 도구는 아직 없다. 004에서 Playwright 도입을 제안하고, 이전 단계의 실제 수동 브라우저 확인과 구분한다. 색상·간격은 별도 시각 검수한다.
+- 기존 Playwright와 `npm run test:browser`를 재사용한다. e2e/cancellation.spec.ts에서 명시적 취소·취소 확인/실패/중복 요청·열린 화면 전환·민감 정보 비노출·HTTP 계약을 검증한다. 색상·간격은 별도 시각 검수한다.
 
+
+## 2026-11-15 불러오기 메모
+
+- 선행 008 완료: `b5a2d8a`를 origin/main에 푸시했고 Notion 008·OPEN-09·홈 기록을 갱신했다. 사용자 `.vscode/`와 기존 완료 이력을 보존한다.
+- 재사용: `src/lib/cancellation/transaction.ts`는 약속 상태·취소 시각과 전체 세션 만료를 같은 트랜잭션에서 처리한다. `requireParticipantSession`은 링크 만료 → 취소 → 초안 만료/인증 순서로 검사한다. 003 공개 화면은 비로그인에게 취소 사실만 표시한다.
+- 신규 구현: 유효한 방장 세션의 명시적 취소, 초안 취소/폐기의 구분, 취소 확인·오류 복구·열린 화면 동기화, 상세 API의 409 계약 정리. 현재 availability/state·overview·result/state는 취소에 400, participants/state는 401을 반환하므로 AC-4에 맞춰 테스트부터 보완한다. 공개 `/state`의 최소 안내 조회와 상세 API 오류 계약은 구분한다.
+- draft의 명시적 취소는 기록을 보존하고 링크를 취소 상태로 남긴다. 기존 draft 나가기·10분 만료 폐기는 001의 물리 삭제·링크 재사용 규칙을 유지한다. 이미 만료된 초안·세션·링크는 기존 접근 제한을 우회하지 않는다.
+- 반복 취소·응답 유실 후 재시도는 기존 취소 결과를 안내하고 취소 시각이나 보존 데이터를 다시 바꾸지 않는다. Server Action은 도메인 오류, HTTP 상세 경계는 409를 검증한다.
+- 기존 동작을 신규 TDD로 소급하지 않는다. 신규 서비스 권한·원자성·경쟁·롤백은 실제 DB, HTTP/열린 브라우저 흐름은 Playwright에서 실패를 실제 확인한 뒤 구현한다. 이번 불러오기에서 테스트를 실행하지 않았다.

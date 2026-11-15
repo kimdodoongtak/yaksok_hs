@@ -6,7 +6,7 @@ import type { AvailabilityResult } from "@/lib/availability/view";
 export const runtime="nodejs";
 const responseHeaders={"Cache-Control":"private, no-store",Vary:"Cookie"};
 function respond(result:AvailabilityResult){
-  const status=result.ok?200:result.code==="AVAILABILITY_VERSION_CONFLICT"?409:result.code==="UNAVAILABLE"?503:result.code==="UNAUTHORIZED"?401:result.code==="FORBIDDEN"?403:400;
+  const status=result.ok?200:result.code==="PROMISE_CANCELLED"?409:result.code==="AVAILABILITY_VERSION_CONFLICT"?409:result.code==="UNAVAILABLE"?503:result.code==="UNAUTHORIZED"?401:result.code==="FORBIDDEN"?403:400;
   return Response.json(result,{status,headers:responseHeaders});
 }
 type Context={params:Promise<{inviteToken:string}>};

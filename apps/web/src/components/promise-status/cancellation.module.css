@@ -1,0 +1,14 @@
+.section { margin-top:16px; padding-top:12px; border-top:1px solid #dce3f1; }
+.trigger { min-height:44px; padding:10px 0; color:#a14352; font-size:14px; }
+.dialog { margin:auto; width:min(400px,calc(100vw - 32px)); max-height:calc(100dvh - 48px); overflow:auto; border:1px solid #dce3f1; border-radius:14px; padding:24px; background:#fff; color:#243047; box-shadow:0 16px 48px #24304724; }
+.dialog::backdrop { background:#24304766; }
+.dialog h2 { margin-bottom:16px; font-size:18px; font-weight:700; }
+.dialog p { margin-top:8px; font-size:14px; line-height:1.8; }
+.dialog .help { font-size:12px; color:#70809b; }
+.actions { display:flex; gap:10px; margin-top:24px; }
+.actions button { flex:1; min-height:46px; padding:10px 8px; border:1px solid #dce3f1; border-radius:8px; font-size:13px; font-weight:600; }
+.actions .danger { background:#a84455; border-color:#a84455; color:white; }
+.error { color:#a52b36; }
+.section button:disabled { opacity:.5; }
+.section button:focus-visible { outline:2px solid #4261df; outline-offset:3px; }
+@media (max-width:350px) { .dialog { padding:20px; } }

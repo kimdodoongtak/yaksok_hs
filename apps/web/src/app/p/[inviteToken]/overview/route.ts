@@ -13,5 +13,5 @@ export async function GET(request: Request, { params }: { params: Promise<{ invi
     week: query.get("week") ?? undefined, participantId: query.get("participantId") ?? undefined,
     limit: query.has("limit") ? Number(query.get("limit")) : undefined,
   });
-  return Response.json(result, { status: result.ok ? 200 : result.code === "UNAVAILABLE" ? 503 : result.code === "UNAUTHORIZED" ? 401 : 400, headers });
+  return Response.json(result, { status: result.ok ? 200 : result.code === "PROMISE_CANCELLED" ? 409 : result.code === "UNAVAILABLE" ? 503 : result.code === "UNAUTHORIZED" ? 401 : 400, headers });
 }
