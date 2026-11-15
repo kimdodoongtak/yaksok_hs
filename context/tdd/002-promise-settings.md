@@ -188,3 +188,16 @@ Docker Node.js **24.22.3**에서 현재 코드로 실행했다. AC-1~7의 구현
 ### 모집 설정에도 동일 적용
 
 사용자 요청으로 2단계의 중복 “모집 설정” 제목도 화면에서 숨기고 안내 문구 위 간격을 조정했다. 스크린리더 제목과 단계 전환 포커스는 유지한다. 정적 표시 변경으로 TDD 비대상. Docker에서 `npm run test:browser -- e2e/promise-settings.spec.ts` 종료 0, 4개 통과. 393px 모집 설정 화면 이미지도 확인했다.
+
+
+## 2026-11-16 단계 이동 스크롤 수정
+
+- 기준: main `96dbaac`, 사용자 요청으로 ‘다음’ 진입 시 페이지 맨 위부터 표시. 기존 개인 미추적 파일 보존.
+- RED: `docker compose exec -T tools npm run test:browser -- e2e/promise-settings.spec.ts -g '설정 단계를 바꾸면'`, exit 1. 320×500에서 다음 단계 이후 `window.scrollY` 기대 0 / 실제 199.
+- 원인: 숨김 제목의 `scrollIntoView`가 페이지 상단 대신 폼 중간 위치로 이동했다.
+- 수정: 제목은 `focus({ preventScroll: true })`, 화면은 `window.scrollTo({ top: 0, left: 0, behavior: "instant" })`로 이동한다. 공통 다음·이전·오류 복귀 경로에 적용한다.
+- 검증 계획: 반복 다음/이전의 상단 위치·제목 포커스·입력값 유지, 설정 및 같은 폼을 쓰는 재조율 브라우저 회귀, 린트·타입·빌드. 실제 DB 변경 없음.
+
+- GREEN·회귀: `docker compose exec -T tools npm run test:browser -- e2e/promise-settings.spec.ts e2e/rescheduling.spec.ts`, exit 0, 15 passed (55.1s). 신규 회귀는 다음/이전 각 2회에서 scrollY=0·포커스·소요 시간 150분 보존을 확인했다.
+- 최종: Docker Node.js 24 전체 단위 43개·린트·타입 검사·운영 빌드 모두 exit 0. 빌드 `Compiled successfully in 1818ms`. 실제 320×500 상단 화면도 검수했다. 서버·DB 로직은 바꾸지 않아 별도 DB 통합 테스트는 반복하지 않았다. 실제 iPhone Safari와 이번 수정의 운영 배포는 미검증이다.
+- 검토 결과: 사용자 요청 충족, 입력 유지·오류 복귀·공유 폼 회귀 통과. [수정 기록](../fixes/002-settings-step-scroll.md). 이번 수정은 커밋·푸시하지 않았다.

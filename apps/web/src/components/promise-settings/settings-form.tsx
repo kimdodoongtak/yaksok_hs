@@ -33,8 +33,8 @@ export function SettingsForm({ inviteToken, serverNow, initialValues, submitSett
   function goTo(next: 1 | 2) {
     setStep(next);
     requestAnimationFrame(() => {
-      heading.current?.focus();
-      heading.current?.scrollIntoView({ block: "start" });
+      heading.current?.focus({ preventScroll: true });
+      window.scrollTo({ top: 0, left: 0, behavior: "instant" });
     });
   }
 

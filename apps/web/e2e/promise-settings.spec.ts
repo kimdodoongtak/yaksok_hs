@@ -351,6 +351,32 @@ test("방장이 모바일 설정을 완료하면 세션이 연장되고 초대 �
   await expect(ticket).toHaveCount(0);
 });
 
+test("설정 단계를 바꾸면 스크롤을 맨 위로 옮기고 입력값과 제목 포커스를 유지한다", async ({ page }) => {
+  const link = await fixture();
+  await page.setViewportSize({ width: 320, height: 500 });
+  await page.goto(`/p/${link.inviteToken}`);
+  await page.getByLabel("닉네임").fill("스크롤방장");
+  await page.getByLabel("PIN").fill("1234");
+  await page.getByRole("button", { name: "방장으로 시작하기" }).click();
+  await page.getByRole("button", { name: "소요 시간 30분 늘리기" }).click();
+  for (let attempt = 0; attempt < 2; attempt++) {
+    await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(0);
+    await page.getByRole("button", { name: "다음", exact: true }).click();
+    await expect(page.getByRole("heading", { name: "모집 설정", exact: true })).toBeFocused();
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
+    await expect(page.getByRole("heading", { name: "약속 설정", exact: true })).toBeInViewport();
+    await expect(page.getByText(/매일 .*소요 2시간 30분/)).toBeVisible();
+    await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(0);
+    await page.getByRole("button", { name: "이전", exact: true }).click();
+    await expect(page.getByRole("heading", { name: "날짜와 시간", exact: true })).toBeFocused();
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
+    await expect(page.locator('input[name="durationMinutes"]')).toHaveValue("150");
+  }
+  await page.screenshot({ path: "test-results/settings-step-scroll-320.png" });
+});
+
 test("설정 진입 시 날짜·시간·소요 시간과 다음 버튼이 첫 화면에 보인다", async ({ page }) => {
   const link = await fixture();
   await page.setViewportSize({ width: 393, height: 700 });
