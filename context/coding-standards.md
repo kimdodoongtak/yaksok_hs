@@ -19,7 +19,7 @@
 
 ## 데이터
 
-- Prisma 7 CLI의 URL은 `apps/web/prisma.config.ts`에서 `DIRECT_URL`로 설정한다. `apps/web/prisma/schema.prisma`의 datasource에 URL을 넣지 않는다.
+- Prisma 7 CLI의 URL은 `apps/web/prisma.config.ts`에서 `DIRECT_URL`로 설정한다. 이 값이 없으면 Neon CLI가 제공한 `DATABASE_URL_UNPOOLED`를 사용한다. `.env.local` → `.env` 순서로 읽고 기존 주입 값을 우선한다. `apps/web/prisma/schema.prisma`의 datasource에 URL을 넣지 않는다.
 - 앱은 `DATABASE_URL`과 `@prisma/adapter-pg`로 Prisma Client를 만든다. 이 TCP 어댑터를 로컬 PostgreSQL과 Neon에 공통으로 사용한다.
 - `prisma-client` 생성기를 사용하고 결과는 `apps/web/src/generated/prisma`에 생성한다. 생성 파일은 Git에서 제외한다.
 - 스키마 변경은 `npm run db:migrate -- --name <변경명>`으로 기록한다. `db push`로 마이그레이션을 생략하지 않는다.

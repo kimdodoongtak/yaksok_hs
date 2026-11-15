@@ -1,6 +1,6 @@
 # Vercel과 Neon 배포
 
-이 문서는 앱과 첫 모델을 구현한 뒤 사용할 절차다. 현재 템플릿은 배포된 앱이 아니며, 외부 프로젝트·DB를 자동 생성하지 않는다.
+기존 Next.js 앱의 Neon DB 연결과 Vercel 공개 배포 절차다. Neon 서비스 설정 적용과 Vercel 앱 배포는 별개다. 실제 실행 상태는 [Neon 검증 기록](../context/tdd/neon-setup.md)을 따른다.
 
 ## 연결 준비
 
@@ -13,6 +13,21 @@
 | --- | --- | --- |
 | `DATABASE_URL` | 앱의 Prisma 어댑터 | 해당 환경의 Neon 풀링 주소 |
 | `DIRECT_URL` | Prisma CLI | 같은 환경의 Neon 직접 연결 주소 |
+
+Neon CLI는 직접 연결을 `DATABASE_URL_UNPOOLED`로 제공한다. Prisma CLI는 `apps/web/.env.local` → `.env` 순서로 읽으며, 이미 주입된 환경 변수는 덮어쓰지 않는다. `DIRECT_URL`이 있으면 우선하고, 없으면 `DATABASE_URL_UNPOOLED`를 사용한다. Vercel에서도 같은 우선순위가 적용된다.
+
+## Neon CLI 연결
+
+앱 루트 `apps/web/`에서 실행한다. `neon.ts`는 Postgres만 사용하는 설정이며 별도 Functions·Auth·스토리지는 선언하지 않는다. `.neon`과 `.env.local`은 Git에서 제외한다.
+
+```bash
+neon init -y --org-id org-still-cloud-28399590 --project-id wispy-resonance-33468060 --branch production --services postgres
+neon login # 인증이 없을 때만 브라우저 로그인
+neon config plan
+neon deploy
+```
+
+`neon deploy`는 Neon 서비스 설정과 환경 변수 가져오기까지 수행한다. Prisma 테이블 적용이나 Next.js 공개 호스팅을 대신하지 않는다. `.env.local`을 가져온 호스트 앱은 운영 DB를 사용하므로 일반 개발·테스트는 기존 Docker 환경을 사용한다.
 
 Vercel의 Production과 Preview 환경에 값을 각각 설정한다. 로컬 Compose용 변수는 Vercel에 필요하지 않다. 실제 연결 문자열은 저장소에 넣지 않는다. [Neon 공식 연결 안내](https://neon.com/docs/guides/prisma).
 
