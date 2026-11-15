@@ -231,7 +231,7 @@ test("타인의 갱신은 집계만 바꾸고 본인 미제출 시간과 되돌�
   await page.getByRole("button",{name:"내 시간",exact:true}).click();await expect(own).toHaveAttribute("aria-pressed","true");
   await page.getByRole("button",{name:"되돌리기",exact:true}).click();await expect(own).toHaveAttribute("aria-pressed","false");
 });
-test("히트맵은 색상만 표시하고 실제 후보 칸에만 시간·공통 인원을 표시한다",async({page,context})=>{
+test("히트맵은 소요시간과 보기 단위에 관계없이 연속 가능 구간을 한 번 표시한다",async({page,context})=>{
   const f=await fixture(context);
   await db.promiseRecord.update({where:{id:f.promise.id},data:{durationMinutes:60}});
   const friend=await db.participant.create({data:{promiseId:f.promise.id,nickname:"후보친구",normalizedNickname:"후보친구",role:"member",passwordHash:"unused",availabilitySubmittedAt:new Date()}});
@@ -242,9 +242,9 @@ test("히트맵은 색상만 표시하고 실제 후보 칸에만 시간·공통
   await page.setViewportSize({width:393,height:852});await page.goto(f.path);
   await page.getByRole("button",{name:"전체 시간",exact:true}).click();
   await expect(page.getByLabel(`${f.start} 09:00 가능 2명 / 전체 2명`,{exact:true})).toHaveText("");
-  await expect(page.getByLabel(new RegExp(`${f.start} 09:00.*후보`))).toHaveCount(0);
-  const candidate=page.getByLabel(`${f.start} 11:00–12:00 2명 · 후보 2개`,{exact:true});
-  await expect(candidate).toBeVisible();await expect(candidate).toContainText("2명");await expect(candidate).toContainText("11–12");
+  await expect(page.getByRole("img",{name:`${f.start} 09:00–09:30 2명 · 가능 구간`,exact:true})).toBeVisible();
+  const candidate=page.getByLabel(`${f.start} 11:00–12:30 2명 · 가능 구간`,{exact:true});
+  await expect(candidate).toBeVisible();await expect(candidate).toContainText("2명");await expect(candidate).toContainText("11:00");
   const pressed=page.getByLabel(`${f.start} 11:30 가능 2명 / 전체 2명`,{exact:true});
   await pressed.hover();await page.mouse.down();
   const tooltip=page.getByRole("tooltip",{name:"선택한 참여자",exact:true});
@@ -256,12 +256,12 @@ test("히트맵은 색상만 표시하고 실제 후보 칸에만 시간·공통
   await pressed.focus();await page.keyboard.down("Space");await expect(tooltip).toBeVisible();await page.keyboard.up("Space");await expect(tooltip).toHaveCount(0);
   await page.keyboard.down("Enter");await expect(tooltip).toBeVisible();await page.keyboard.press("Escape");await expect(tooltip).toHaveCount(0);await page.keyboard.up("Enter");
   await page.getByRole("button",{name:"30분",exact:true}).click();
-  await expect(page.getByLabel(`${f.start} 11:30–12:30 2명 · 후보 1개`,{exact:true})).toBeVisible();
+  await expect(candidate).toHaveCount(1);await expect(candidate).toBeVisible();
   await page.getByRole("button",{name:"2시간",exact:true}).click();
   await expect(candidate).toBeVisible();
   for(const width of [320,393,1280]){await page.setViewportSize({width,height:852});expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);await page.screenshot({path:`test-results/candidate-heatmap-${width}.png`,fullPage:true});}
 });
-test("2시간 보기에서 중간 시작 후보의 글씨가 실제 후보 영역 안에 표시된다",async({page,context})=>{
+test("2시간 보기에서도 연속 구간 글씨는 중복 없이 전체 중앙에 표시된다",async({page,context})=>{
   const f=await fixture(context);
   const friend=await db.participant.create({data:{promiseId:f.promise.id,nickname:"배치친구",normalizedNickname:"배치친구",role:"member",passwordHash:"unused",availabilitySubmittedAt:new Date()}});
   for(const member of [f.member,friend]){
@@ -273,14 +273,15 @@ test("2시간 보기에서 중간 시작 후보의 글씨가 실제 후보 영�
   await page.getByRole("button",{name:"2시간",exact:true}).click();
   for(const width of [393,320,1280]){
     await page.setViewportSize({width,height:852});await page.evaluate(()=>document.fonts.ready);
-    for(const [start,end,last] of [["10:00","12:00","11:30"],["11:00","13:00","12:30"]]){
-      const label=page.getByRole("img",{name:new RegExp(`${f.start} ${start}–${end} 2명 · 후보`)}).locator(":scope > span");
-      await expect(label).toBeVisible();
+    for(const [start,end,last] of [["10:00","13:00","12:30"]]){
+      const label=page.getByRole("img",{name:new RegExp(`${f.start} ${start}–${end} 2명 · 가능 구간`)}).locator(":scope > span");
+      await expect(label).toHaveCount(1);await expect(label).toBeVisible();
       const box=(await label.boundingBox())!;
       const firstSlot=(await page.getByLabel(`${f.start} ${start} 가능 2명 / 전체 2명`,{exact:true}).boundingBox())!;
       const lastSlot=(await page.getByLabel(`${f.start} ${last} 가능 2명 / 전체 2명`,{exact:true}).boundingBox())!;
       expect(box.y).toBeGreaterThanOrEqual(firstSlot.y);
       expect(box.y+box.height).toBeLessThanOrEqual(lastSlot.y+lastSlot.height);
+      expect(Math.abs(box.y+box.height/2-(firstSlot.y+lastSlot.y+lastSlot.height)/2)).toBeLessThan(2);
       expect(box.x).toBeGreaterThanOrEqual(firstSlot.x);
       expect(box.x+box.width).toBeLessThanOrEqual(firstSlot.x+firstSlot.width);
     }

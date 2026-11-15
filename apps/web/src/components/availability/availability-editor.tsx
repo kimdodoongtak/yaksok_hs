@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { closeCollection } from "@/actions/promise-status";
 import { heatLegend } from "./heatmap-scale";
 import { HeatmapCell } from "./heatmap-cell";
+import { availabilityBlocks } from "./heatmap-blocks";
 import Link from "next/link";
 import { submitAvailability } from "@/actions/availability";
 import type { AvailabilityResult, AvailabilitySnapshot } from "@/lib/availability/view";
@@ -56,6 +57,7 @@ export function AvailabilityEditor({inviteToken,initial}:{inviteToken:string;ini
   },[]);
   const {settings}=snapshot;
   const days=Array.from({length:7},(_,i)=>addDays(week,i));
+  const blocksByDay=Object.fromEntries(days.map(day=>[day,view==="all"&&overview.data?availabilityBlocks(overview.data.slotParticipantIndexes,day,settings.dailyStartMinute,settings.dailyEndMinute):[]]));
   const minutes=Array.from({length:Math.ceil((settings.dailyEndMinute-settings.dailyStartMinute)/stepMinutes)},(_,i)=>settings.dailyStartMinute+i*stepMinutes);
   const closed=snapshot.status!=="collecting";
   const editable=(day:string,minute:number)=>view==="mine" && !closed && !pending && minute>=settings.dailyStartMinute && minute+30<=settings.dailyEndMinute && day>=settings.dateRangeStart && day<=settings.dateRangeEnd && slotAt(day,minute)>snapshot.serverNow;
@@ -255,7 +257,7 @@ export function AvailabilityEditor({inviteToken,initial}:{inviteToken:string;ini
       <div className={styles.grid} style={{gridAutoRows:50}}>
         {minutes.map(minute=><div className={styles.row} key={minute}>
           <div className={styles.time}>{stepMinutes>30 ? <span className={styles.timeRange}>{compactTimeLabel(minute)} ~ {compactTimeLabel(Math.min(minute+stepMinutes,settings.dailyEndMinute))}</span> : timeLabel(minute)}</div>
-          {days.map(day=>{if(view!=="mine")return <HeatmapCell key={day} day={day} minute={minute} stepMinutes={stepMinutes} endMinute={settings.dailyEndMinute} startMinute={settings.dailyStartMinute} valid={day>=settings.dateRangeStart&&day<=settings.dateRangeEnd} data={overview.data} all={view==="all"}/>;
+          {days.map(day=>{if(view!=="mine")return <HeatmapCell key={day} blocks={blocksByDay[day]} day={day} minute={minute} stepMinutes={stepMinutes} endMinute={settings.dailyEndMinute} startMinute={settings.dailyStartMinute} valid={day>=settings.dateRangeStart&&day<=settings.dateRangeEnd} data={overview.data} all={view==="all"}/>;
           const active=cellState(day,minute),enabled=cellMinutes(minute).some(m=>editable(day,m));return <button key={day} type="button" className={styles.slot} style={{minHeight:44}} data-day={day} data-minute={minute} data-hour={minute%60===0} data-block-start={active===true && cellState(day,minute-stepMinutes)!==true} data-block-end={active===true && cellState(day,minute+stepMinutes)!==true} aria-label={`${day} ${timeLabel(minute)}${stepMinutes>30?`–${timeLabel(Math.min(minute+stepMinutes,settings.dailyEndMinute))}`:""}`} aria-pressed={active} disabled={!enabled}
             onPointerDown={event=>startDrag(event,day,minute)}
             onClick={event=>{if(event.detail===0)toggle(day,minute);}}

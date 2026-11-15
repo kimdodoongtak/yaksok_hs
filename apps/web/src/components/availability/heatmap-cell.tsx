@@ -2,18 +2,12 @@
 import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type { OverviewSnapshot } from "@/lib/candidates/view";
-import type { Candidate } from "@/lib/candidates/policy";
 import { slotAt, timeLabel } from "./calendar";
 import { AnimalAvatar } from "@/components/ui/animal-avatar";
-import { samePeople } from "./heatmap-blocks";
+import { samePeople, type AvailabilityBlock } from "./heatmap-blocks";
 import { heatLevel } from "./heatmap-scale";
 import styles from "./availability.module.css";
 
-const clock=new Intl.DateTimeFormat("en-GB",{timeZone:"Asia/Seoul",hour:"2-digit",minute:"2-digit",hourCycle:"h23"});
-function candidateTime(candidate:Candidate){
-  const start=clock.format(new Date(candidate.startAt)),end=clock.format(new Date(candidate.endAt));
-  return {start,end:end==="00:00"?"24:00":end};
-}
 type HeldSlot={part:number;anchor:DOMRect};
 function SlotPeople({id,held,day,data}:{id:string;held:HeldSlot;day:string;data:OverviewSnapshot}){
   const popup=useRef<HTMLDivElement>(null);
@@ -45,7 +39,7 @@ function SlotPeople({id,held,day,data}:{id:string;held:HeldSlot;day:string;data:
     <ul>{people.map(person=><li key={person.id}><AnimalAvatar index={data.participants.findIndex(member=>member.id===person.id)} size={26}/><span>{person.nickname}</span></li>)}</ul>
   </div>,document.body);
 }
-export function HeatmapCell({day,minute,stepMinutes,endMinute,startMinute,valid,data,all}:{day:string;minute:number;stepMinutes:number;endMinute:number;startMinute:number;valid:boolean;data?:OverviewSnapshot;all:boolean}){
+export function HeatmapCell({blocks,day,minute,stepMinutes,endMinute,startMinute,valid,data,all}:{blocks:AvailabilityBlock[];day:string;minute:number;stepMinutes:number;endMinute:number;startMinute:number;valid:boolean;data?:OverviewSnapshot;all:boolean}){
   const [held,setHeld]=useState<HeldSlot|null>(null);
   const tooltipId=useId(),holding=held!==null;
   useEffect(()=>{
@@ -57,16 +51,12 @@ export function HeatmapCell({day,minute,stepMinutes,endMinute,startMinute,valid,
     return ()=>{window.removeEventListener("pointerup",hide);window.removeEventListener("pointercancel",hide);window.removeEventListener("blur",hide);window.removeEventListener("scroll",hide,true);document.removeEventListener("visibilitychange",hide);};
   },[holding]);
   const parts=Array.from({length:Math.min(stepMinutes,endMinute-minute)/30},(_,i)=>minute+i*30);
-  const start=slotAt(day,minute),end=new Date(new Date(start).getTime()+parts.length*1800000).toISOString();
-  const candidates=all&&valid?data?.weekCandidates.filter(candidate=>candidate.startAt>=start&&candidate.startAt<end) ?? []:[];
-  const first=candidates[0],time=first?candidateTime(first):null;
-  // Position the caption within the candidate's occupied part of this display row.
-  const rowStart=new Date(start).getTime(),rowEnd=new Date(end).getTime();
-  const captionStart=first?new Date(first.startAt).getTime():rowStart;
-  const captionEnd=first?Math.min(new Date(first.endAt).getTime(),rowEnd):rowEnd;
-  const captionStyle={
-    top:`calc(${(captionStart-rowStart)/(rowEnd-rowStart)*100}% + 2px)`,
-    height:`calc(${(captionEnd-captionStart)/(rowEnd-rowStart)*100}% - 4px)`,
+  const startingBlocks=all&&valid?blocks.filter(block=>block.count>=2&&block.startMinute>=minute&&block.startMinute<minute+stepMinutes):[];
+  // Convert the whole continuous interval to displayed row coordinates.
+  const position=(value:number)=>{
+    const row=Math.floor((value-startMinute)/stepMinutes),rowMinute=startMinute+row*stepMinutes;
+    const fraction=value===rowMinute?0:(value-rowMinute)/Math.min(stepMinutes,endMinute-rowMinute);
+    return (row+fraction)*50;
   };
   return <div className={styles.readCell} style={{minHeight:44}}>
     {parts.map(part=>{
@@ -92,9 +82,14 @@ export function HeatmapCell({day,minute,stepMinutes,endMinute,startMinute,valid,
         onKeyUp={event=>{if(event.key==="Enter"||event.key===" "){event.preventDefault();setHeld(null);}}}
       >{data&&valid&&!all&&available?"✓":""}</span>;
     })}
-    {first&&time&&<div className={styles.heatCandidate} style={captionStyle} role="img" aria-label={`${day} ${time.start}–${time.end} ${first.count}명 · 후보 ${candidates.length}개`}>
-      <span className={styles.candidateCaption} data-compact={stepMinutes===120}><strong>{first.count}명</strong>{time.start.endsWith(":00")&&time.end.endsWith(":00")?<span className={styles.wholeHours}>{time.start.slice(0,2)}–{time.end.slice(0,2)}</span>:<span>{time.start}<br/>~{time.end}</span>}</span>
-    </div>}
+    {startingBlocks.map(block=>{
+      const time={start:timeLabel(block.startMinute),end:timeLabel(block.endMinute)};
+      const height=position(block.endMinute)-position(block.startMinute)-4;
+      const compact=height<42;
+      return <div key={block.startMinute} className={styles.heatCandidate} style={{top:position(block.startMinute)-position(minute)+2,height}} role="img" aria-label={`${day} ${time.start}–${time.end} ${block.count}명 · 가능 구간`}>
+        <span className={styles.candidateCaption} data-compact={compact}><strong>{block.count}명</strong>{height>=28&&(time.start.endsWith(":00")&&time.end.endsWith(":00")?<span className={styles.wholeHours}>{time.start.slice(0,2)}–{time.end.slice(0,2)}</span>:<span>{time.start}<br/>~{time.end}</span>)}</span>
+      </div>;
+    })}
     {held&&all&&valid&&data&&<SlotPeople id={tooltipId} held={held} day={day} data={data}/>}
   </div>;
 }
