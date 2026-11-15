@@ -2,6 +2,20 @@
 
 기존 Next.js 앱의 Neon DB 연결과 Vercel 공개 배포 절차다. Neon 서비스 설정 적용과 Vercel 앱 배포는 별개다. 실제 실행 상태는 [Neon 검증 기록](../context/tdd/neon-setup.md)을 따른다.
 
+## 2026-11-16 실제 운영 배포 확인
+
+- 운영 주소: https://yaksok-hs.vercel.app
+- 기존 프로젝트: `yaksok-hs/yaksok-hs`, 앱 루트 `apps/web`.
+- 배포 `dpl_2BT4rp9fsNNdDP8gPT9jjXjYFgN3`: Production / READY, 커밋 `40e86e0`, 빌드 1분 37초. Vercel API와 빌드 로그로 확인했다.
+- 실제 배포 Node.js는 `24.x`다. 프로젝트 화면의 기본값 `26.x`와 다르지만 앱 `engines.node`의 24.x가 적용된 것을 API 및 런타임 로그에서 확인했다.
+- `DATABASE_URL`·`DIRECT_URL`은 Secret으로 Production에만 등록되어 있다. Preview 변수는 아직 없다.
+- HTTPS 홈 HTTP 200 및 형식이 유효하지만 존재하지 않는 초대 토큰의 DB 조회·무효 링크 안내 HTTP 200을 확인했다. 이번 단계에서 운영 DB 쓰기나 전체 제품 흐름 검증은 하지 않았다.
+- 최근 30분 error 로그 조회에는 pg의 향후 SSL 모드 변경 경고 1건이 있었다. 검사한 요청은 정상 응답했으며, 오류가 전혀 없다고 해석하지 않는다.
+- 사용자 요청의 [Vercel 에이전트 설정 가이드](https://vercel.com/get-started.md)에 따라 CLI `65.16.0` 설치·`kimdodoongtak` 인증, 사용자 범위 Vercel 플러그인 설치·활성화, `https://mcp.vercel.com` 공유 MCP 등록·OAuth 로그인을 완료했다.
+- Codex 설정은 사용자 `~/.codex/config.toml`에 병합했다. 재시작 후 `search_vercel_documentation` 호출 성공, `list_teams`는 빈 목록을 반환했다. 알려진 프로젝트·팀 ID를 지정한 `get_project`는 팀 권한 부족으로 HTTP 403을 반환했다. `authorize_team_access`로 일회성 팀 승인 링크를 사용자에게 제공했으며 승인 후 같은 조회를 재검증해야 한다. CLI의 기존 문서 검색·팀 조회·배포 확인 성공과 MCP의 팀 권한 상태를 구분한다.
+- 로컬 연결 정보는 Git 제외 `apps/web/.vercel/`에 있다. CLI link가 `.env.local`에 `VERCEL_OIDC_TOKEN`을 추가했으며 기존 Neon 변수와 브랜치가 유지됨을 값 출력 없이 확인했다.
+- 이번 작업은 기존 배포 확인과 에이전트 도구 설정이다. 새 배포·도메인 구매·추가 서비스 활성화·커밋·푸시는 수행하지 않았다.
+
 ## 연결 준비
 
 1. Neon에 프로젝트와 PostgreSQL DB를 준비한다. 로컬 PostgreSQL과 메이저 버전을 맞춘다.

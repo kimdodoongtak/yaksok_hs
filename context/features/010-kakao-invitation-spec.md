@@ -52,7 +52,7 @@ POST /api/kakao/skill은 PRD가 제시한 경로를 사용하되 본문·응답�
 
 ## 구현 계획
 
-공식 규격·진입 시나리오 확인 → 실제 가능한 요청/응답 예시 확정 → 유효·실패·재시도 TDD → Route Handler → 실제 테스트 봇 왕복 검증. 예정 apps/web/src/lib/kakao/, src/app/api/kakao/skill/route.ts. 웹 독립 테스트에는 고정된 링크 fixture를 사용하며 공개 대체 생성 기능을 만들지 않는다.
+공식 규격·진입 시나리오 확인 → 실제 가능한 요청/응답 예시 확정 → 유효·실패·재시도 TDD → Route Handler → 실제 테스트 봇 왕복 검증. 예정 apps/web/src/lib/kakao/, src/app/api/kakao/skill/route.ts. 010 웹 독립 테스트에는 고정된 링크 fixture를 사용한다. 2026-11-16 사용자 결정으로 웹 공개 생성은 별도 [011](011-web-invitation-spec.md)에서 구현하며 카카오 연동을 대체 완료한 것으로 보지 않는다.
 
 한 동작의 실패 assertion을 실제 확인한 뒤 최소 구현·회귀 검증을 반복한다. 테스트 도구 오류나 DB 연결 실패는 RED로 인정하지 않는다.
 

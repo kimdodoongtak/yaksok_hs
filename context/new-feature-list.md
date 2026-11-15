@@ -18,6 +18,7 @@
 | 8 | 008-participant-management | 탈퇴·내보내기와 방장 승계 | [스펙](features/008-participant-management-spec.md) | 006 — 006까지의 상태별 참석자·후보 결과와 세션이 필요하다 | 완료 — 2026-11-15 |
 | 9 | 009-cancellation | 약속 취소와 접근 차단 | [스펙](features/009-cancellation-spec.md) | 008 — 008의 마지막 방장 탈퇴에서도 사용하는 약속 취소·세션 만료 서비스를 재사용한다. | 완료 — 2026-11-15 |
 | 10 | 010-kakao-invitation | 카카오 챗봇에서 초대 링크 받기 | [스펙](features/010-kakao-invitation-spec.md) | 001 — 001의 링크 발급·읽기 서비스를 사용한다 | 확인 필요 |
+| 11 | 011-web-invitation | 홈에서 약속 만들기 | [스펙](features/011-web-invitation-spec.md) | 001·002·003 — 발급·방장 등록·설정·참여 재사용 | 완료 — 2026-11-16 |
 
 007과 008은 006 이후 서로 독립적이다. 010의 실제 코드 의존성은 001이며, 외부 규격 확인은 초기에 진행할 수 있다. 전체 챗봇→확정 E2E는 001~009까지 준비된 뒤 실행한다.
 

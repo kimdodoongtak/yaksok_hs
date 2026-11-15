@@ -71,6 +71,11 @@ h1, h2, h3 { word-break: keep-all; }
 .home-ticket > div > p:last-child { color: var(--muted); font-size: 14px; line-height: 1.7; }
 .home-ticket footer { display: flex; justify-content: space-between; align-items: center; padding: 20px 22px; border-top: 1px dashed var(--line); font-size: 10px; color: var(--accent); }
 .home-ticket footer i { width: 100px; height: 24px; background: repeating-linear-gradient(90deg,var(--ink) 0 1px,transparent 1px 3px,var(--ink) 3px 5px,transparent 5px 7px); }
+.home-create-form { margin-top: 24px; }
+.home-create-form > button { width: 100%; min-height: 48px; padding: 12px 20px; border-radius: 100px; background: var(--accent); color: white; font-size: 14px; font-weight: 600; }
+.home-create-form > button:hover:not(:disabled) { background: var(--accent-hover); }
+.home-create-form > button:disabled { opacity: .55; }
+.home-create-form > p { margin-top: 12px; color: var(--accent); font-size: 14px; line-height: 1.7; }
 .app-entry:has(.settings-flow) .journey-header { padding-bottom: 12px; }
 .app-entry:has(.settings-flow) .journey-stages { margin-top: 6px; }
 .app-entry:has(.settings-flow) .journey-stages li { gap: 5px; }
