@@ -102,7 +102,7 @@
 .zoomControls button[aria-pressed="true"] { background: white; color: var(--accent); box-shadow: 0 1px 3px #18191612; }
 .undoControls { display: flex; gap: 8px; }
 .undoControls button { display: grid; place-items: center; width: 44px; height: 44px; padding: 0; flex-shrink: 0; border: 0; border-radius: 7px; color: var(--accent); background: transparent; }
-.undoControls button:not(:disabled):hover { background: #fff0ea; }
+.undoControls button:not(:disabled):hover { background: var(--subtle); }
 .timeRange { font-size: 12px; }
 .slot[aria-pressed="mixed"], .slot[aria-pressed="mixed"]:hover { color: var(--accent); background: repeating-linear-gradient(135deg,var(--soft) 0 5px,#fff0ea 5px 10px); font-size: 10px; border: 1px dashed #f7aaa2; border-radius: 4px; }
 .legend .partialLegend i { background: repeating-linear-gradient(135deg,#f7aaa2 0 2px,#fff0ea 2px 4px); border-color: #f7aaa2; }
@@ -228,7 +228,8 @@
 .editTools { margin: 10px 0 8px; gap: 8px; }
 .editTools button { border-radius: 100px; color: var(--ink); }
 .undoControls { gap: 6px; }
-.undoControls button { width: 42px; min-height: 36px; height: 36px; background: white; border-color: var(--line); }
+.undoControls button { width: 42px; min-height: 36px; height: 36px; background: transparent; color: var(--muted); border-color: var(--line); }
+.undoControls svg { width: 19px; height: 19px; stroke-width: 1.8; }
 .zoomControls { background: var(--subtle); border-radius: 100px; }
 .zoomControls button { min-height: 32px; padding: 0 9px; font-size: 11px; }
 .zoomControls button[aria-pressed="true"] { color: var(--accent); }
@@ -376,7 +377,10 @@
 .closeActions > .closeConfirm { border-color: var(--accent); background: var(--accent); color: white; }
 .closeActions > .closeConfirm:hover:not(:disabled) { background: var(--accent-hover); }
 
-.topBar { position: sticky; top: 0; z-index: 20; display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 60px; padding-block: 8px; background: var(--paper); }
+.topBar { position: sticky; top: 0; z-index: 20; display: grid; grid-template-columns: minmax(0,1fr) auto minmax(0,1fr); align-items: center; gap: 16px; min-height: 60px; padding-block: 8px; background: var(--paper); }
+.topBar > :global(.journey-header), .topBar > .mobileInfoButton { grid-column: 1; grid-row: 1; justify-self: start; }
+.topBar > .deadlineCountdown { grid-column: 2; grid-row: 1; }
+.topBar > .headerAction { grid-column: 3; grid-row: 1; justify-self: end; }
 .topBar > :global(.journey-header) { padding: 0; }
 .header .headingRow { margin-top: 22px; }
 
@@ -407,6 +411,7 @@
 @media (max-width: 359px) { .topBar { gap: 8px; } .deadlineCountdown strong { font-size: 12px; } }
 
 .mobileInfoButton { display: none; }
+.headerAction svg { display: none; }
 .candidateCaption[data-compact="true"] { gap: 0; line-height: 1; }
 .candidateCaption[data-compact="true"] strong { font-size: 10px; }
 .candidateCaption[data-compact="true"] > span { font-size: 9px; }
@@ -415,11 +420,12 @@
 @media (max-width: 899px) {
   .topBar { min-height: 60px; gap: 8px; }
   .topBar > :global(.journey-header) { display: none; }
-  .topBar > .headerAction :is(button,a) { min-height: 44px; padding: 6px 0; border-radius: 4px; background: transparent; color: var(--muted); font-size: 12px; font-weight: 500; white-space: nowrap; }
+  .topBar > .headerAction svg { display: block; flex-shrink: 0; }
+  .topBar > .headerAction :is(button,a) { gap: 6px; min-height: 44px; padding: 6px 0; border-radius: 4px; background: transparent; color: var(--muted); font-size: 13px; font-weight: 500; white-space: nowrap; }
   .topBar > .headerAction :is(button,a):hover { color: var(--ink); }
   .topBar > .headerAction a { color: var(--accent); }
   .topBar > .headerAction a:hover { color: var(--accent-hover); }
-  .mobileInfoButton { display: flex; align-items: center; gap: 6px; min-height: 44px; color: var(--ink); font-size: 13px; font-weight: 700; white-space: nowrap; }
+  .mobileInfoButton { display: flex; align-items: center; gap: 6px; min-height: 44px; color: var(--ink); font-size: 13px; font-weight: 500; white-space: nowrap; }
   /* Keep the page heading available to assistive technology without taking calendar space. */
   .header { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
   .header :global(.journey-stages) { display: none; }

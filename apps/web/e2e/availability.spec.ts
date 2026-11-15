@@ -680,8 +680,27 @@ for (const role of ["host", "member"] as const) {
     await page.goto(f.path);
     const timer = page.getByRole("timer", { name: "응답 마감까지 남은 시간" });
     await expect(timer).toContainText("2일 3시간");
+    const centered=async()=>{
+      const box=(await timer.boundingBox())!;
+      expect(Math.abs(box.x+box.width/2-page.viewportSize()!.width/2)).toBeLessThan(1);
+      const left=(await page.getByRole(page.viewportSize()!.width<900?"button":"link",{name:page.viewportSize()!.width<900?"약속 정보 열기":"약속 잡기",exact:true}).boundingBox())!;
+      expect(left.x+left.width).toBeLessThanOrEqual(box.x);
+      if(page.viewportSize()!.width<900){
+        const action=page.getByRole("button",{name:"응답 마감",exact:true});
+        const candidate=page.getByRole("link",{name:"후보 보기",exact:true});
+        const right=await action.count()?await action.boundingBox():await candidate.count()?await candidate.boundingBox():null;
+        if(right)expect(Math.abs((box.x-left.x-left.width)-(right.x-box.x-box.width))).toBeLessThan(1);
+      }
+    };
+    for(const width of [320,393,1280]){
+      await page.setViewportSize({width,height:740});await page.evaluate(()=>document.fonts.ready);
+      await centered();
+      if(role==="host")expect((await page.getByRole("button",{name:"응답 마감",exact:true}).boundingBox())!.x).toBeGreaterThanOrEqual((await timer.boundingBox())!.x+(await timer.boundingBox())!.width);
+    }
+    await page.setViewportSize({width:320,height:740});
     await page.evaluate(() => window.scrollTo(0, 400));
     await expect(timer).toBeInViewport();
+    await centered();
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
     await page.screenshot({ path: `test-results/deadline-remaining-${role}-320.png` });
     await page.setViewportSize({ width: 393, height: 852 });
@@ -690,6 +709,11 @@ for (const role of ["host", "member"] as const) {
     await db.promiseRecord.update({ where: { id: f.promise.id }, data: { status: "closed" } });
     await page.goto(`${f.path}?view=responses`);
     await expect(timer).toHaveText("응답 마감");
+    for(const width of [320,393,1280]){
+      await page.setViewportSize({width,height:740});await centered();
+      const box=(await timer.boundingBox())!;
+      expect((await page.getByRole("link",{name:"후보 보기",exact:true}).boundingBox())!.x).toBeGreaterThanOrEqual(box.x+box.width);
+    }
   });
 }
 

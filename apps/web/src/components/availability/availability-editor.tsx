@@ -207,7 +207,7 @@ export function AvailabilityEditor({inviteToken,initial}:{inviteToken:string;ini
     } catch {setMessage("제출하지 못했어요. 선택은 유지돼요. 다시 시도해 주세요.");}
     finally {busy.current=false;setPending(false);}
   }
-  const collectionAction=closed?<Link href={`/p/${inviteToken}/candidates`}>후보 보기</Link>:snapshot.role==="host"?<button type="button" disabled={pending} onClick={()=>{setSidebarOpen(false);setConfirmClose(true);}}>응답 마감</button>:<span className={styles.viewBadge}>모집 중</span>;
+  const collectionAction=closed?<Link href={`/p/${inviteToken}/candidates`}><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg>후보 보기</Link>:snapshot.role==="host"?<button type="button" disabled={pending} onClick={()=>{setSidebarOpen(false);setConfirmClose(true);}}><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg>응답 마감</button>:<span className={styles.viewBadge}>모집 중</span>;
   return <main className={`${styles.page} ${styles.calendarPage}`}><div className={styles.shell}>
     <div className={styles.topBar}>
       <button type="button" className={styles.mobileInfoButton} aria-label="약속 정보 열기" aria-expanded={sidebarOpen} aria-controls="availability-drawer" onClick={()=>setSidebarOpen(true)}><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg><span>약속 정보</span></button>
