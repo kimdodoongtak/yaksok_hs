@@ -1,0 +1,136 @@
+{
+  "project": "yaksok_hs",
+  "scope": "로컬 Codex 로그와 저장소 문서 기반 집계. 초기 기획 전체 또는 사용자 노동시간 집계가 아님.",
+  "development_cutoff": "2026-11-15T13:21:17+09:00",
+  "development_cutoff_commit": "e804d37",
+  "first_commit": "2026-11-12T23:46:26+09:00",
+  "commit_span_seconds": 221691,
+  "latest_log_snapshot": "2026-11-15T17:33:00.514+09:00",
+  "method": {
+    "session_scope": "session_meta.cwd가 프로젝트 루트와 정확히 일치하는 로컬 세션 46개: 주 대화 11개, 보조 세션 35개",
+    "token_deduplication": "이어진 주 대화의 반복 기록은 cumulative total_token_usage 전체 값으로 중복 제거 후 last_token_usage 합산. 보조 세션은 세션별 중복 제거. 주 대화 합계가 최종 누적 카운터와 일치함을 확인.",
+    "time": "완료된 turn_id별 duration_ms 중복 제거 합계. 도구 실행과 대기 포함. 중단 4개와 진행 중 턴 제외. 보조 작업은 겹칠 수 있어 주 대화 시간에 더하지 않음.",
+    "tokens": "cached_input은 input에, reasoning_output은 output에 포함되어 중복 가산하지 않음. 과금 내역이 아닌 로컬 사용량 카운터.",
+    "issues": "검토 중 발견 10건 + 사용자 요청 동작/표시 보완 2건. 재검토에서 발견한 별도 경계는 각각 집계. TDD의 의도적 RED, 일반 UI 변경, 도구 장애, 문서 수정은 제외. GitHub Issues 건수가 아님."
+  },
+  "issue_counts": {
+    "documented_product_findings": 12,
+    "documented_resolved": 12,
+    "additional_ui_improvement_documents": 4,
+    "fix_documents_excluding_template": 14
+  },
+  "measurements": {
+    "through_009_commit": {
+      "combined_tokens": {
+        "input_tokens": 336601026,
+        "cached_input_tokens": 326705152,
+        "output_tokens": 1100560,
+        "total_tokens": 337701586,
+        "uncached_input_tokens": 9895874,
+        "uncached_input_plus_output_tokens": 10996434
+      },
+      "main": {
+        "token_usage_sum_unique_last": {
+          "input_tokens": 285646594,
+          "cached_input_tokens": 278953728,
+          "output_tokens": 1031104,
+          "reasoning_output_tokens": 222189,
+          "total_tokens": 286677698
+        },
+        "token_events": 1983,
+        "latest_cumulative": {
+          "input_tokens": 285646594,
+          "cached_input_tokens": 278953728,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 1031104,
+          "reasoning_output_tokens": 222189,
+          "total_tokens": 286677698
+        },
+        "completed_turns": 179,
+        "duration_hours": 10.207564166666666,
+        "union_hours": 10.205555555555556,
+        "first_started": 1794495029,
+        "last_completed": 1794716286
+      },
+      "auxiliary": {
+        "token_usage_sum_unique_last": {
+          "input_tokens": 50954432,
+          "cached_input_tokens": 47751424,
+          "output_tokens": 69456,
+          "reasoning_output_tokens": 16327,
+          "total_tokens": 51023888
+        },
+        "token_events": 807,
+        "latest_cumulative": {
+          "input_tokens": 4083952,
+          "cached_input_tokens": 3716480,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 4219,
+          "reasoning_output_tokens": 878,
+          "total_tokens": 4088171
+        },
+        "completed_turns": 806,
+        "duration_hours": 0.7323880555555555,
+        "union_hours": 0.7366666666666667,
+        "first_started": 1794495216,
+        "last_completed": 1794716477
+      }
+    },
+    "latest_available": {
+      "combined_tokens": {
+        "input_tokens": 357359058,
+        "cached_input_tokens": 346648448,
+        "output_tokens": 1176876,
+        "total_tokens": 358535934,
+        "uncached_input_tokens": 10710610,
+        "uncached_input_plus_output_tokens": 11887486
+      },
+      "main": {
+        "token_usage_sum_unique_last": {
+          "input_tokens": 302738517,
+          "cached_input_tokens": 295705216,
+          "output_tokens": 1102135,
+          "reasoning_output_tokens": 239855,
+          "total_tokens": 303840652
+        },
+        "token_events": 2097,
+        "latest_cumulative": {
+          "input_tokens": 302738517,
+          "cached_input_tokens": 295705216,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 1102135,
+          "reasoning_output_tokens": 239855,
+          "total_tokens": 303840652
+        },
+        "completed_turns": 191,
+        "duration_hours": 10.980370277777778,
+        "union_hours": 10.979444444444445,
+        "first_started": 1794495029,
+        "last_completed": 1794731501
+      },
+      "auxiliary": {
+        "token_usage_sum_unique_last": {
+          "input_tokens": 54620541,
+          "cached_input_tokens": 50943232,
+          "output_tokens": 74741,
+          "reasoning_output_tokens": 18473,
+          "total_tokens": 54695282
+        },
+        "token_events": 848,
+        "latest_cumulative": {
+          "input_tokens": 4083952,
+          "cached_input_tokens": 3716480,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 4219,
+          "reasoning_output_tokens": 878,
+          "total_tokens": 4088171
+        },
+        "completed_turns": 847,
+        "duration_hours": 0.7736955555555556,
+        "union_hours": 0.7786111111111111,
+        "first_started": 1794495216,
+        "last_completed": 1794731490
+      }
+    }
+  }
+}

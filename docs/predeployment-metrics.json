@@ -1,0 +1,70 @@
+{
+  "cutoff": "2026-11-16T01:23:47+09:00",
+  "groups": {
+    "main": {
+      "tokens": {
+        "input_tokens": 368211226,
+        "cached_input_tokens": 360094976,
+        "output_tokens": 1347286,
+        "reasoning_output_tokens": 326660,
+        "total_tokens": 369558512
+      },
+      "token_events": 2539,
+      "sessions": 13,
+      "completed_turns": 233,
+      "duration_seconds": 49596.165,
+      "union_seconds": 49466,
+      "aborted_turns": 4,
+      "aborted_duration_seconds": 285.809,
+      "model_event_counts": {
+        "gpt-6-astra": 2225,
+        "gpt-5.6-sol": 314
+      },
+      "user_messages": 255,
+      "first_started_utc": "2026-11-12T14:50:29+00:00"
+    },
+    "auxiliary": {
+      "tokens": {
+        "input_tokens": 64608842,
+        "cached_input_tokens": 59952640,
+        "output_tokens": 89226,
+        "reasoning_output_tokens": 23135,
+        "total_tokens": 64698068
+      },
+      "token_events": 979,
+      "sessions": 41,
+      "completed_turns": 978,
+      "duration_seconds": 3241.883,
+      "union_seconds": 3244,
+      "aborted_turns": 0,
+      "aborted_duration_seconds": 0.0,
+      "model_event_counts": {
+        "codex-auto-review": 979
+      },
+      "user_messages": 600,
+      "first_started_utc": "2026-11-12T14:53:36+00:00"
+    }
+  },
+  "combined_tokens": {
+    "input_tokens": 432820068,
+    "cached_input_tokens": 420047616,
+    "output_tokens": 1436512,
+    "reasoning_output_tokens": 349795,
+    "total_tokens": 434256580,
+    "uncached_input_tokens": 12772452,
+    "uncached_input_plus_output_tokens": 14208964
+  },
+  "project": "yaksok_hs",
+  "audit_date": "2026-11-17",
+  "cutoff_commit": "40e86e0",
+  "cutoff_meaning": "최초 배포 커밋 생성 시각. 실제 배포 시작/완료 시각 아님.",
+  "commit_elapsed_seconds": 265041,
+  "method": {
+    "source": "로컬 Codex JSONL; session_meta.cwd 정확히 일치; 이벤트 timestamp <= cutoff",
+    "tokens": "main 누적 total_token_usage 전체 필드로 중복 제거 후 last_token_usage 합계; auxiliary는 세션별 동일 방법",
+    "time": "task_complete를 turn_id로 중복 제거; 중단/진행 중 제외; 턴 내부 사람 대기 미분리; 보조 세션 시간은 합산하지 않음",
+    "user_messages": "주 대화 UserMessage를 client_id 또는 turn_id/item.id로 중복 제거; 교정 개입 분류 아님",
+    "auxiliary": "source.subagent.other=guardian, codex-auto-review; 자동 승인 검토",
+    "limitations": "로그 범위 밖 작업 미포함. 기존 009 집계와 같은 기준점 재집계 시 69,209 토큰 차이; 원인 미확정, 기존 통계와 합산하지 않음."
+  }
+}

@@ -1,0 +1,13 @@
+﻿번호,기능,발견 구분,내용,문서상 상태,근거 파일
+1,001,검토,닉네임의 zero-width·줄바꿈·제어 문자 허용,수정 완료,context/tdd/001-invitation-and-host.md
+2,001,검토,인증 확인 전 만료 초안 삭제,수정 완료,context/tdd/001-invitation-and-host.md
+3,001,검토,없는·만료 링크에 불필요한 PIN 해시 실행 및 예외 경계,수정 완료,context/tdd/001-invitation-and-host.md
+4,001,재검토,U+2800 비가시 문자로 글자 수 정책 우회,수정 완료,context/tdd/001-invitation-and-host.md
+5,001,재검토,이미 선점된 링크에 불필요한 PIN 해시 실행,수정 완료,context/tdd/001-invitation-and-host.md
+6,002,검토,시작일 변경 후 응답 마감 기본값 미갱신,수정 완료,context/fixes/002-promise-settings-review.md
+7,003,검토,정원 도달 시 로그인 폼과 선택 탭 불일치,수정 완료,context/fixes/003-participant-access-review.md
+8,007,검토,다른 탭 변경 후 응답 보존 안내와 실제 초기화 영향 불일치,수정 완료,context/fixes/007-rescheduling-review.md
+9,008,검토,참여자 조회 복구 후 실패 메시지 잔존,수정 완료,context/fixes/008-participant-management-review.md
+10,009,검토,열린 취소 완료 화면의 링크 만료 안내 미갱신,수정 완료,context/fixes/009-cancellation-review.md
+11,003,사용자 요청 보완,동일 PIN으로 변경 허용,수정 완료,context/fixes/003-same-pin-and-copy.md
+12,005,사용자 요청 보완,빈 히트맵 칸에 0 반복 표시,수정 완료,context/fixes/005-empty-heatmap.md

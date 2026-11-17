@@ -1,0 +1,276 @@
+{
+  "scope": {
+    "project": "/Users/Iris/Documents/GitHub/yaksok_hs",
+    "cutoff_inclusive_second": "2026-11-15T13:21:17+09:00",
+    "basis": "previous 009 development snapshot; no later UI or this audit"
+  },
+  "sessions": {
+    "main": 11,
+    "approval_review": 31
+  },
+  "unique_events": 2790,
+  "duplicates_removed": 12602,
+  "usage_record_unmatched": 1,
+  "totals": {
+    "input_tokens": 336601026,
+    "cached_input_tokens": 326705152,
+    "output_tokens": 1100560,
+    "reasoning_output_tokens": 238516,
+    "total_tokens": 337701586,
+    "uncached_input_tokens": 9895874,
+    "uncached_input_plus_output_tokens": 10996434,
+    "responses": 2790
+  },
+  "by_source": {
+    "approval_review": {
+      "total": {
+        "input_tokens": 50954432,
+        "cached_input_tokens": 47751424,
+        "output_tokens": 69456,
+        "reasoning_output_tokens": 16327,
+        "total_tokens": 51023888,
+        "uncached_input_tokens": 3203008,
+        "uncached_input_plus_output_tokens": 3272464,
+        "responses": 807
+      },
+      "categories": {
+        "other_or_unattributed": {
+          "input_tokens": 16441114,
+          "cached_input_tokens": 15473792,
+          "output_tokens": 24378,
+          "reasoning_output_tokens": 7395,
+          "total_tokens": 16465492,
+          "uncached_input_tokens": 967322,
+          "uncached_input_plus_output_tokens": 991700,
+          "responses": 254
+        },
+        "other_quality_checks": {
+          "input_tokens": 9603553,
+          "cached_input_tokens": 9291392,
+          "output_tokens": 11020,
+          "reasoning_output_tokens": 1588,
+          "total_tokens": 9614573,
+          "uncached_input_tokens": 312161,
+          "uncached_input_plus_output_tokens": 323181,
+          "responses": 154
+        },
+        "test_and_product_or_quality_mixed": {
+          "input_tokens": 496997,
+          "cached_input_tokens": 486784,
+          "output_tokens": 409,
+          "reasoning_output_tokens": 59,
+          "total_tokens": 497406,
+          "uncached_input_tokens": 10213,
+          "uncached_input_plus_output_tokens": 10622,
+          "responses": 5
+        },
+        "test_direct": {
+          "input_tokens": 24412768,
+          "cached_input_tokens": 22499456,
+          "output_tokens": 33649,
+          "reasoning_output_tokens": 7285,
+          "total_tokens": 24446417,
+          "uncached_input_tokens": 1913312,
+          "uncached_input_plus_output_tokens": 1946961,
+          "responses": 394
+        }
+      }
+    },
+    "main": {
+      "total": {
+        "input_tokens": 285646594,
+        "cached_input_tokens": 278953728,
+        "output_tokens": 1031104,
+        "reasoning_output_tokens": 222189,
+        "total_tokens": 286677698,
+        "uncached_input_tokens": 6692866,
+        "uncached_input_plus_output_tokens": 7723970,
+        "responses": 1983
+      },
+      "categories": {
+        "other_or_unattributed": {
+          "input_tokens": 85740668,
+          "cached_input_tokens": 82086144,
+          "output_tokens": 242326,
+          "reasoning_output_tokens": 56925,
+          "total_tokens": 85982994,
+          "uncached_input_tokens": 3654524,
+          "uncached_input_plus_output_tokens": 3896850,
+          "responses": 584
+        },
+        "other_quality_checks": {
+          "input_tokens": 13779570,
+          "cached_input_tokens": 13686144,
+          "output_tokens": 32266,
+          "reasoning_output_tokens": 8417,
+          "total_tokens": 13811836,
+          "uncached_input_tokens": 93426,
+          "uncached_input_plus_output_tokens": 125692,
+          "responses": 93
+        },
+        "tdd_documentation": {
+          "input_tokens": 26037488,
+          "cached_input_tokens": 25868544,
+          "output_tokens": 125730,
+          "reasoning_output_tokens": 11191,
+          "total_tokens": 26163218,
+          "uncached_input_tokens": 168944,
+          "uncached_input_plus_output_tokens": 294674,
+          "responses": 175
+        },
+        "test_and_product_or_quality_mixed": {
+          "input_tokens": 118855760,
+          "cached_input_tokens": 116361600,
+          "output_tokens": 532592,
+          "reasoning_output_tokens": 116312,
+          "total_tokens": 119388352,
+          "uncached_input_tokens": 2494160,
+          "uncached_input_plus_output_tokens": 3026752,
+          "responses": 863
+        },
+        "test_direct": {
+          "input_tokens": 41233108,
+          "cached_input_tokens": 40951296,
+          "output_tokens": 98190,
+          "reasoning_output_tokens": 29344,
+          "total_tokens": 41331298,
+          "uncached_input_tokens": 281812,
+          "uncached_input_plus_output_tokens": 380002,
+          "responses": 268
+        }
+      }
+    }
+  },
+  "by_category": {
+    "other_or_unattributed": {
+      "input_tokens": 102181782,
+      "cached_input_tokens": 97559936,
+      "output_tokens": 266704,
+      "reasoning_output_tokens": 64320,
+      "total_tokens": 102448486,
+      "uncached_input_tokens": 4621846,
+      "uncached_input_plus_output_tokens": 4888550,
+      "responses": 838,
+      "percent_total": 30.337
+    },
+    "other_quality_checks": {
+      "input_tokens": 23383123,
+      "cached_input_tokens": 22977536,
+      "output_tokens": 43286,
+      "reasoning_output_tokens": 10005,
+      "total_tokens": 23426409,
+      "uncached_input_tokens": 405587,
+      "uncached_input_plus_output_tokens": 448873,
+      "responses": 247,
+      "percent_total": 6.937
+    },
+    "tdd_documentation": {
+      "input_tokens": 26037488,
+      "cached_input_tokens": 25868544,
+      "output_tokens": 125730,
+      "reasoning_output_tokens": 11191,
+      "total_tokens": 26163218,
+      "uncached_input_tokens": 168944,
+      "uncached_input_plus_output_tokens": 294674,
+      "responses": 175,
+      "percent_total": 7.7474
+    },
+    "test_and_product_or_quality_mixed": {
+      "input_tokens": 119352757,
+      "cached_input_tokens": 116848384,
+      "output_tokens": 533001,
+      "reasoning_output_tokens": 116371,
+      "total_tokens": 119885758,
+      "uncached_input_tokens": 2504373,
+      "uncached_input_plus_output_tokens": 3037374,
+      "responses": 868,
+      "percent_total": 35.5005
+    },
+    "test_direct": {
+      "input_tokens": 65645876,
+      "cached_input_tokens": 63450752,
+      "output_tokens": 131839,
+      "reasoning_output_tokens": 36629,
+      "total_tokens": 65777715,
+      "uncached_input_tokens": 2195124,
+      "uncached_input_plus_output_tokens": 2326963,
+      "responses": 662,
+      "percent_total": 19.4781
+    }
+  },
+  "method": {
+    "unit": "unique model response usage event; full prompt context included",
+    "dedupe": "main cumulative usage tuple globally; approval review tuple within each session",
+    "attribution": "outgoing test file edits/reads/test commands plus the immediately following response consuming those tool results; mixed product and quality-check actions separate",
+    "approval_review": "exact planned command only; inherited conversation never used to classify",
+    "limitations": [
+      "Testing includes regression and tests added after implementation; not a pure TDD-only figure.",
+      "Cannot infer incremental overhead versus a no-TDD run.",
+      "An attributed response includes all context, not just test code tokens.",
+      "A RED/GREEN phrase alone is not counted as test activity."
+    ]
+  },
+  "original_snapshot_reconciliation": {
+    "input_tokens": {
+      "expected": 336601026,
+      "actual": 336601026,
+      "matches": true
+    },
+    "cached_input_tokens": {
+      "expected": 326705152,
+      "actual": 326705152,
+      "matches": true
+    },
+    "output_tokens": {
+      "expected": 1100560,
+      "actual": 1100560,
+      "matches": true
+    },
+    "total_tokens": {
+      "expected": 337701586,
+      "actual": 337701586,
+      "matches": true
+    },
+    "uncached_input_tokens": {
+      "expected": 9895874,
+      "actual": 9895874,
+      "matches": true
+    },
+    "uncached_input_plus_output_tokens": {
+      "expected": 10996434,
+      "actual": 10996434,
+      "matches": true
+    }
+  },
+  "audit_date": "2026-11-17",
+  "limitations_ko": [
+    "TDD만으로 추가 발생한 토큰은 산출할 수 없다. 테스트 없는 동일 작업의 비교 실행이 없다.",
+    "직접 관련도 응답 전체 입력·출력에 붙인 분류다. 프롬프트 전체 문맥이 포함되므로 테스트 코드 자체 토큰 수가 아니다.",
+    "TDD, 버그 재현, 사후 테스트, 회귀 테스트를 함께 포함한다. RED/GREEN 단어만으로 테스트 작업으로 분류하지 않았다.",
+    "제품 코드 읽기·수정 또는 린트·타입·빌드가 같은 응답/직전 도구 결과에 섞이면 혼합으로 분리한다.",
+    "검증 기록 분류에는 다른 문서 수정·린트·타입·빌드가 섞인 응답도 포함한다. 순수 문서 작성 비용으로 볼 수 없다.",
+    "자동 승인 검토는 실제 승인 요청 명령으로만 분류한다. 상속된 전체 대화의 테스트 언급은 사용하지 않는다.",
+    "대기 프로세스의 시작 배치에 여러 작업이 있으면 배치 전체 표시를 계승한다. 결과 확인은 바로 다음 모델 응답까지만 연결한다.",
+    "스크립트가 인식하지 못한 동적 명령·임시 검사·간접 구현 추론은 기타/미분류에 남을 수 있다.",
+    "API 과금 내역이 아니며 자동 승인 검토 토큰의 청구 여부를 확인한 것이 아니다.",
+    "009 완료 커밋 시점의 기존 총량에 맞춘 집계로 11월 15일 이후 UI·배포 작업과 이번 분석은 제외한다."
+  ],
+  "checks": {
+    "all_token_fields_reconcile_with_original": true,
+    "each_total_equals_input_plus_output": true,
+    "cache_never_exceeds_input": true,
+    "test_direct_has_no_detected_product_or_quality_flags": true,
+    "unmatched_usage_event_count": 1,
+    "unmatched_usage_event_tokens": 38257,
+    "unmatched_usage_event_category": "other_or_unattributed",
+    "documentation_also_containing_product_or_quality_responses": 52,
+    "documentation_also_containing_product_or_quality_tokens": 7231949
+  },
+  "test_related_including_mixed_and_documentation": {
+    "total_tokens": 211826691,
+    "cached_input_tokens": 206167680,
+    "uncached_input_plus_output_tokens": 5659011,
+    "responses": 1705,
+    "percent_total": 62.726
+  }
+}

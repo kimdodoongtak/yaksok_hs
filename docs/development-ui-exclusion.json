@@ -1,0 +1,179 @@
+{
+  "audit_date": "2026-11-17",
+  "cutoff": "2026-11-15T13:21:17+09:00",
+  "cutoff_commit": "e804d37",
+  "definition": "필수 화면 구현은 유지. 구현 후 시각·배치·문구·입력 컨트롤·표현 방식의 반복 개선 및 해당 토론/승인 턴만 제외. 기능 추가·정책 변경과 UI가 섞인 턴은 유지.",
+  "baseline": {
+    "tokens": {
+      "total_tokens": 337701586,
+      "input_tokens": 336601026,
+      "cached_input_tokens": 326705152,
+      "uncached_input_tokens": 9895874,
+      "output_tokens": 1100560,
+      "uncached_input_plus_output_tokens": 10996434
+    },
+    "main_completed_turn_duration_ms": 36747231,
+    "human_messages": 196,
+    "change_feedback_messages": 51
+  },
+  "excluded": {
+    "tokens": {
+      "total_tokens": 66370617,
+      "input_tokens": 66167104,
+      "cached_input_tokens": 63723648,
+      "uncached_input_tokens": 2443456,
+      "output_tokens": 203513,
+      "uncached_input_plus_output_tokens": 2646969
+    },
+    "main_completed_turn_duration_ms": 7403620,
+    "human_messages": 61,
+    "change_feedback_messages": 40,
+    "all_turns": 54,
+    "completed_turns": 51,
+    "main_tokens": 57285737,
+    "approval_review_tokens": 9084880,
+    "token_percent": 19.653629047510602,
+    "time_percent": 20.147422808537602
+  },
+  "remaining": {
+    "tokens": {
+      "total_tokens": 271330969,
+      "input_tokens": 270433922,
+      "cached_input_tokens": 262981504,
+      "uncached_input_tokens": 7452418,
+      "output_tokens": 897047,
+      "uncached_input_plus_output_tokens": 8349465
+    },
+    "main_completed_turn_duration_ms": 29343611,
+    "human_messages": 135,
+    "change_feedback_messages": 11,
+    "completed_turns": 128
+  },
+  "excluded_feedback_message_indices": [
+    39,
+    40,
+    42,
+    44,
+    47,
+    48,
+    49,
+    50,
+    52,
+    53,
+    54,
+    55,
+    78,
+    79,
+    80,
+    81,
+    84,
+    102,
+    103,
+    104,
+    105,
+    106,
+    108,
+    117,
+    128,
+    129,
+    130,
+    132,
+    135,
+    138,
+    139,
+    140,
+    142,
+    153,
+    156,
+    157,
+    159,
+    160,
+    176,
+    178
+  ],
+  "excluded_related_message_indices": [
+    36,
+    41,
+    43,
+    45,
+    46,
+    51,
+    56,
+    82,
+    83,
+    95,
+    96,
+    107,
+    118,
+    136,
+    137,
+    141,
+    143,
+    144,
+    154,
+    158,
+    177
+  ],
+  "retained_function_or_mixed_feedback": [
+    {
+      "message_index": 37,
+      "summary": "설정 기본값·정원 입력·문구 변경"
+    },
+    {
+      "message_index": 73,
+      "summary": "동일 PIN 변경 차단·감성 문구 제거"
+    },
+    {
+      "message_index": 97,
+      "summary": "모바일 사이드바·시간 드래그 선택"
+    },
+    {
+      "message_index": 98,
+      "summary": "사이드바 달력 대신 참여자·시간 비교"
+    },
+    {
+      "message_index": 100,
+      "summary": "반복 입력 기능 제안"
+    },
+    {
+      "message_index": 101,
+      "summary": "시간표 축척·되돌리기·주 초기화"
+    },
+    {
+      "message_index": 109,
+      "summary": "복구 추가·편집 버튼 재배치·초기화 확인"
+    },
+    {
+      "message_index": 110,
+      "summary": "전체 초기화 지원 제안"
+    },
+    {
+      "message_index": 127,
+      "summary": "구현된 요일 반복을 주 반복으로 변경"
+    },
+    {
+      "message_index": 133,
+      "summary": "숫자 대신 색상·후보에만 라벨"
+    },
+    {
+      "message_index": 134,
+      "summary": "색상 범례·누르는 동안 선택자 표시"
+    }
+  ],
+  "method": [
+    "기존 사람 메시지 집계의 1~196번 인덱스를 사용. 한 턴에 포함된 모든 메시지가 UI 분류인지 확인하여 무관한 요청을 함께 제외하지 않음.",
+    "주 개발 응답은 turn_id, 자동 승인 검토 응답은 root_turn_id로 원래 개발 턴에 연결.",
+    "사용량 미대응 승인 이벤트 1개(38,257토큰)는 기존 집계대로 남겨두며 UI로 추정해 빼지 않음.",
+    "시간은 기존과 동일하게 task_complete.duration_ms 합계. 중단·미완료 턴은 원래 시간 집계에도 없음. 도구 실행·대기 포함이며 보조 승인 검토 시간을 더하지 않음.",
+    "UI 제외 대상 54개 턴 중 완료된 것은 51개. 중단된 3개 턴의 기록된 토큰은 제외하되 시간을 새로 추정하지 않음."
+  ],
+  "limitations": [
+    "UI 없는 개발을 새로 수행한 실험이 아니라 기존 로그에서 해당 턴을 제외한 사후 분류다.",
+    "기능을 구현하기 위해 처음 만든 필수 UI와 기능 개발/테스트는 남아 있다.",
+    "이후 기능 턴이 과거 UI 대화를 읽은 문맥 토큰은 분리하지 못해 그대로 남는다. 실제 UI 없는 개발 비용/시간 예측과 다르다.",
+    "UI에 딸린 테스트·검증·문서·승인 검토가 제외 턴에 들어가면 함께 빠진다. 앞서 TDD 관련 토큰과 별개 비용으로 더하거나 또 빼면 중복될 수 있다.",
+    "남은 수정 피드백 11개에도 기능 변경과 UI가 섞인 요청이 있어 순수 버그 11개라고 해석하지 않는다.",
+    "테스트 사례 수와 자동 압축 횟수는 이 분류만으로 반사실적 개수를 계산하지 않는다.",
+    "연성 쪽의 집계 범위·입력 PRD/디자인 확정 상태·시간 측정 방법이 같은지는 확인하지 않았다."
+  ]
+}

@@ -1,0 +1,587 @@
+{
+  "project": "yaksok_hs",
+  "audit_date": "2026-11-17",
+  "cutoff": "2026-11-15T13:21:17+09:00",
+  "cutoff_commit": "e804d37",
+  "tests": {
+    "unit": 23,
+    "postgres_integration": 90,
+    "chromium": 73,
+    "total": 186,
+    "meaning": "009 최종 전체 회귀 통과 사례 수; 반복 실행 횟수나 assertion 개수 아님",
+    "evidence": "context/tdd/009-cancellation.md:62"
+  },
+  "pull_requests": {
+    "observed_count": 0,
+    "meaning": "이번 작업의 PR 생성 기록 없음; main 직접 커밋·푸시",
+    "remote_reference_check": {
+      "command": "git ls-remote origin 'refs/pull/*/head'",
+      "exit_code": 0,
+      "stdout_lines": 0,
+      "checked_on": "2026-11-17"
+    }
+  },
+  "human_messages": {
+    "total": 196,
+    "ordinary_messages": 188,
+    "question_reply_messages": 8,
+    "raw_repeated_items": 1494,
+    "meaning": "UserMessage 이벤트를 client_id 우선, 없으면 turn_id+item.id로 중복 제거; 첨부 포함 한 전송=1개; 질문 답변 UI 응답 8개 포함; 시스템·승인 검토·요약 제외"
+  },
+  "change_requests": {
+    "count": 51,
+    "unit": "구현된 화면·동작에 대한 수정/개선 피드백 메시지",
+    "method": "196개 메시지를 문맥으로 수동 분류; UI 디자인·기능 보완·원복 포함; 한 메시지의 여러 요청은 1회",
+    "excluded": "초기 정책 확정·일반 질문·기능 단계 명령·단순 승인·샘플 데이터 생성·철회된 가로폭 지적",
+    "classification_note": "객관적 버그 개수가 아니며 제안/질문 경계에 판단이 들어감. 선택한 51개를 CSV에 명시. 117의 기본값 제안 뒤 118의 실행 동의는 중복 수정 내용으로 세지 않음. 84의 규격 맞추기는 앞선 일반 질문을 실제 수정 지시로 바꾼 것으로 포함.",
+    "evidence": "docs/development-change-requests.csv"
+  },
+  "compactions": {
+    "main_count": 20,
+    "unit": "compacted 이벤트를 compaction_response_id/window_id로 중복 제거",
+    "manual_compact_request_found": false,
+    "meaning": "주 대화에서 관찰된 압축 완료 횟수; 수동 /compact 요청 없음; 자동 승인 검토의 압축 제외",
+    "events": [
+      {
+        "timestamp": "2026-11-12T15:44:04.203Z",
+        "window_number": 1,
+        "window_id": "01a1d06e-2e68-7f21-b0e6-088be6c75d16",
+        "first_window_id": "01a1d03d-0fe2-72e0-9585-5f58dfd7fcc6",
+        "previous_window_id": "01a1d03d-0fe2-72e0-9585-5f58dfd7fcc6",
+        "compaction_response_id": "resp_0cd123f0083d05a9016af5de23728487d095c882185534259e",
+        "keys": [
+          "message",
+          "replacement_history",
+          "replacement_history_metadata",
+          "retained_context",
+          "window_number",
+          "first_window_id",
+          "previous_window_id",
+          "window_id",
+          "compaction_response_id",
+          "latest_token_usage_record",
+          "resume_metadata"
+        ],
+        "file": "rollout-2026-11-12T23-50-25-01a1d03d-0fe0-72c1-8830-3c9a3ca346a0.jsonl",
+        "line": 602
+      },
+      {
+        "timestamp": "2026-11-13T03:20:06.451Z",
+        "window_number": 2,
+        "window_id": "01a1d2eb-6c30-7852-b44a-fbcc6ace2736",
+        "first_window_id": "01a1d03d-0fe2-72e0-9585-5f58dfd7fcc6",
+        "previous_window_id": "01a1d06e-2e68-7f21-b0e6-088be6c75d16",
+        "compaction_response_id": "resp_0cd123f0083d05a9016af681aa4e3487d099cdfcd9072511cb",
+        "keys": [
+          "message",
+          "replacement_history",
+          "replacement_history_metadata",
+          "retained_context",
+          "window_number",
+          "first_window_id",
+          "previous_window_id",
+          "window_id",
+          "compaction_response_id",
+          "latest_token_usage_record",
+          "resume_metadata"
+        ],
+        "file": "rollout-2026-11-12T23-50-25-01a1d03d-0fe0-72c1-8830-3c9a3ca346a0.jsonl",
+        "line": 1113
+      },
+      {
+        "timestamp": "2026-11-13T03:53:17.557Z",
+        "window_number": 3,
+        "window_id": "01a1d309-cdf3-7170-80ee-c8eaa2660d22",
+        "first_window_id": "01a1d03d-0fe2-72e0-9585-5f58dfd7fcc6",
+        "previous_window_id": "01a1d2eb-6c30-7852-b44a-fbcc6ace2736",
+        "compaction_response_id": "resp_0cd123f0083d05a9016af689987b4887d0be33b78e0e9ae9e4",
+        "keys": [
+          "message",
+          "replacement_history",
+          "replacement_history_metadata",
+          "retained_context",
+          "window_number",
+          "first_window_id",
+          "previous_window_id",
+          "window_id",
+          "compaction_response_id",
+          "latest_token_usage_record",
+          "resume_metadata"
+        ],
+        "file": "rollout-2026-11-12T23-50-25-01a1d03d-0fe0-72c1-8830-3c9a3ca346a0.jsonl",
+        "line": 1565
+      },
+      {
+        "timestamp": "2026-11-13T13:24:19.603Z",
+        "window_number": 4,
+        "window_id": "01a1d514-9a10-7e00-85d6-d01ea921760d",
+        "first_window_id": "01a1d03d-0fe2-72e0-9585-5f58dfd7fcc6",
+        "previous_window_id": "01a1d309-cdf3-7170-80ee-c8eaa2660d22",
+        "compaction_response_id": "resp_0cd123f0083d05a9016af70f590ea487d0bf74c8e269ccb1c6",
+        "keys": [
+          "message",
+          "replacement_history",
+          "replacement_history_metadata",
+          "retained_context",
+          "window_number",
+          "first_window_id",
+          "previous_window_id",
+          "window_id",
+          "compaction_response_id",
+          "latest_token_usage_record",
+          "resume_metadata"
+        ],
+        "file": "rollout-2026-11-12T23-50-25-01a1d03d-0fe0-72c1-8830-3c9a3ca346a0.jsonl",
+        "line": 2159
+      },
+      {
+        "timestamp": "2026-11-13T14:20:28.376Z",
+        "window_number": 5,
+        "window_id": "01a1d548-0154-7cd0-a604-4d27c4b96e16",
+        "first_window_id": "01a1d03d-0fe2-72e0-9585-5f58dfd7fcc6",
+        "previous_window_id": "01a1d514-9a10-7e00-85d6-d01ea921760d",
+        "compaction_response_id": "resp_0cd123f0083d05a9016af71c53d89087d0a6c15d61fac788b6",
+        "keys": [
+          "message",
+          "replacement_history",
+          "replacement_history_metadata",
+          "retained_context",
+          "window_number",
+          "first_window_id",
+          "previous_window_id",
+          "window_id",
+          "compaction_response_id",
+          "latest_token_usage_record",
+          "resume_metadata"
+        ],
+        "file": "rollout-2026-11-12T23-50-25-01a1d03d-0fe0-72c1-8830-3c9a3ca346a0.jsonl",
+        "line": 2995
+      },
+      {
+        "timestamp": "2026-11-13T15:19:12.827Z",
+        "window_number": 6,
+        "window_id": "01a1d57d-c8b9-7251-ba27-4b20899a6b69",
+        "first_window_id": "01a1d03d-0fe2-72e0-9585-5f58dfd7fcc6",
+        "previous_window_id": "01a1d548-0154-7cd0-a604-4d27c4b96e16",
+        "compaction_response_id": "resp_0cd123f0083d05a9016af729fe8a1487d08a24331e9043de8e",
+        "keys": [
+          "message",
+          "replacement_history",
+          "replacement_history_metadata",
+          "retained_context",
+          "window_number",
+          "first_window_id",
+          "previous_window_id",
+          "window_id",
+          "compaction_response_id",
+          "latest_token_usage_record",
+          "resume_metadata"
+        ],
+        "file": "rollout-2026-11-13T23-54-31-01a1d567-2eed-7f63-bd1d-786d42cad2a4.jsonl",
+        "line": 3704
+      },
+      {
+        "timestamp": "2026-11-14T07:33:02.047Z",
+        "window_number": 7,
+        "window_id": "01a1d8f9-57da-7442-aa71-2e414ac82e2b",
+        "first_window_id": "01a1d03d-0fe2-72e0-9585-5f58dfd7fcc6",
+        "previous_window_id": "01a1d57d-c8b9-7251-ba27-4b20899a6b69",
+        "compaction_response_id": "resp_0cd123f0083d05a9016af80e41377087d0b7660a45ea10adf1",
+        "keys": [
+          "message",
+          "replacement_history",
+          "replacement_history_metadata",
+          "retained_context",
+          "window_number",
+          "first_window_id",
+          "previous_window_id",
+          "window_id",
+          "compaction_response_id",
+          "latest_token_usage_record",
+          "resume_metadata"
+        ],
+        "file": "rollout-2026-11-13T23-54-31-01a1d567-2eed-7f63-bd1d-786d42cad2a4.jsonl",
+        "line": 4240
+      },
+      {
+        "timestamp": "2026-11-14T08:38:00.331Z",
+        "window_number": 8,
+        "window_id": "01a1d934-d385-74b2-8b09-45d7091d181a",
+        "first_window_id": "01a1d03d-0fe2-72e0-9585-5f58dfd7fcc6",
+        "previous_window_id": "01a1d8f9-57da-7442-aa71-2e414ac82e2b",
+        "compaction_response_id": "resp_034b461b9b91ea2d016af81d77f99087d0b7bfa91cdea989d1",
+        "keys": [
+          "message",
+          "replacement_history",
+          "replacement_history_metadata",
+          "retained_context",
+          "window_number",
+          "first_window_id",
+          "previous_window_id",
+          "window_id",
+          "compaction_response_id",
+          "latest_token_usage_record",
+          "resume_metadata"
+        ],
+        "file": "rollout-2026-11-14T17-33-56-01a1d931-19f2-7473-8a3b-23666932bd25.jsonl",
+        "line": 4802
+      },
+      {
+        "timestamp": "2026-11-14T10:24:02.378Z",
+        "window_number": 9,
+        "window_id": "01a1d995-e73f-7211-a4af-35cdcc919b04",
+        "first_window_id": "01a1d03d-0fe2-72e0-9585-5f58dfd7fcc6",
+        "previous_window_id": "01a1d934-d385-74b2-8b09-45d7091d181a",
+        "compaction_response_id": "resp_034b461b9b91ea2d016af83643d5dc87d0be09aafa84ee556d",
+        "keys": [
+          "message",
+          "replacement_history",
+          "replacement_history_metadata",
+          "retained_context",
+          "window_number",
+          "first_window_id",
+          "previous_window_id",
+          "window_id",
+          "compaction_response_id",
+          "latest_token_usage_record",
+          "resume_metadata"
+        ],
+        "file": "rollout-2026-11-14T17-33-56-01a1d931-19f2-7473-8a3b-23666932bd25.jsonl",
+        "line": 5543
+      },
+      {
+        "timestamp": "2026-11-14T13:03:38.806Z",
+        "window_number": 10,
+        "window_id": "01a1da28-0731-7933-b2dc-d640e57fb714",
+        "first_window_id": "01a1d03d-0fe2-72e0-9585-5f58dfd7fcc6",
+        "previous_window_id": "01a1d995-e73f-7211-a4af-35cdcc919b04",
+        "compaction_response_id": "resp_0e7d5b511303be1e016af85bb92da887d0bed93bb9643d8b23",
+        "keys": [
+          "message",
+          "replacement_history",
+          "replacement_history_metadata",
+          "retained_context",
+          "window_number",
+          "first_window_id",
+          "previous_window_id",
+          "window_id",
+          "compaction_response_id",
+          "latest_token_usage_record",
+          "resume_metadata"
+        ],
+        "file": "rollout-2026-11-14T21-39-18-01a1da11-bd9a-7373-9cba-e24eb180ad81.jsonl",
+        "line": 6116
+      },
+      {
+        "timestamp": "2026-11-14T13:56:27.986Z",
+        "window_number": 11,
+        "window_id": "01a1da58-62cd-7ce1-8016-48c4111a5e48",
+        "first_window_id": "01a1d03d-0fe2-72e0-9585-5f58dfd7fcc6",
+        "previous_window_id": "01a1da28-0731-7933-b2dc-d640e57fb714",
+        "compaction_response_id": "resp_0e7d5b511303be1e016af868211d4087d095f7b5100fc72c7e",
+        "keys": [
+          "message",
+          "replacement_history",
+          "replacement_history_metadata",
+          "retained_context",
+          "window_number",
+          "first_window_id",
+          "previous_window_id",
+          "window_id",
+          "compaction_response_id",
+          "latest_token_usage_record",
+          "resume_metadata"
+        ],
+        "file": "rollout-2026-11-14T21-39-18-01a1da11-bd9a-7373-9cba-e24eb180ad81.jsonl",
+        "line": 6912
+      },
+      {
+        "timestamp": "2026-11-14T14:48:32.961Z",
+        "window_number": 12,
+        "window_id": "01a1da88-11b8-7f80-80bd-3ae51c8658d3",
+        "first_window_id": "01a1d03d-0fe2-72e0-9585-5f58dfd7fcc6",
+        "previous_window_id": "01a1da58-62cd-7ce1-8016-48c4111a5e48",
+        "compaction_response_id": "resp_0ec89203a73195d8016af874130bb487d0abd4f2c6222803e1",
+        "keys": [
+          "message",
+          "replacement_history",
+          "replacement_history_metadata",
+          "retained_context",
+          "window_number",
+          "first_window_id",
+          "previous_window_id",
+          "window_id",
+          "compaction_response_id",
+          "latest_token_usage_record",
+          "resume_metadata"
+        ],
+        "file": "rollout-2026-11-14T23-18-44-01a1da6c-c596-7503-8f1b-d74a89a336a8.jsonl",
+        "line": 7551
+      },
+      {
+        "timestamp": "2026-11-14T15:39:59.370Z",
+        "window_number": 13,
+        "window_id": "01a1dab7-2a01-7623-9d7b-368111a249e1",
+        "first_window_id": "01a1d03d-0fe2-72e0-9585-5f58dfd7fcc6",
+        "previous_window_id": "01a1da88-11b8-7f80-80bd-3ae51c8658d3",
+        "compaction_response_id": "resp_05515ee800383e7d016af88073984887d0b3adf99bc3adb5e7",
+        "keys": [
+          "message",
+          "replacement_history",
+          "replacement_history_metadata",
+          "retained_context",
+          "window_number",
+          "first_window_id",
+          "previous_window_id",
+          "window_id",
+          "compaction_response_id",
+          "latest_token_usage_record",
+          "resume_metadata"
+        ],
+        "file": "rollout-2026-11-15T00-14-00-01a1da9f-5f75-7791-b52f-ffe69cd673ae.jsonl",
+        "line": 8194
+      },
+      {
+        "timestamp": "2026-11-14T16:16:31.450Z",
+        "window_number": 14,
+        "window_id": "01a1dad8-9cd4-7190-8777-2a6772a6525f",
+        "first_window_id": "01a1d03d-0fe2-72e0-9585-5f58dfd7fcc6",
+        "previous_window_id": "01a1dab7-2a01-7623-9d7b-368111a249e1",
+        "compaction_response_id": "resp_08fbfaa249c326ef016af888d0a1cc87d0badb69d7a648ce21",
+        "keys": [
+          "message",
+          "replacement_history",
+          "replacement_history_metadata",
+          "retained_context",
+          "mcp_resource_origins",
+          "window_number",
+          "first_window_id",
+          "previous_window_id",
+          "window_id",
+          "compaction_response_id",
+          "latest_token_usage_record",
+          "resume_metadata"
+        ],
+        "file": "rollout-2026-11-15T01-10-11-01a1dad2-ce91-7072-bd1a-17f092ac9009.jsonl",
+        "line": 8870
+      },
+      {
+        "timestamp": "2026-11-14T17:08:59.107Z",
+        "window_number": 15,
+        "window_id": "01a1db08-a44d-7153-a3cc-8a04a972fb3d",
+        "first_window_id": "01a1d03d-0fe2-72e0-9585-5f58dfd7fcc6",
+        "previous_window_id": "01a1dad8-9cd4-7190-8777-2a6772a6525f",
+        "compaction_response_id": "resp_0c7dbc43746d0630016af8953b545087d09862b565008fa91a",
+        "keys": [
+          "message",
+          "replacement_history",
+          "replacement_history_metadata",
+          "retained_context",
+          "mcp_resource_origins",
+          "window_number",
+          "first_window_id",
+          "previous_window_id",
+          "window_id",
+          "compaction_response_id",
+          "latest_token_usage_record",
+          "resume_metadata"
+        ],
+        "file": "rollout-2026-11-15T02-06-04-01a1db05-f9d7-7520-8965-20601567797b.jsonl",
+        "line": 9444
+      },
+      {
+        "timestamp": "2026-11-14T17:41:16.419Z",
+        "window_number": 16,
+        "window_id": "01a1db26-33f8-7533-894a-886810e27712",
+        "first_window_id": "01a1d03d-0fe2-72e0-9585-5f58dfd7fcc6",
+        "previous_window_id": "01a1db08-a44d-7153-a3cc-8a04a972fb3d",
+        "compaction_response_id": "resp_0867c65e737e087b016af89cc4131887d09cb23ae67ece8f56",
+        "keys": [
+          "message",
+          "replacement_history",
+          "replacement_history_metadata",
+          "retained_context",
+          "mcp_resource_origins",
+          "window_number",
+          "first_window_id",
+          "previous_window_id",
+          "window_id",
+          "compaction_response_id",
+          "latest_token_usage_record",
+          "resume_metadata"
+        ],
+        "file": "rollout-2026-11-15T02-37-04-01a1db22-5ad4-78b3-97fb-41a0e3b39a08.jsonl",
+        "line": 9959
+      },
+      {
+        "timestamp": "2026-11-14T18:19:12.178Z",
+        "window_number": 17,
+        "window_id": "01a1db48-eda4-7753-b544-29a3a20f9b4d",
+        "first_window_id": "01a1d03d-0fe2-72e0-9585-5f58dfd7fcc6",
+        "previous_window_id": "01a1db26-33f8-7533-894a-886810e27712",
+        "compaction_response_id": "resp_0867c65e737e087b016af8a5cf769c87d099133f5c90e89381",
+        "keys": [
+          "message",
+          "replacement_history",
+          "replacement_history_metadata",
+          "retained_context",
+          "mcp_resource_origins",
+          "window_number",
+          "first_window_id",
+          "previous_window_id",
+          "window_id",
+          "compaction_response_id",
+          "latest_token_usage_record",
+          "resume_metadata"
+        ],
+        "file": "rollout-2026-11-15T02-37-04-01a1db22-5ad4-78b3-97fb-41a0e3b39a08.jsonl",
+        "line": 10555
+      },
+      {
+        "timestamp": "2026-11-14T18:49:04.646Z",
+        "window_number": 18,
+        "window_id": "01a1db64-477d-7cf3-9e10-b515e08339e0",
+        "first_window_id": "01a1d03d-0fe2-72e0-9585-5f58dfd7fcc6",
+        "previous_window_id": "01a1db48-eda4-7753-b544-29a3a20f9b4d",
+        "compaction_response_id": "resp_033a064db543a41f016af8acb2e97887d09ae0cceb7f1f02fb",
+        "keys": [
+          "message",
+          "replacement_history",
+          "replacement_history_metadata",
+          "retained_context",
+          "mcp_resource_origins",
+          "window_number",
+          "first_window_id",
+          "previous_window_id",
+          "window_id",
+          "compaction_response_id",
+          "latest_token_usage_record",
+          "resume_metadata"
+        ],
+        "file": "rollout-2026-11-15T03-46-54-01a1db62-4952-7541-b796-4880e34f37b5.jsonl",
+        "line": 11069
+      },
+      {
+        "timestamp": "2026-11-14T19:20:15.746Z",
+        "window_number": 19,
+        "window_id": "01a1db80-d47a-7b90-bc7d-69fb50aeb4fa",
+        "first_window_id": "01a1d03d-0fe2-72e0-9585-5f58dfd7fcc6",
+        "previous_window_id": "01a1db64-477d-7cf3-9e10-b515e08339e0",
+        "compaction_response_id": "resp_033a064db543a41f016af8b3fd0edc87d0834ad0ab32e0d917",
+        "keys": [
+          "message",
+          "replacement_history",
+          "replacement_history_metadata",
+          "retained_context",
+          "mcp_resource_origins",
+          "window_number",
+          "first_window_id",
+          "previous_window_id",
+          "window_id",
+          "compaction_response_id",
+          "latest_token_usage_record",
+          "resume_metadata"
+        ],
+        "file": "rollout-2026-11-15T03-46-54-01a1db62-4952-7541-b796-4880e34f37b5.jsonl",
+        "line": 11652
+      },
+      {
+        "timestamp": "2026-11-15T04:21:02.650Z",
+        "window_number": 20,
+        "window_id": "01a1dd6f-ee2e-7390-9277-d286a7187e95",
+        "first_window_id": "01a1d03d-0fe2-72e0-9585-5f58dfd7fcc6",
+        "previous_window_id": "01a1db80-d47a-7b90-bc7d-69fb50aeb4fa",
+        "compaction_response_id": "resp_033a064db543a41f016af932c1f98887d08fe1f69ab25ebdc5",
+        "keys": [
+          "message",
+          "replacement_history",
+          "replacement_history_metadata",
+          "retained_context",
+          "mcp_resource_origins",
+          "window_number",
+          "first_window_id",
+          "previous_window_id",
+          "window_id",
+          "compaction_response_id",
+          "latest_token_usage_record",
+          "resume_metadata"
+        ],
+        "file": "rollout-2026-11-15T03-46-54-01a1db62-4952-7541-b796-4880e34f37b5.jsonl",
+        "line": 12140
+      }
+    ]
+  },
+  "tdd_tickets": {
+    "documented_red_green_count": 10,
+    "strict_all_behavior_compliance_count": null,
+    "strict_status": "모든 TDD 대상 코드 변경을 실행 로그 시간순으로 전수 대조하지 않아 확정 불가. 미확인을 미준수 또는 0개로 해석하지 않음.",
+    "definition": "001~009 및 004a. 000은 TDD 비대상, 010은 미구현, 011은 집계 시점 이후. 정적 UI·환경 구성 비대상 및 기존 구현 사후 회귀는 자동 위반으로 보지 않음.",
+    "tickets": [
+      {
+        "id": "001",
+        "evidence": "context/tdd/001-invitation-and-host.md",
+        "assessment": "실제 RED/GREEN 기록 확인",
+        "strict_all_behavior_audit": "미확인"
+      },
+      {
+        "id": "002",
+        "evidence": "context/tdd/002-promise-settings.md",
+        "assessment": "실제 RED/GREEN 기록 확인",
+        "strict_all_behavior_audit": "미확인"
+      },
+      {
+        "id": "003",
+        "evidence": "context/tdd/003-participant-access.md",
+        "assessment": "실제 RED/GREEN 기록 확인",
+        "strict_all_behavior_audit": "미확인"
+      },
+      {
+        "id": "004",
+        "evidence": "context/tdd/004-availability.md",
+        "assessment": "실제 RED/GREEN 기록 확인",
+        "strict_all_behavior_audit": "미확인"
+      },
+      {
+        "id": "004a",
+        "evidence": "context/tdd/004a-availability-repeat.md",
+        "assessment": "실제 RED/GREEN 기록 확인",
+        "strict_all_behavior_audit": "미확인"
+      },
+      {
+        "id": "005",
+        "evidence": "context/tdd/005-status-and-candidates.md",
+        "assessment": "실제 RED/GREEN 기록 확인",
+        "strict_all_behavior_audit": "미확인"
+      },
+      {
+        "id": "006",
+        "evidence": "context/tdd/006-confirmation.md",
+        "assessment": "실제 RED/GREEN 기록 확인",
+        "strict_all_behavior_audit": "미확인"
+      },
+      {
+        "id": "007",
+        "evidence": "context/tdd/007-rescheduling.md",
+        "assessment": "실제 RED/GREEN 기록 확인",
+        "strict_all_behavior_audit": "미확인"
+      },
+      {
+        "id": "008",
+        "evidence": "context/tdd/008-participant-management.md",
+        "assessment": "실제 RED/GREEN 기록 확인",
+        "strict_all_behavior_audit": "미확인"
+      },
+      {
+        "id": "009",
+        "evidence": "context/tdd/009-cancellation.md",
+        "assessment": "실제 RED/GREEN 기록 확인",
+        "strict_all_behavior_audit": "미확인"
+      }
+    ]
+  },
+  "limitations": [
+    "현재까지의 총계가 아니라 기존 토큰·버그 집계와 같은 009 완료 시점이다.",
+    "이번에는 제품 테스트를 새로 실행하지 않았고 해당 커밋의 과거 실행 근거를 확인했다.",
+    "원본 채팅·비공개 추론·원시 명령 출력은 보고서에 복사하지 않았다."
+  ]
+}
