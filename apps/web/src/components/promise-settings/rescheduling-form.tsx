@@ -46,7 +46,7 @@ export function ReschedulingForm({inviteToken,initial}:{inviteToken:string;initi
   finally{busy.current=false;setSaving(false);}
  }
  return <main className="app-entry"><section><JourneyHeader stage={mode === "reset" ? 1 : 2} href={`/p/${inviteToken}`}/>
-  <header className="flex items-center justify-between gap-4"><h1 className="text-lg font-semibold">{mode==="reset"?"설정 변경":"재조율"}</h1><Link href={`/p/${inviteToken}/availability`} className="text-sm text-[#e92520]">돌아가기</Link></header>
+  <header className="flex items-center justify-between gap-4"><h1 className="text-lg font-semibold">{mode==="reset"?"설정 변경":"재조율"}</h1><Link href={`/p/${inviteToken}/availability`} className="text-sm text-[var(--accent)]">돌아가기</Link></header>
   <SettingsForm inviteToken={inviteToken} serverNow={initial.serverNow} initialValues={values} submitSettings={stage}/>
   <dialog ref={dialog} className={styles.changeDialog} aria-labelledby="change-title" onCancel={event=>{event.preventDefault();if(!busy.current&&staged)finish();}}>
    <h2 id="change-title">변경 내용을 적용할까요?</h2>

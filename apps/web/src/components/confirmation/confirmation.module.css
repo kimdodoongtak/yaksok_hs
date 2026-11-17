@@ -3,7 +3,7 @@
 .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; font-size: 12px; color: var(--muted); }
 .header a { font-size: 14px; font-weight: 700; color: var(--accent); }
 .ticket { width: min(100%, 320px); margin: 0 auto; animation: ticketImpact 280ms 470ms ease-out; }
-.coverShadow { position: relative; z-index: 1; filter: drop-shadow(0 5px 5px #18191620); transform: translate(-2px,0) rotate(-2deg); transform-origin: center bottom; }
+.coverShadow { position: relative; z-index: 1; filter: drop-shadow(0 5px 5px #24304720); transform: translate(-2px,0) rotate(-2deg); transform-origin: center bottom; }
 .ticketCover { position: relative; height: 174px; overflow: hidden; background: #344eaa; clip-path: polygon(0 0,100% 0,100% 100%,76% 100%,60% 90%,45% 100%,35% 96%,22% 100%,0 100%); }
 .coverPhoto { object-fit: cover; object-position: center; }
 .coverShade { position: absolute; inset: 0; background: linear-gradient(90deg,#10203738,transparent 75%),linear-gradient(0deg,#15243585,transparent 70%); }
@@ -11,7 +11,7 @@
 .coverBrand { position: absolute; top: 22px; left: 24px; color: white; text-shadow: 0 1px 4px #10203755; font-size: 10px; letter-spacing: .25em; font-weight: 600; }
 .coverTitle { position: absolute; left: 24px; bottom: 30px; color: white; text-shadow: 0 1px 6px #10203755; }
 .ticket h1 { font-size: 27px; font-weight: 600; line-height: 1.3; letter-spacing: .025em; }
-.paperShadow { position: relative; margin-top: 8px; filter: drop-shadow(0 8px 9px #18191612); }
+.paperShadow { position: relative; margin-top: 8px; filter: drop-shadow(0 8px 9px #24304712); }
 .paper { position: relative; background: #fffefb; clip-path: polygon(0 17px,22% 17px,35% 10px,45% 17px,60% 0,76% 17px,100% 17px,100% 100%,0 100%); }
 .paper::after { opacity: .1; }
 .ticketDetails { padding: 33px 25px 19px; }
@@ -42,7 +42,7 @@
 .attendees h2 span { color: var(--accent); font-weight: 600; }
 .attendees ul { display: flex; flex-wrap: wrap; gap: 6px 0; margin-top: 10px; }
 .attendees li { font-size: 13px; font-weight: 500; overflow-wrap: anywhere; max-width: 100%; line-height: 1.7; }
-.attendees li:not(:last-child)::after { content: "·"; padding: 0 8px; color: #938e83; }
+.attendees li:not(:last-child)::after { content: "·"; padding: 0 8px; color: #8491a7; }
 .attendees p,.help { font-size: 11px; line-height: 1.7; color: var(--muted); }
 .ticketStub { position: relative; display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 17px 25px 18px; border-top: 1px dashed var(--line); color: var(--ink); }
 .ticketStub::before,.ticketStub::after { content: ""; position: absolute; top: -7px; width: 12px; height: 12px; border-radius: 50%; background: #eeefed; }
@@ -50,7 +50,7 @@
 .ticketStub > span:first-child { font-size: 10px; font-weight: 600; }
 .ticketStub > svg { width: 164px; max-width: 100%; height: 24px; }
 .ticketStub > span:last-child { font-size: 7px; letter-spacing: .22em; color: var(--muted); }
-.primary { display: block; width: min(100%,320px); min-height: 46px; padding: 12px; margin: 23px auto 0; background: var(--accent); color: white; font-size: 14px; font-weight: 600; border-radius: 9px; cursor: pointer; box-shadow: 0 3px 8px #e9252015; }
+.primary { display: block; width: min(100%,320px); min-height: 46px; padding: 12px; margin: 23px auto 0; background: var(--accent); color: white; font-size: 14px; font-weight: 600; border-radius: 9px; cursor: pointer; box-shadow: 0 3px 8px #4261df15; }
 .help { margin-top: 10px; text-align: center; word-break: keep-all; }
 @media (max-width: 359px) { .page { padding: 20px 20px 24px; }.ticketDetails { padding-left: 22px; padding-right: 22px; }.attendees { margin-inline: 22px; }.ticketCover { height: 155px; } }
 .notice button { min-height: 44px; color: var(--accent); font-weight: 600; cursor: pointer; }
@@ -58,7 +58,7 @@
 .manual input { width: 100%; min-width: 0; margin-top: 8px; padding: 8px; border: 1px solid #cbd5e1; border-radius: 5px; background: white; font-size: 13px; }
 .back { display: block; padding: 16px; text-align: center; font-size: 13px; color: var(--muted); }
 .dialog { width: min(380px,calc(100vw - 32px)); max-height: calc(100dvh - 32px); margin: auto; padding: 24px; border: 1px solid var(--line); border-radius: 14px; color: var(--ink); background: white; }
-.dialog::backdrop { background: #18191666; }
+.dialog::backdrop { background: #24304766; }
 .dialog h2 { font-size: 18px; font-weight: 700; }
 .summary { margin: 20px 0; padding: 16px; border-radius: 8px; background: var(--paper); display: grid; gap: 6px; font-size: 14px; }
 .summary strong { font-size: 20px; font-variant-numeric: tabular-nums; }
@@ -72,7 +72,7 @@
 
 .canvas { background: var(--paper); background-image: none; }
 .page { width: min(100%,440px); padding: 16px 20px 28px; color: var(--ink); }
-.ticket { width: 100%; border-radius: 18px; overflow: hidden; box-shadow: 0 5px 0 #18191605; background: white; }
+.ticket { width: 100%; border-radius: 18px; overflow: hidden; box-shadow: 0 5px 0 #24304705; background: white; }
 .coverShadow { transform: none; filter: none; }
 .ticketCover { height: 190px; background: var(--subtle); clip-path: none; }
 .coverBrand { left: 20px; top: 18px; font-size: 9px; letter-spacing: .12em; }
@@ -99,6 +99,8 @@
 .ticketStub > span:last-child { font-size: 8px; line-height: 1.5; letter-spacing: .06em; }
 .primary { width: 100%; min-height: 48px; border-radius: 100px; background: var(--accent); box-shadow: none; }
 .back { padding: 12px; }
+.ticket { border: 1px solid var(--line); border-radius: 12px; }
+.primary { border-radius: 8px; }
 .dialog { border: 0; border-radius: 24px; padding: 24px; }
 .dialog h2 { font-size: 23px; }
 .summary { overflow: hidden; background: var(--paper); border-radius: 16px; padding: 0 16px 18px; margin: 24px 0 18px; gap: 8px; }

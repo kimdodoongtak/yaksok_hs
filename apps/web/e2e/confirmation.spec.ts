@@ -140,7 +140,7 @@ test("마감된 약속은 후보 화면으로 열리고 응답 시간표와 왕�
   await page.getByRole("link",{name:"응답 시간표 보기",exact:true}).click();
   await expect(page).toHaveURL(`${f.path}?view=responses`);
   await expect(page.getByLabel("주별 가능 시간",{exact:true})).toBeVisible();
-  await expect(page.getByRole("button",{name:"선택 제출",exact:true})).toBeDisabled();
+  await expect(page.getByRole("button",{name:"제출 완료",exact:true})).toBeDisabled();
   const refreshed=page.waitForResponse(response=>response.url().endsWith("/availability/state"));
   await page.evaluate(()=>window.dispatchEvent(new Event("focus")));await refreshed;
   await expect(page).toHaveURL(`${f.path}?view=responses`);

@@ -74,7 +74,7 @@ export function LiveInvitation({
       )}
       {(view.state === "available" || view.state === "draft-expired") && (
         <>
-          <p className="mb-3 text-xs font-semibold text-[#e92520]">STEP 1 · 방장 등록</p>
+          <p className="mb-3 text-xs font-semibold text-[var(--accent)]">STEP 1 · 방장 등록</p>
           <h1 className="text-2xl font-bold tracking-tight">
             {view.state === "available"
               ? "방장 등록"
@@ -90,7 +90,7 @@ export function LiveInvitation({
       )}
       {view.state === "host" && (
         <>
-          <h1 className="text-xl font-bold text-[#181916]">약속 설정</h1>
+          <h1 className="text-xl font-bold text-[var(--ink)]">약속 설정</h1>
           <p className="mt-1 text-xs text-slate-500">{view.nickname}님, 약속을 설정해 주세요.</p>
           {view.warning && (
             <p

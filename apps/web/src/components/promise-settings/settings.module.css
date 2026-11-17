@@ -23,7 +23,7 @@
 .timeSection { padding: 12px 0; margin-bottom: 14px; border-bottom: 1px solid var(--settings-border); }
 .review { margin-top: 20px; padding: 16px; border-radius: 8px; background: var(--settings-pale); font-size: 14px; line-height: 1.8; }
 .ticketSection { margin-top: 28px; }
-.ticket { --ticket-stub-width: 52px; position: relative; display: grid; grid-template-columns: minmax(0, 1fr) var(--ticket-stub-width); overflow: hidden; background: #fffdf8; color: var(--ink); border: 1px solid var(--line); border-radius: 4px; box-shadow: 0 3px 8px #18191608; }
+.ticket { --ticket-stub-width: 52px; position: relative; display: grid; grid-template-columns: minmax(0, 1fr) var(--ticket-stub-width); overflow: hidden; background: #fffdf8; color: var(--ink); border: 1px solid var(--line); border-radius: 4px; box-shadow: 0 3px 8px #24304708; }
 .ticket::before, .ticket::after { content: ""; position: absolute; z-index: 1; right: calc(var(--ticket-stub-width) - 9px); width: 18px; height: 18px; border-radius: 50%; background: var(--paper); }
 .ticket::before { top: -10px; }
 .ticket::after { bottom: -10px; }
@@ -99,8 +99,8 @@
 .durationBox > .timeArrows { padding-top: 2px; }
 .flipDisplay { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; min-width: 0; }
 .flipUnit { min-width: 0; text-align: center; }
-.flipFace { position: relative; display: grid; place-items: center; height: 64px; border: 1px solid var(--settings-border); border-radius: 8px; background: linear-gradient(var(--paper) 50%, #fff 50%); box-shadow: 0 2px 3px #1819160a; font-size: clamp(36px, 10vw, 48px); line-height: 1; font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: -.04em; }
-.flipFace::after { content: ""; position: absolute; top: 50%; left: 0; right: 0; height: 1px; background: #ddd8cd99; }
+.flipFace { position: relative; display: grid; place-items: center; height: 64px; border: 1px solid var(--settings-border); border-radius: 8px; background: linear-gradient(var(--paper) 50%, #fff 50%); box-shadow: 0 2px 3px #2430470a; font-size: clamp(36px, 10vw, 48px); line-height: 1; font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: -.04em; }
+.flipFace::after { content: ""; position: absolute; top: 50%; left: 0; right: 0; height: 1px; background: #dce3f199; }
 .flipCaption { display: block; margin-top: 8px; font-size: 12px; color: var(--settings-muted); }
 .timeBox[data-invalid="true"], .durationBox[data-invalid="true"] { border-color: #b91c1c; }
 
@@ -125,7 +125,7 @@
 .daySelected { background: var(--settings-accent); color: white; font-weight: 600; }
 .dayRange { background: var(--settings-pale); }
 .dayToday { border: 1px solid var(--settings-accent); }
-.dayDisabled { background: var(--paper); color: #938e83; }
+.dayDisabled { background: var(--paper); color: #8491a7; }
 .dayDefault:hover { background: var(--settings-pale); }
 
 .stepper {
@@ -162,22 +162,22 @@
 .dateSection { padding-bottom: 14px; border-bottom: 1px solid var(--settings-border); }
 .dateHeading { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 4px; }
 .calendarDialog { position: fixed; inset: 0; width: min(420px, calc(100vw - 24px)); max-height: calc(100dvh - 24px); margin: auto; padding: 16px; overflow-y: auto; border: 1px solid var(--settings-border); border-radius: 12px; background: white; color: var(--ink); }
-.calendarDialog::backdrop { background: #18191666; }
+.calendarDialog::backdrop { background: #24304766; }
 .dialogHeading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .calendarDialog .summaryValue { margin-top: 8px; font-size: 14px; }
 .calendarDialog .calendar { margin-top: 12px; }
 
-.changeDialog { --settings-accent:var(--accent); --settings-border:var(--line); margin:auto; width:min(420px,calc(100vw - 32px)); max-height:calc(100dvh - 48px); overflow:auto; border:1px solid var(--line); border-radius:16px; padding:24px; color:var(--ink); background:white; box-shadow:0 16px 48px #18191624; }
-.changeDialog::backdrop { background:#18191666; }
+.changeDialog { --settings-accent:var(--accent); --settings-border:var(--line); margin:auto; width:min(420px,calc(100vw - 32px)); max-height:calc(100dvh - 48px); overflow:auto; border:1px solid var(--line); border-radius:16px; padding:24px; color:var(--ink); background:white; box-shadow:0 16px 48px #24304724; }
+.changeDialog::backdrop { background:#24304766; }
 .changeDialog h2 { font-size:18px; font-weight:700; margin-bottom:16px; }
 .changeDialog p { font-size:14px; line-height:1.7; margin:8px 0; }
 .changeDialog [role="alert"] { color:#a32929; }
 .changeDialog a { text-decoration:underline; font-size:14px; }
 
-/* Red Ticket: settings keep the two-step input flow in a compact paper panel. */
+/* 2단계 설정 흐름과 간결한 패널 배치를 유지한다. */
 .form { margin-top: 20px; }
 .stepProgress { padding: 0 2px 12px; }
-.card { border: 0; border-radius: 20px; padding: 20px; box-shadow: 0 3px 0 #18191604; }
+.card { border: 0; border-radius: 20px; padding: 20px; box-shadow: 0 3px 0 #24304704; }
 .previous, .submit { min-height: 48px; border-radius: 100px; }
 .previous { background: transparent; border-color: var(--ink); }
 .input { background: var(--paper); border-color: var(--line); border-radius: 12px; }
@@ -193,7 +193,7 @@
 .stepperButton { border-radius: 50%; }
 .stepperInput { border: 0; border-radius: 50%; }
 .ticketSection { margin-top: 24px; }
-.ticket { display: block; border: 0; border-radius: 18px; background: white; color: var(--ink); box-shadow: 0 4px 0 #18191606; }
+.ticket { display: block; border: 0; border-radius: 18px; background: white; color: var(--ink); box-shadow: 0 4px 0 #24304706; }
 .ticketBody { padding: 0 20px; }
 .ticketHeader { margin-inline: -20px; padding: 14px 20px; background: var(--accent); color: white; }
 .ticketBadge { border: 0; background: white; color: var(--accent); border-radius: 100px; padding: 4px 10px; font-weight: 700; }
@@ -249,3 +249,7 @@
 .deadlinePresets button[aria-pressed="true"] { border-color: var(--accent); background: var(--accent); color: white; }
 .deadlinePresets button:disabled { opacity: .4; cursor: not-allowed; }
 .deadlineSummary { margin-top: 10px; color: var(--muted); font-size: 12px; line-height: 1.6; font-variant-numeric: tabular-nums; }
+.card, .ticket { border: 1px solid var(--line); border-radius: 12px; }
+.previous, .submit, .input, .dateRangeTrigger, .deadlinePresets button { border-radius: 8px; }
+.previous { background: white; border-color: var(--line); }
+.summaryValue { color: var(--accent); }

@@ -478,6 +478,9 @@ test("이번 주 반복은 미제출 시간을 복사하고 한 번에 되돌리
   await page.getByRole("button",{name:`${f.start} 09:30`,exact:true}).click();
   await page.getByRole("button",{name:`${f.start} 11:00`,exact:true}).click();
   await page.getByRole("button",{name:"1시간",exact:true}).click();
+  // 개발 도구 배지가 하단 제품 버튼을 가릴 때 실제 닫기 버튼으로 접는다.
+  const devBadge=page.getByRole("button",{name:"Collapse issues badge",exact:true});
+  if(await devBadge.isVisible()) await devBadge.click();
   await repeat.click();
   const dialog=page.getByRole("dialog",{name:"이번 주 반복",exact:true});
   await expect(dialog).toBeVisible();
@@ -566,6 +569,8 @@ test("이번 주 반복은 모바일에서 보고 있는 주를 기준으로 삼
     await db.participant.update({where:{id:f.member.id},data:{availabilityVersion:1,availabilitySubmittedAt:new Date()}});
     await page.goto(`http://127.0.0.1:3100${f.path}`);
     await page.getByRole("button",{name:"다음 주",exact:true}).tap();
+    const devBadge=page.getByRole("button",{name:"Collapse issues badge",exact:true});
+    if(await devBadge.isVisible()) await devBadge.tap();
     const repeat=page.getByRole("button",{name:"이번 주 반복",exact:true});await repeat.tap();
     const dialog=page.getByRole("dialog",{name:"이번 주 반복",exact:true});
     await expect(dialog.getByRole("combobox")).toHaveCount(0);

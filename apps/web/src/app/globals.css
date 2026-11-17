@@ -1,32 +1,33 @@
 @import "tailwindcss";
 
 :root {
-  --paper: #f4f1ea;
+  --paper: #f5f6f8;
   --surface: #ffffff;
-  --ink: #181916;
-  --muted: #6f6c64;
-  --line: #ddd8cd;
-  --subtle: #ebe7de;
-  --accent: #e92520;
-  --accent-hover: #cc201b;
-  --soft: #fce4e0;
+  --ink: #243047;
+  --muted: #70809b;
+  --line: #dce3f1;
+  --subtle: #edf0f6;
+  --accent: #4261df;
+  --accent-hover: #344fc4;
+  --soft: #e7edff;
+  --danger: #cc201b;
   --heat-0: #ffffff;
-  --heat-1: #fff0ea;
-  --heat-2: #ffd6c8;
-  --heat-3: #ffa68e;
-  --heat-4: #ff775f;
-  --heat-ink: #5c2b24;
+  --heat-1: #f1f4ff;
+  --heat-2: #d7e2ff;
+  --heat-3: #aec4fa;
+  --heat-4: #809fea;
+  --heat-ink: #243f73;
 }
 @theme {
-  --color-slate-900: #181916;
-  --color-slate-700: #45443f;
-  --color-slate-600: #6f6c64;
-  --color-slate-500: #6f6c64;
-  --color-slate-400: #8c887f;
-  --color-slate-300: #ddd8cd;
-  --color-slate-200: #ddd8cd;
-  --color-slate-100: #ebe7de;
-  --color-slate-50: #f4f1ea;
+  --color-slate-900: #243047;
+  --color-slate-700: #475569;
+  --color-slate-600: #70809b;
+  --color-slate-500: #70809b;
+  --color-slate-400: #94a3b8;
+  --color-slate-300: #dce3f1;
+  --color-slate-200: #dce3f1;
+  --color-slate-100: #edf0f6;
+  --color-slate-50: #f5f6f8;
 }
 body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--font-noto-sans-kr), "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; -webkit-font-smoothing: antialiased; }
 button, a, input, select { -webkit-tap-highlight-color: transparent; }
@@ -62,9 +63,10 @@ h1, h2, h3 { word-break: keep-all; }
 .status-stamp strong { font-size: 23px; line-height: 1.1; }
 .status-stamp[data-kind="expired"] { color: var(--ink); }
 .status-stamp[data-kind="invalid"] { color: var(--muted); }
+.status-stamp[data-kind="cancelled"] { color: var(--danger); }
 @media (max-width: 359px) { .app-entry { padding-inline: 16px; } .journey-header { padding-bottom: 20px; } }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; } }
-.home-ticket { overflow: hidden; margin-top: 10vh; background: white; border-radius: 18px; box-shadow: 0 8px 24px #18191608; }
+.home-ticket { overflow: hidden; margin-top: 10vh; background: white; border-radius: 18px; box-shadow: 0 8px 24px #24304708; }
 .home-ticket-band { padding: 14px 20px; background: var(--accent); color: white; font-size: 10px; font-weight: 700; letter-spacing: .1em; }
 .home-ticket > div { padding: 28px 22px; }
 .home-ticket h1 { font-size: 27px; font-weight: 800; margin: 10px 0 20px; }
@@ -79,3 +81,7 @@ h1, h2, h3 { word-break: keep-all; }
 .app-entry:has(.settings-flow) .journey-header { padding-bottom: 12px; }
 .app-entry:has(.settings-flow) .journey-stages { margin-top: 6px; }
 .app-entry:has(.settings-flow) .journey-stages li { gap: 5px; }
+
+/* 이전 파란색 디자인의 테두리와 모서리. 최신 화면 구성은 유지한다. */
+.registration-form, .home-ticket { border: 1px solid var(--line); border-radius: 12px; }
+.registration-form > button, .home-create-form > button { border-radius: 8px; }
