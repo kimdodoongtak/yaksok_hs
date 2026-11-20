@@ -81,7 +81,7 @@ test("전체 시간과 참여자 시간을 비교해도 내 미제출 선택과 
   await expect(page.getByLabel(`${f.start} 09:00 가능 0명 / 전체 2명`,{exact:true})).toBeVisible();
   await expect(page.getByLabel(`${f.start} 09:00 가능 0명 / 전체 2명`,{exact:true})).toHaveText("");
   await expect(page.getByLabel(`${f.start} 09:30 가능 1명 / 전체 2명`,{exact:true})).toHaveText("");
-  for(const name of ["30분","2시간","1시간"]){
+  for(const name of ["30분","1시간"]){
     await page.getByRole("button",{name,exact:true}).click();
     await expect(page.getByLabel(`${f.start} 09:00 가능 0명 / 전체 2명`,{exact:true})).toHaveText("");
     await expect(page.getByLabel(`${f.start} 09:30 가능 1명 / 전체 2명`,{exact:true})).toHaveText("");
@@ -257,11 +257,11 @@ test("히트맵은 소요시간과 보기 단위에 관계없이 연속 가능 �
   await page.keyboard.down("Enter");await expect(tooltip).toBeVisible();await page.keyboard.press("Escape");await expect(tooltip).toHaveCount(0);await page.keyboard.up("Enter");
   await page.getByRole("button",{name:"30분",exact:true}).click();
   await expect(candidate).toHaveCount(1);await expect(candidate).toBeVisible();
-  await page.getByRole("button",{name:"2시간",exact:true}).click();
+  await page.getByRole("button",{name:"1시간",exact:true}).click();
   await expect(candidate).toBeVisible();
   for(const width of [320,393,1280]){await page.setViewportSize({width,height:852});expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);await page.screenshot({path:`test-results/candidate-heatmap-${width}.png`,fullPage:true});}
 });
-test("2시간 보기에서도 연속 구간 글씨는 중복 없이 전체 중앙에 표시된다",async({page,context})=>{
+test("1시간 보기에서도 연속 구간 글씨는 중복 없이 전체 중앙에 표시된다",async({page,context})=>{
   const f=await fixture(context);
   const friend=await db.participant.create({data:{promiseId:f.promise.id,nickname:"배치친구",normalizedNickname:"배치친구",role:"member",passwordHash:"unused",availabilitySubmittedAt:new Date()}});
   for(const member of [f.member,friend]){
@@ -270,7 +270,7 @@ test("2시간 보기에서도 연속 구간 글씨는 중복 없이 전체 중�
   }
   await page.setViewportSize({width:393,height:852});await page.goto(f.path);
   await page.getByRole("button",{name:"전체 시간",exact:true}).click();
-  await page.getByRole("button",{name:"2시간",exact:true}).click();
+  await page.getByRole("button",{name:"1시간",exact:true}).click();
   for(const width of [393,320,1280]){
     await page.setViewportSize({width,height:852});await page.evaluate(()=>document.fonts.ready);
     for(const [start,end,last] of [["10:00","13:00","12:30"]]){

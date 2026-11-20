@@ -199,3 +199,21 @@ it("주간 임시 후보는 슬롯 인원이 아닌 연속 참석자 교집합�
   expect(result).toMatchObject({ok:true,snapshot:{status:"collecting",candidates:[],weekCandidates:[{startAt:atTime("11:00").toISOString(),endAt:atTime("12:00").toISOString(),count:2}]}});
   expect(await createCandidatesService(db,()=>at).read({...f.input,week:"2026-11-22"})).toMatchObject({ok:true,snapshot:{weekCandidates:[]}});
 });
+
+it("월별 조회는 다른 주의 제출도 포함하되 다음 달과 잘못된 월을 제외한다",async()=>{
+  const f=await fixture(),service=createCandidatesService(db,()=>at);
+  await db.promiseRecord.update({where:{id:f.promise.id},data:{dateRangeEnd:new Date("2026-12-02")}});
+  await db.participant.update({where:{id:f.member.id},data:{availabilitySubmittedAt:at}});
+  const slots=[first,"2026-11-23T00:00:00.000Z","2026-12-01T00:00:00.000Z"];
+  await db.participantAvailableSlot.createMany({data:slots.map(slot=>({participantId:f.member.id,slotStartAt:new Date(slot)}))});
+  const result=await service.read({...f.input,week:"2026-11-15",month:"2026-11",participantId:f.member.id});
+  expect(result.ok).toBe(true);if(!result.ok)return;
+  expect(Object.keys(result.snapshot.heatmap).sort()).toEqual(slots.slice(0,2));
+  expect(Object.keys(result.snapshot.slotParticipantIndexes).sort()).toEqual(slots.slice(0,2));
+  expect(result.snapshot.selected?.slots).toEqual(slots.slice(0,2));
+  const december=await service.read({...f.input,month:"2026-12",participantId:f.member.id});
+  expect(december).toMatchObject({ok:true,snapshot:{selected:{slots:[slots[2]]}}});
+  for(const month of ["2026-13","2026-00","2026-1","invalid"]){
+    expect(await service.read({...f.input,month})).toEqual({ok:false,code:"INVALID_INPUT"});
+  }
+});

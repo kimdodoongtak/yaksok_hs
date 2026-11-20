@@ -9,7 +9,7 @@ export type OverviewSnapshot = {
   week: string;
   selected: { participantId: string; slots: string[] } | null;
   heatmap: Record<string, number>;
-  // 같은 응답의 participants 배열 위치. 해당 주의 제출 슬롯만 포함한다.
+  // 같은 응답의 participants 배열 위치. 요청한 주 또는 월의 제출 슬롯만 포함한다.
   slotParticipantIndexes: Record<string, number[]>;
   weekCandidates: Candidate[];
   candidates: Candidate[];

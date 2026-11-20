@@ -5,7 +5,7 @@ import { requireParticipantSession } from "../participant-access/session";
 import { settingsOf } from "../availability/service";
 import { calculateCandidates } from "./policy";
 import type { CloseResult, OverviewResult } from "./view";
-export type OverviewInput = SessionInput & { week?: string; participantId?: string; limit?: number };
+export type OverviewInput = SessionInput & { week?: string; month?: string; participantId?: string; limit?: number };
 export function createCandidatesService(db: PrismaClient, clock?: () => Date | Promise<Date>) {
   return {
     async read(input: OverviewInput): Promise<OverviewResult> {
@@ -18,6 +18,10 @@ export function createCandidatesService(db: PrismaClient, clock?: () => Date | P
         const weekTime = new Date(`${week}T00:00:00+09:00`).getTime();
         const limit = input.limit ?? 5;
         if (!/^\d{4}-\d{2}-\d{2}$/.test(week) || !Number.isFinite(weekTime) || new Date(weekTime + 9 * 3600000).toISOString().slice(0, 10) !== week || !Number.isInteger(limit) || limit < 1 || limit > 4320) return { ok: false as const, code: "INVALID_INPUT" };
+        if(input.month!==undefined&& !/^\d{4}-(0[1-9]|1[0-2])$/.test(input.month))return {ok:false as const,code:"INVALID_INPUT"};
+        const rangeStart=input.month?new Date(`${input.month}-01T00:00:00+09:00`).getTime():weekTime;
+        const rangeDays=input.month?new Date(Date.UTC(Number(input.month.slice(0,4)),Number(input.month.slice(5,7)),0)).getUTCDate():7;
+        const inRange=(slot:string)=>{const at=new Date(slot).getTime();return at>=rangeStart&&at<rangeStart+rangeDays*86400000;};
         const members = await tx.participant.findMany({
           where: { promiseId: access.promise.id, status: "active" }, orderBy: [{ createdAt: "asc" }, { id: "asc" }],
           select: { id: true, nickname: true, role: true, availabilitySubmittedAt: true,
@@ -33,9 +37,9 @@ export function createCandidatesService(db: PrismaClient, clock?: () => Date | P
         return { ok: true as const, snapshot: {
           participantId: access.session.participantId, status, serverNow: access.at.toISOString(), settings, week,
           participants: members.map(({ id, nickname, role }) => ({ id, nickname, role })),
-          selected: target ? { participantId: target.id, slots: target.availabilitySubmittedAt ? data.find(member => member.id === target.id)!.slots.filter(inWeek) : [] } : null,
-          heatmap: Object.fromEntries(Object.entries(calculated.heatmap).filter(([slot]) => inWeek(slot))),
-          slotParticipantIndexes: Object.fromEntries(Object.entries(calculated.participantIdsBySlot).filter(([slot]) => inWeek(slot)).map(([slot, ids]) => [slot, ids.map(id => memberIndexes.get(id)!)])),
+          selected: target ? { participantId: target.id, slots: target.availabilitySubmittedAt ? data.find(member => member.id === target.id)!.slots.filter(inRange) : [] } : null,
+          heatmap: Object.fromEntries(Object.entries(calculated.heatmap).filter(([slot]) => inRange(slot))),
+          slotParticipantIndexes: Object.fromEntries(Object.entries(calculated.participantIdsBySlot).filter(([slot]) => inRange(slot)).map(([slot, ids]) => [slot, ids.map(id => memberIndexes.get(id)!)])),
           weekCandidates: ["collecting", "closed"].includes(status) ? calculated.candidates.filter(candidate => inWeek(candidate.startAt)) : [],
           candidates: status === "closed" ? calculated.candidates.slice(0, limit) : [], hasMore: status === "closed" && calculated.candidates.length > limit,
         } };

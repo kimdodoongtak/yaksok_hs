@@ -10,7 +10,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ invi
   const jar = await cookies();
   const result = await candidatesService.read({
     inviteToken, sessionToken: jar.get(sessionCookie(inviteToken, new Date(0)).name)?.value,
-    week: query.get("week") ?? undefined, participantId: query.get("participantId") ?? undefined,
+    week: query.get("week") ?? undefined, month: query.get("month") ?? undefined, participantId: query.get("participantId") ?? undefined,
     limit: query.has("limit") ? Number(query.get("limit")) : undefined,
   });
   return Response.json(result, { status: result.ok ? 200 : result.code === "PROMISE_CANCELLED" ? 409 : result.code === "UNAVAILABLE" ? 503 : result.code === "UNAUTHORIZED" ? 401 : 400, headers });

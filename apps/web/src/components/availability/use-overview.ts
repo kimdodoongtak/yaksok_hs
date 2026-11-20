@@ -3,11 +3,12 @@ import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { OverviewResult, OverviewSnapshot } from "@/lib/candidates/view";
 
-export function useOverview(inviteToken:string, participantId:string, week:string, selectedId:string|undefined, limit:number, revision:string) {
+export function useOverview(inviteToken:string, participantId:string, week:string, selectedId:string|undefined, limit:number, revision:string, month?:string) {
   const router=useRouter();
   const [refreshId,setRefreshId]=useState(0);
   const refresh=useCallback(()=>setRefreshId(value=>value+1),[]);
   const query=new URLSearchParams({week,limit:String(limit)});
+  if(month)query.set("month",month);
   if(selectedId)query.set("participantId",selectedId);
   const url=`/p/${inviteToken}/overview?${query}`;
   const key=`${url}:${participantId}:${revision}:${refreshId}`;

@@ -41,13 +41,122 @@ async function openReset(page:Page){
   await page.getByRole("dialog",{name:"주간 반복",exact:true}).getByRole("button",{name:"초기화",exact:true}).click();
   return page.getByRole("dialog",{name:"선택한 시간을 초기화할까요?",exact:true});
 }
+test("날짜 보기에서 하루를 채우고 시간 수정·월 이동·제출 후에도 선택을 유지한다",async({page,context})=>{
+  const f=await fixture(context);await page.setViewportSize({width:393,height:740});await page.goto(f.path);
+  await expect(page.getByRole("button",{name:"날짜",exact:true})).toBeVisible();
+  await expect(page.getByRole("button",{name:"2시간",exact:true})).toHaveCount(0);
+  await page.getByRole("button",{name:"30분",exact:true}).click();
+  await page.getByRole("button",{name:`${f.start} 09:00`,exact:true}).click();
+  await page.getByRole("button",{name:"날짜",exact:true}).click();
+  const card=page.getByRole("button",{name:`${f.start} 하루 선택`,exact:true});
+  await expect(page.getByRole("button",{name:"다음 달",exact:true})).toBeVisible();
+  await expect(page.getByLabel("주별 가능 시간",{exact:true})).toHaveCount(0);
+  await expect(card).toHaveAttribute("aria-pressed","mixed");await expect(card).toContainText("일부 가능");
+  await expect(page.getByText("날짜 선택 시 09:00~18:00 가능으로 표시돼요.",{exact:true})).toBeVisible();
+  await card.click();await expect(card).toHaveAttribute("aria-pressed","true");
+  if(f.start.slice(0,7)!==f.end.slice(0,7)){
+    await page.getByRole("button",{name:"다음 달",exact:true}).click();await expect(card).toHaveCount(0);
+    await page.getByRole("button",{name:"이전 달",exact:true}).click();await expect(card).toHaveAttribute("aria-pressed","true");
+  }
+  await page.getByRole("button",{name:"1시간",exact:true}).click();
+  const first=page.getByRole("button",{name:`${f.start} 09:00–10:00`,exact:true});await expect(first).toHaveAttribute("aria-pressed","true");
+  await first.click();await page.getByRole("button",{name:"날짜",exact:true}).click();await expect(card).toHaveAttribute("aria-pressed","mixed");
+  await card.click();await card.click();await expect(card).toHaveAttribute("aria-pressed","false");await card.click();
+  const nextDay=new Date(new Date(f.start).getTime()+86400000).toISOString().slice(0,10);
+  const crossesMonth=nextDay.slice(0,7)!==f.start.slice(0,7);
+  if(crossesMonth)await page.getByRole("button",{name:"다음 달",exact:true}).click();
+  await page.getByRole("button",{name:`${nextDay} 하루 선택`,exact:true}).click();
+  await page.getByRole("button",{name:"전체 시간",exact:true}).click();
+  await expect(page.getByRole("button",{name:`${nextDay} 하루 선택`,exact:true})).toHaveCount(0);
+  await page.getByRole("button",{name:"내 시간",exact:true}).click();
+  await expect(page.getByRole("button",{name:`${nextDay} 하루 선택`,exact:true})).toHaveAttribute("aria-pressed","true");
+  expect(await db.participantAvailableSlot.count({where:{participantId:f.member.id}})).toBe(0);
+  await page.getByRole("button",{name:"선택 제출",exact:true}).click();await expect(page.getByRole("status")).toContainText("제출했어요");
+  expect(await db.participantAvailableSlot.count({where:{participantId:f.member.id}})).toBe(36);
+  await page.reload();await page.getByRole("button",{name:"날짜",exact:true}).click();await expect(card).toHaveAttribute("aria-pressed","true");
+  await collapseDevBadge(page);
+  for(const width of [320,393,1280]){
+    await page.setViewportSize({width,height:740});expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+    const boxes=await page.getByRole("group",{name:"월별 가능 날짜",exact:true}).getByRole("button").evaluateAll(elements=>elements.map(element=>{const b=element.getBoundingClientRect();return {x:b.x,y:b.y,right:b.right};}));
+    for(let i=1;i<boxes.length;i++)if(Math.abs(boxes[i].y-boxes[i-1].y)<1)expect(boxes[i-1].right).toBeLessThanOrEqual(boxes[i].x);
+    await page.screenshot({path:`test-results/date-view-${width}.png`});
+  }
+});
+test("월 경계 날짜를 선택한 뒤 시간 보기에서 돌아와도 같은 달을 유지한다",async({page,context})=>{
+  const f=await fixture(context);
+  const next=new Date(`${f.start.slice(0,7)}-01T00:00:00Z`);next.setUTCMonth(next.getUTCMonth()+1);
+  const target=next.toISOString().slice(0,10);
+  await db.promiseRecord.update({where:{id:f.promise.id},data:{dateRangeEnd:new Date(target)}});
+  await page.goto(f.path);await page.getByRole("button",{name:"날짜",exact:true}).click();await page.getByRole("button",{name:"다음 달",exact:true}).click();
+  const card=page.getByRole("button",{name:`${target} 하루 선택`,exact:true});await card.click();
+  await page.getByRole("button",{name:"1시간",exact:true}).click();
+  await expect(page.getByRole("button",{name:`${target} 09:00–10:00`,exact:true})).toHaveAttribute("aria-pressed","true");
+  await page.getByRole("button",{name:"날짜",exact:true}).click();await expect(card).toBeVisible();await expect(card).toHaveAttribute("aria-pressed","true");
+});
+test("날짜 요약은 하루 공통 인원과 일부 인원을 구분하고 조회 실패를 알린다",async({page,context})=>{
+  const f=await fixture(context);
+  await db.promiseRecord.update({where:{id:f.promise.id},data:{dailyEndMinute:600,durationMinutes:60,dateRangeEnd:new Date(new Date(f.start).getTime()+40*86400000)}});
+  const friend=await db.participant.create({data:{promiseId:f.promise.id,nickname:"날짜친구",normalizedNickname:"날짜친구",passwordHash:"unused",role:"member",availabilitySubmittedAt:new Date()}});
+  await db.participant.update({where:{id:f.member.id},data:{availabilitySubmittedAt:new Date()}});
+  await db.participantAvailableSlot.createMany({data:[{participantId:f.member.id,slotStartAt:new Date(f.slot("09:00"))},{participantId:friend.id,slotStartAt:new Date(f.slot("09:30"))}]});
+  await page.setViewportSize({width:393,height:740});await page.goto(f.path);
+  await page.getByRole("button",{name:"날짜",exact:true}).click();await page.getByRole("button",{name:"전체 시간",exact:true}).click();
+  const summary=page.getByRole("group",{name:`${f.start} 가능 요약`,exact:true});
+  await expect(summary).toContainText("전체 가능 0명");await expect(summary).toContainText("일부 가능 2명");
+  await db.participantAvailableSlot.create({data:{participantId:friend.id,slotStartAt:new Date(f.slot("09:00"))}});
+  await page.evaluate(()=>window.dispatchEvent(new Event("focus")));
+  await expect(summary).toContainText("전체 가능 1명");await expect(summary).toContainText("일부 가능 1명");
+  await page.getByRole("button",{name:"약속 정보 열기",exact:true}).click();
+  await page.getByRole("dialog",{name:"약속 정보",exact:true}).getByRole("button",{name:"날짜친구",exact:true}).click();
+  await expect(summary).toContainText("전체 가능");await expect(summary.getByRole("button")).toHaveCount(0);
+  await page.route("**/overview?**",route=>route.abort());
+  await page.getByRole("button",{name:"다음 달",exact:true}).click();
+  await expect(page.getByText("시간 정보를 불러오지 못했어요.",{exact:false})).toBeVisible();
+  await expect(page.getByRole("group",{name:"월별 가능 날짜",exact:true})).toContainText("조회 못함");
+  await page.unroute("**/overview?**");await page.getByRole("button",{name:"다시 불러오기",exact:true}).click();
+  await expect(page.getByRole("group",{name:"월별 가능 날짜",exact:true})).not.toContainText("조회 못함");
+});
+test("모바일 날짜 탭과 스와이프를 구분하고 시간표 스크롤 뒤에도 날짜를 바로 보여준다",async({browser})=>{
+  const context=await browser.newContext({viewport:{width:320,height:640},hasTouch:true,isMobile:true});
+  try{
+    const f=await fixture(context),page=await context.newPage();await page.goto(`http://127.0.0.1:3100${f.path}`);
+    await page.evaluate(()=>window.scrollTo(0,500));
+    await page.getByRole("button",{name:"날짜",exact:true}).tap();await expect.poll(()=>page.evaluate(()=>window.scrollY)).toBe(0);
+    await expect(page.getByRole("group",{name:"터치 조작",exact:true})).toHaveCount(0);
+    const cards=page.getByRole("group",{name:"월별 가능 날짜",exact:true}).locator("button:not(:disabled)");
+    await cards.first().tap();await expect(cards.first()).toHaveAttribute("aria-pressed","true");
+    const client=await context.newCDPSession(page),box=(await cards.nth(2).boundingBox())!;
+    const x=box.x+box.width/2,y=box.y+box.height/2;
+    await client.send("Input.dispatchTouchEvent",{type:"touchStart",touchPoints:[{x,y}]});
+    for(let n=1;n<=6;n++)await client.send("Input.dispatchTouchEvent",{type:"touchMove",touchPoints:[{x,y:y-15*n}]});
+    await client.send("Input.dispatchTouchEvent",{type:"touchEnd",touchPoints:[]});
+    await expect(cards.nth(2)).toHaveAttribute("aria-pressed","false");await expect(cards.first()).toHaveAttribute("aria-pressed","true");
+    await page.evaluate(()=>new Promise<void>(resolve=>{window.addEventListener("scrollend",()=>resolve(),{once:true});window.scrollTo(0,0);setTimeout(resolve,700);}));await collapseDevBadge(page);
+    await page.screenshot({path:"test-results/date-touch-320.png"});
+    await page.getByRole("button",{name:"1시간",exact:true}).tap();await expect(page.getByRole("button",{name:"스크롤",exact:true})).toHaveAttribute("aria-pressed","true");
+  }finally{await context.close();}
+});
+test("날짜 선택은 제출 실패·초기화 취소를 보존하고 마감 뒤에는 읽기 전용이다",async({page,context})=>{
+  const f=await fixture(context);await page.goto(f.path);await page.getByRole("button",{name:"날짜",exact:true}).click();
+  const card=page.getByRole("button",{name:`${f.start} 하루 선택`,exact:true});await card.focus();await page.keyboard.press("Space");
+  await expect(card).toHaveAttribute("aria-pressed","true");
+  await page.route(`**${f.path}`,route=>route.request().method()==="POST"?route.abort():route.continue());
+  await page.getByRole("button",{name:"선택 제출",exact:true}).click();await expect(page.getByRole("status")).toContainText("제출하지 못했어요");
+  await expect(card).toHaveAttribute("aria-pressed","true");await page.unroute(`**${f.path}`);
+  await openReset(page);await page.keyboard.press("Escape");await expect(card).toHaveAttribute("aria-pressed","true");
+  const clear=await openReset(page);await clear.getByRole("button",{name:"이번 주 초기화",exact:true}).click();await expect(card).toHaveAttribute("aria-pressed","false");
+  await card.click();await page.getByRole("button",{name:"선택 제출",exact:true}).click();await expect(page.getByRole("status")).toContainText("제출했어요");
+  await db.promiseRecord.update({where:{id:f.promise.id},data:{status:"closed"}});
+  await page.goto(f.path+"?view=responses");await page.getByRole("button",{name:"날짜",exact:true}).click();
+  await expect(card).toBeDisabled();await expect(card).toHaveAttribute("aria-pressed","true");
+});
 test("주간 반복 안에서 빈 주의 전체 초기화에 접근하고 제출 전 저장을 보존한다",async({page,context})=>{
   const f=await fixture(context);
   await db.participantAvailableSlot.create({data:{participantId:f.member.id,slotStartAt:new Date(f.slot("09:00"))}});
   await page.setViewportSize({width:320,height:740});await page.goto(f.path);
   await page.getByRole("button",{name:"다음 주",exact:true}).click();
   await expect(page.locator("footer").getByRole("button",{name:"초기화",exact:true})).toHaveCount(0);
-  const repeat=page.getByRole("button",{name:"주간 반복",exact:true});await repeat.click();
+  const repeat=page.getByRole("button",{name:"주간 반복",exact:true});await collapseDevBadge(page);await repeat.click();
   const weekly=page.getByRole("dialog",{name:"주간 반복",exact:true});
   await expect(weekly).toContainText("이번 주에 선택한 시간이 없어요");
   await expect(weekly.getByRole("button",{name:"적용",exact:true})).toBeDisabled();
@@ -117,13 +226,6 @@ test("모바일 선택 전환으로 편집하고 스크롤 복귀 후 선택을 
     await page.getByRole("button",{name:"내 시간",exact:true}).tap();
     await expect(scroll).toHaveAttribute("aria-pressed","true");
   } finally {await context.close();}
-});
-test("2시간 보기에서도 시간 칸 높이를 유지한다",async({page,context})=>{
-  const f=await fixture(context);await page.setViewportSize({width:393,height:640});await page.goto(f.path);
-  const cell=()=>page.getByLabel("주별 가능 시간").locator(`button[data-day="${f.start}"]`).first();
-  const before=(await cell().boundingBox())!.height;
-  await page.getByRole("button",{name:"2시간",exact:true}).click();
-  expect((await cell().boundingBox())!.height).toBe(before);
 });
 test("가능 시간을 선택하고 주를 이동한 뒤 제출·재제출·빈 제출한다",async({page,context})=>{
   const f=await fixture(context);
@@ -274,6 +376,24 @@ test("로그인 주체가 바뀌면 이전 편집 화면을 닫고 새 참여 �
   await expect(page.getByRole("heading",{name:"참여 정보",exact:true})).toBeVisible({timeout:12000});
   await expect(page.getByText("새로그인",{exact:true})).toBeVisible();
   expect((await db.participant.findUniqueOrThrow({where:{id:other.id}})).availabilityVersion).toBe(0);
+});
+for(const gap of ["가로","세로"] as const)test(`선택 모드의 ${gap} 칸 사이 여백에서 드래그해도 페이지 스크롤 대신 선택한다`,async({browser})=>{
+  const context=await browser.newContext({viewport:{width:393,height:740},hasTouch:true,isMobile:true});
+  try{
+    const f=await fixture(context),page=await context.newPage();await page.goto(`http://127.0.0.1:3100${f.path}`);
+    await page.getByRole("button",{name:"다음 주",exact:true}).tap();await page.getByRole("button",{name:"선택",exact:true}).tap();
+    const grid=page.getByLabel("주별 가능 시간",{exact:true});
+    const first=grid.locator('button[data-minute="660"]:not(:disabled)').first();
+    const a=(await first.boundingBox())!;
+    const b=(await (gap==="가로"?grid.locator('button[data-minute="660"]:not(:disabled)').nth(1):grid.locator('button[data-minute="720"]:not(:disabled)').first()).boundingBox())!;
+    const x=gap==="가로"?(a.x+a.width+b.x)/2:a.x+a.width/2,y=gap==="가로"?a.y+a.height/2:(a.y+a.height+b.y)/2;
+    const client=await context.newCDPSession(page);
+    await client.send("Input.dispatchTouchEvent",{type:"touchStart",touchPoints:[{x,y}]});
+    for(let n=1;n<=6;n++)await client.send("Input.dispatchTouchEvent",{type:"touchMove",touchPoints:[{x,y:y-15*n}]});
+    await client.send("Input.dispatchTouchEvent",{type:"touchEnd",touchPoints:[]});
+    await expect.poll(()=>grid.locator('button[aria-pressed="true"]').count()).toBeGreaterThanOrEqual(2);
+    expect(await page.evaluate(()=>window.scrollY)).toBe(0);
+  }finally{await context.close();}
 });
 test("모바일 손가락 드래그로 연속 시간을 선택·해제하고 시간축에서 스크롤한다",async({browser})=>{
   const context=await browser.newContext({viewport:{width:393,height:852},hasTouch:true,isMobile:true});
@@ -488,8 +608,8 @@ test("전체 초기화 후 제출해도 이미 지난 선택은 보존한다",as
   await page.getByRole("button",{name:"선택 제출",exact:true}).click();await expect(page.getByRole("status")).toContainText("제출했어요");
   expect((await db.participantAvailableSlot.findMany({where:{participantId:f.member.id}})).map(row=>row.slotStartAt.toISOString())).toEqual([pastSlot]);
 });
-test("축소해도 부분 선택을 보존하고 2시간 묶음·마지막 짧은 칸을 30분 슬롯으로 제출한다",async({page,context})=>{
-  const f=await fixture(context);await db.promiseRecord.update({where:{id:f.promise.id},data:{dailyEndMinute:1440}});
+test("축소해도 부분 선택을 보존하고 1시간 묶음·마지막 짧은 칸을 30분 슬롯으로 제출한다",async({page,context})=>{
+  const f=await fixture(context);await db.promiseRecord.update({where:{id:f.promise.id},data:{dailyEndMinute:1410}});
   await page.setViewportSize({width:393,height:852});await page.goto(f.path);
   await expect(page.getByRole("button",{name:"1시간",exact:true})).toHaveAttribute("aria-pressed","true");
   await expect(page.getByRole("button",{name:`${f.start} 09:00–10:00`,exact:true})).toBeVisible();
@@ -498,17 +618,17 @@ test("축소해도 부분 선택을 보존하고 2시간 묶음·마지막 짧�
   await page.getByRole("button",{name:`${f.start} 09:00`,exact:true}).click();
   const hourly=page.getByRole("button",{name:"1시간",exact:true});await expect(hourly).toBeVisible();await hourly.click();
   await expect(page.getByRole("button",{name:`${f.start} 09:00–10:00`,exact:true})).toHaveAttribute("aria-pressed","mixed");
-  await page.getByRole("button",{name:"2시간",exact:true}).click();
-  const group=page.getByRole("button",{name:`${f.start} 09:00–11:00`,exact:true});await expect(group).toHaveAttribute("aria-pressed","mixed");
+  await page.getByRole("button",{name:"1시간",exact:true}).click();
+  const group=page.getByRole("button",{name:`${f.start} 09:00–10:00`,exact:true});await expect(group).toHaveAttribute("aria-pressed","mixed");
   await page.getByRole("button",{name:"30분",exact:true}).click();
   await expect(page.getByRole("button",{name:`${f.start} 09:00`,exact:true})).toHaveAttribute("aria-pressed","true");
   await expect(page.getByRole("button",{name:`${f.start} 09:30`,exact:true})).toHaveAttribute("aria-pressed","false");
-  await page.getByRole("button",{name:"2시간",exact:true}).click();await group.focus();await page.keyboard.press("Space");
+  await page.getByRole("button",{name:"1시간",exact:true}).click();await group.focus();await page.keyboard.press("Space");
   await expect(group).toHaveAttribute("aria-pressed","true");
-  await page.getByRole("button",{name:`${f.start} 23:00–24:00`,exact:true}).click();
+  await page.getByRole("button",{name:`${f.start} 23:00–23:30`,exact:true}).click();
   for(const width of [320,393,1280]){await page.setViewportSize({width,height:width===1280?800:852});expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);await page.screenshot({path:`test-results/availability-zoom-${width}.png`,fullPage:true});}
   await page.getByRole("button",{name:"선택 제출",exact:true}).click();await expect(page.getByRole("status")).toContainText("제출했어요");
-  expect((await db.participantAvailableSlot.findMany({where:{participantId:f.member.id},orderBy:{slotStartAt:"asc"}})).map(row=>row.slotStartAt.toISOString())).toEqual(["09:00","09:30","10:00","10:30","23:00","23:30"].map(time=>f.slot(time)));
+  expect((await db.participantAvailableSlot.findMany({where:{participantId:f.member.id},orderBy:{slotStartAt:"asc"}})).map(row=>row.slotStartAt.toISOString())).toEqual(["09:00","09:30","23:00"].map(time=>f.slot(time)));
 });
 
 test("주간 반복은 미제출 시간을 복사하고 명시적으로 제출한다",async({page,context})=>{
@@ -771,8 +891,8 @@ test("조회 실패 중에도 남은 마감 시간이 흐르고 새 마감을 �
   await page.route("**/availability/state", route => route.abort());
   await page.goto(f.path);
   // SSR 문구만 보이는 시점이 아니라 클라이언트 입력이 연결된 뒤 시간을 진행한다.
-  await page.getByRole("button", { name: "2시간", exact: true }).click();
-  await expect(page.getByRole("button", { name: "2시간", exact: true })).toHaveAttribute("aria-pressed", "true");
+  await page.getByRole("button", { name: "30분", exact: true }).click();
+  await expect(page.getByRole("button", { name: "30분", exact: true })).toHaveAttribute("aria-pressed", "true");
   const timer = page.getByRole("timer", { name: "응답 마감까지 남은 시간" });
   await expect(timer).toContainText("1분");
   await page.clock.fastForward(40000);
