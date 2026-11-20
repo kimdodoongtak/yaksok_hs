@@ -93,7 +93,7 @@ test("전체 시간과 참여자 시간을 비교해도 내 미제출 선택과 
   await expect(page.getByLabel(`${f.start} 09:30 가능`,{exact:true})).toBeVisible();
   await page.getByRole("button",{name:"내 시간",exact:true}).click();
   await expect(own).toHaveAttribute("aria-pressed","true");
-  await expect(page.getByRole("button",{name:"되돌리기",exact:true})).toBeEnabled();
+  await expect(page.getByRole("button",{name:"선택 제출",exact:true})).toBeEnabled();
   expect(await db.participantAvailableSlot.count({where:{participantId:f.member.id}})).toBe(0);
   const url=`/p/${f.link.inviteToken}/overview`;
   expect((await request.get(url)).status()).toBe(401);
@@ -219,7 +219,7 @@ for(const width of [393,1280]){
     await expect(page.getByText("임시 집계 · 전체 1명",{exact:true})).toBeVisible();await stable();
   });
 }
-test("타인의 갱신은 집계만 바꾸고 본인 미제출 시간과 되돌리기를 보존한다",async({page,context})=>{
+test("타인의 갱신은 집계만 바꾸고 본인 미제출 시간을 보존한다",async({page,context})=>{
   const f=await fixture(context);await page.goto(f.path);
   const own=page.getByRole("button",{name:`${f.start} 09:00–10:00`,exact:true});await own.click();
   await page.getByRole("button",{name:"전체 시간",exact:true}).click();
@@ -229,7 +229,7 @@ test("타인의 갱신은 집계만 바꾸고 본인 미제출 시간과 되돌�
   await page.evaluate(()=>window.dispatchEvent(new Event("focus")));
   await expect(page.getByLabel(`${f.start} 09:30 가능 1명 / 전체 2명`,{exact:true})).toBeVisible();
   await page.getByRole("button",{name:"내 시간",exact:true}).click();await expect(own).toHaveAttribute("aria-pressed","true");
-  await page.getByRole("button",{name:"되돌리기",exact:true}).click();await expect(own).toHaveAttribute("aria-pressed","false");
+  await own.click();await expect(own).toHaveAttribute("aria-pressed","false");
 });
 test("히트맵은 소요시간과 보기 단위에 관계없이 연속 가능 구간을 한 번 표시한다",async({page,context})=>{
   const f=await fixture(context);

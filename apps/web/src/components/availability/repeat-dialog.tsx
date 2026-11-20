@@ -10,12 +10,13 @@ const weekdays = ["일", "월", "화", "수", "목", "금", "토"];
 const dateLabel = (day: string) => `${Number(day.slice(5, 7))}월 ${Number(day.slice(8))}일`;
 const weekLabel = (week: string) => `${dateLabel(week)} ~ ${dateLabel(addDays(week, 6))}`;
 
-export function RepeatDialog({ slots, settings, now, sourceWeek, onApply, onClose }: {
+export function RepeatDialog({ slots, settings, now, sourceWeek, onApply, onReset, onClose }: {
   slots: ReadonlySet<string>;
   settings: SlotSettings;
   now: string;
   sourceWeek: string;
   onApply: (next: Set<string>) => void;
+  onReset: () => void;
   onClose: () => void;
 }) {
   const dialog = useRef<HTMLDialogElement>(null);
@@ -31,6 +32,8 @@ export function RepeatDialog({ slots, settings, now, sourceWeek, onApply, onClos
   const next = repeatWeeks({ slots, sourceWeek, targetWeeks, settings, now });
   const added = [...next].filter(slot => !slots.has(slot));
   const addedWeeks = new Set(added.map(slot => weekStart(localDay(slot)))).size;
+  const futureSlots = [...slots].filter(slot => slot > now);
+  const hasSource = futureSlots.some(slot => localDay(slot) >= sourceWeek && localDay(slot) < addDays(sourceWeek, 7));
   const pattern = weekdays.map((label, index) => {
     const day = addDays(sourceWeek, index);
     const ranges: { start: number; end: number }[] = [];
@@ -54,7 +57,8 @@ export function RepeatDialog({ slots, settings, now, sourceWeek, onApply, onClos
   }, []);
 
   return <dialog ref={dialog} className={styles.dialog} aria-labelledby="repeat-title" onCancel={onClose} onClose={event => { if (!event.currentTarget.open) onClose(); }}>
-    <header><h2 id="repeat-title">이번 주 반복</h2><button type="button" aria-label="이번 주 반복 닫기" onClick={onClose}>×</button></header>
+    <header><h2 id="repeat-title">주간 반복</h2><button type="button" aria-label="주간 반복 닫기" onClick={onClose}>×</button></header>
+    {!hasSource && <p className={styles.hint}>이번 주에 선택한 시간이 없어요. 시간을 선택한 뒤 다른 주에 반복할 수 있어요.</p>}
     <details className={styles.source}>
       <summary><span>{weekLabel(sourceWeek)}</span><span className={styles.disclosure}>시간 보기 <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true"><path d="m3 4.5 3 3 3-3"/></svg></span></summary>
       <div className={styles.pattern} aria-label="반복할 시간">
@@ -74,6 +78,7 @@ export function RepeatDialog({ slots, settings, now, sourceWeek, onApply, onClos
     </fieldset>
     <p className={styles.preview} aria-live="polite">{added.length ? `${addedWeeks}개 주에 ${durationLabel(added.length * 30)} 추가` : targetWeeks.length ? "이미 선택된 시간이거나 추가할 미래 시간이 없어요." : ""}</p>
     <p className={styles.hint}>기존 선택은 유지돼요.</p>
+    <div className={styles.resetSection}><span>선택한 시간을 지우려면</span><button type="button" disabled={!futureSlots.length} onClick={onReset}>초기화</button></div>
     <footer><button type="button" onClick={onClose}>취소</button><button type="button" className={styles.apply} disabled={!added.length} onClick={() => onApply(next)}>적용</button></footer>
   </dialog>;
 }

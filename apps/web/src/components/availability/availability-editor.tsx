@@ -14,7 +14,6 @@ import { useSlotDrag } from "./use-slot-drag";
 import { AvailabilitySidebar } from "./availability-sidebar";
 import { useOverview } from "./use-overview";
 import { DeadlineCountdown } from "./deadline-countdown";
-import { EditButton } from "./edit-button";
 import { RepeatDialog } from "./repeat-dialog";
 import styles from "./availability.module.css";
 
@@ -26,12 +25,6 @@ export function AvailabilityEditor({inviteToken,initial}:{inviteToken:string;ini
   const [snapshot,setSnapshot]=useState(initial);
   const [draft,setDraft]=useState(()=>new Set(initial.slots));
   const [stepMinutes,setStepMinutes]=useState(60);
-  const [history,setHistory]=useState<Set<string>[]>([]);
-  const [future,setFuture]=useState<Set<string>[]>([]);
-  const remember=useCallback((before:Set<string>,after:Set<string>)=>{
-    if(before.size===after.size && [...before].every(slot=>after.has(slot)))return;
-    setHistory(previous=>[...previous.slice(-49),new Set(before)]);setFuture([]);
-  },[]);
   const [week,setWeek]=useState(()=>weekStart(initial.settings.dateRangeStart));
   const [view,setView]=useState("mine");
   const [touchSelecting,setTouchSelecting]=useState(false);
@@ -44,6 +37,7 @@ export function AvailabilityEditor({inviteToken,initial}:{inviteToken:string;ini
   const [confirmClear,setConfirmClear]=useState(false);
   const [repeatWeek,setRepeatWeek]=useState<string|null>(null);
   const clearDialog=useRef<HTMLDialogElement>(null);
+  const repeatButton=useRef<HTMLButtonElement>(null);
   const drawer=useRef<HTMLDialogElement>(null);
   const latest=useRef(initial);
   const busy=useRef(false);
@@ -62,7 +56,7 @@ export function AvailabilityEditor({inviteToken,initial}:{inviteToken:string;ini
   const minutes=Array.from({length:Math.ceil((settings.dailyEndMinute-settings.dailyStartMinute)/stepMinutes)},(_,i)=>settings.dailyStartMinute+i*stepMinutes);
   const closed=snapshot.status!=="collecting";
   const editable=(day:string,minute:number)=>view==="mine" && !closed && !pending && minute>=settings.dailyStartMinute && minute+30<=settings.dailyEndMinute && day>=settings.dateRangeStart && day<=settings.dateRangeEnd && slotAt(day,minute)>snapshot.serverNow;
-  const {start: startDrag, cancelDrag, handlers: dragHandlers}=useSlotDrag(grid,draft,setDraft,editable,()=>setMessage(""),remember,stepMinutes);
+  const {start: startDrag, cancelDrag, handlers: dragHandlers}=useSlotDrag(grid,draft,setDraft,editable,()=>setMessage(""),stepMinutes);
   const selected=[...draft].sort();
   const dirty=JSON.stringify(selected)!==JSON.stringify(snapshot.slots);
   const submitted=Boolean(snapshot.submittedAt)&&!dirty;
@@ -74,7 +68,7 @@ export function AvailabilityEditor({inviteToken,initial}:{inviteToken:string;ini
     const changedVersion=previous.version!==next.version;
     if(next.participantId!==previous.participantId || next.version<previous.version)return;
     if(force || changedSettings || changedVersion || next.status!==previous.status){
-      cancelDrag();setDraft(new Set(next.slots));setHistory([]);setFuture([]);setConfirmClear(false);setRepeatWeek(null);setConfirmClose(false);
+      cancelDrag();setDraft(new Set(next.slots));setConfirmClear(false);setRepeatWeek(null);setConfirmClose(false);
       if(!force)setMessage(changedSettings?(next.submittedAt===null?"약속 설정이 변경됐어요. 가능 시간을 확인하고 다시 제출해 주세요.":"약속 설정이 변경됐어요. 최신 선택을 불러왔어요."):changedVersion?"다른 기기에서 응답이 변경됐어요. 최신 선택을 불러왔어요.":"응답이 마감됐어요. 제출한 시간만 확인할 수 있어요.");
     }
     if(changedSettings)setWeek(current=>current<weekStart(next.settings.dateRangeStart)||current>next.settings.dateRangeEnd?weekStart(next.settings.dateRangeStart):current);
@@ -115,8 +109,9 @@ export function AvailabilityEditor({inviteToken,initial}:{inviteToken:string;ini
   useEffect(()=>{
     const dialog=clearDialog.current;
     if(!confirmClear || !dialog)return;
+    const opener=repeatButton.current;
     dialog.showModal();dialog.querySelector<HTMLButtonElement>("[data-cancel]")?.focus();
-    return ()=>dialog.close();
+    return ()=>{dialog.close();opener?.focus({preventScroll:true});};
   },[confirmClear]);
   useEffect(()=>{
     const dialog=closeDialog.current;
@@ -150,7 +145,7 @@ export function AvailabilityEditor({inviteToken,initial}:{inviteToken:string;ini
     const select=!parts.every(m=>draft.has(slotAt(day,m)));
     const next=new Set(draft);
     parts.forEach(m=>{const slot=slotAt(day,m);if(select)next.add(slot);else next.delete(slot);});
-    remember(draft,next);setDraft(next);setMessage("");
+    setDraft(next);setMessage("");
   }
   function zoom(value:number){
     cancelDrag(true);
@@ -167,7 +162,7 @@ export function AvailabilityEditor({inviteToken,initial}:{inviteToken:string;ini
     setConfirmClear(false);
     const slots=scope==="week"?weekSlots:futureSlots;
     if(pending || closed || !slots.length)return;
-    cancelDrag();const next=new Set(draft);slots.forEach(slot=>next.delete(slot));remember(draft,next);setDraft(next);setMessage(`${scope==="week"?"이번 주":"모든 주의"} 선택을 지웠어요. 되돌리기로 복원할 수 있어요.`);
+    cancelDrag();const next=new Set(draft);slots.forEach(slot=>next.delete(slot));setDraft(next);setMessage(`${scope==="week"?"이번 주":"모든 주의"} 선택을 지웠어요. 선택 제출을 눌러 저장하세요.`);
   }
   function openRepeat(){
     cancelDrag(true);
@@ -175,16 +170,7 @@ export function AvailabilityEditor({inviteToken,initial}:{inviteToken:string;ini
   }
   function applyRepeat(next:Set<string>){
     if(pending || closed)return;
-    remember(draft,next);setDraft(next);setRepeatWeek(null);setMessage("반복 시간을 추가했어요. 선택 제출을 눌러 저장하세요.");
-  }
-  function undo(){
-    if(pending || closed || !history.length)return;
-    cancelDrag();setFuture(previous=>[...previous,new Set(draft)]);setDraft(new Set(history[history.length-1]));setHistory(previous=>previous.slice(0,-1));setMessage("마지막 변경을 되돌렸어요.");
-  }
-  function redo(){
-    if(pending || closed || !future.length)return;
-    cancelDrag();setHistory(previous=>[...previous.slice(-49),new Set(draft)]);
-    setDraft(new Set(future[future.length-1]));setFuture(previous=>previous.slice(0,-1));setMessage("되돌린 변경을 복구했어요.");
+    setDraft(next);setRepeatWeek(null);setMessage("반복 시간을 추가했어요. 선택 제출을 눌러 저장하세요.");
   }
   function move(event:KeyboardEvent<HTMLButtonElement>,day:string,minute:number){
     const steps:Record<string,[number,number]>={ArrowUp:[0,-stepMinutes],ArrowDown:[0,stepMinutes],ArrowLeft:[-1,0],ArrowRight:[1,0]};
@@ -214,10 +200,7 @@ export function AvailabilityEditor({inviteToken,initial}:{inviteToken:string;ini
   const collectionAction=closed?<Link href={`/p/${inviteToken}/candidates`}><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg>후보 보기</Link>:snapshot.role==="host"?<button type="button" disabled={pending} onClick={()=>{setSidebarOpen(false);setConfirmClose(true);}}><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg>응답 마감</button>:<span className={styles.viewBadge}>모집 중</span>;
   return <main className={`${styles.page} ${styles.calendarPage}`}><div className={styles.shell}>
     <div className={styles.topBar}>
-      <button type="button" className={styles.mobileInfoButton} aria-label="약속 정보 열기" aria-expanded={sidebarOpen} aria-controls="availability-drawer" onClick={()=>setSidebarOpen(true)}><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg><span>약속 정보</span></button>
       <JourneyHeader href={`/p/${inviteToken}`}/>
-      <DeadlineCountdown deadline={settings.votingDeadlineAt} serverNow={snapshot.serverNow} closed={closed}/>
-      {(closed||snapshot.role==="host")&&<div className={styles.headerAction}>{collectionAction}</div>}
     </div>
     <header className={styles.header}>
       <JourneyProgress stage={closed ? 2 : 1}/>
@@ -229,9 +212,13 @@ export function AvailabilityEditor({inviteToken,initial}:{inviteToken:string;ini
       <aside className={styles.sidebar} aria-label="약속 정보"><AvailabilitySidebar snapshot={snapshot} inviteToken={inviteToken} {...participantProps}/></aside>
       <section className={styles.panel} aria-label="가능 시간 선택">
     <div className={styles.calendarControls} ref={controls} data-calendar-controls>
+    <div className={styles.calendarTopRow}>
+      <button type="button" className={styles.mobileInfoButton} aria-label="약속 정보 열기" aria-expanded={sidebarOpen} aria-controls="availability-drawer" onClick={()=>setSidebarOpen(true)}><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
     <div className={styles.viewSwitch} role="group" aria-label="시간 보기">
       <button type="button" aria-pressed={view==="mine"} onClick={()=>changeView("mine")}>내 시간</button>
       <button type="button" aria-pressed={view==="all"} onClick={()=>changeView("all")}>전체 시간</button>
+    </div>
+    {(closed||snapshot.role==="host")?<div className={styles.headerAction}>{collectionAction}</div>:<span aria-hidden="true"/>}
     </div>
     <div className={styles.toolbar}>
       <button type="button" aria-label="이전 주" disabled={week<=weekStart(settings.dateRangeStart)} onClick={()=>setWeek(addDays(week,-7))}>‹</button>
@@ -239,18 +226,13 @@ export function AvailabilityEditor({inviteToken,initial}:{inviteToken:string;ini
       <button type="button" aria-label="다음 주" disabled={addDays(week,7)>settings.dateRangeEnd} onClick={()=>setWeek(addDays(week,7))}>›</button>
     </div>
     <div className={styles.editTools}>
-<div className={styles.undoControls}><EditButton label="되돌리기" description="마지막 변경 되돌리기" disabled={view!=="mine"||pending||closed||!history.length} onClick={undo}>
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m8 4-5 5 5 5"/><path d="M3 9h10a6 6 0 0 1 0 12h-3"/></svg>
-    </EditButton><EditButton label="복구하기" description="되돌린 변경 복구하기" disabled={view!=="mine"||pending||closed||!future.length} onClick={redo}>
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m16 4 5 5-5 5"/><path d="M21 9H11a6 6 0 0 0 0 12h3"/></svg>
-    </EditButton></div>
-      <div className={styles.zoomControls} role="group" aria-label="한 칸의 시간">{[30,60,120].map(value=><button key={value} type="button" disabled={pending} aria-pressed={stepMinutes===value} onClick={()=>zoom(value)}>{durationLabel(value)}</button>)}</div>
-    </div>
-    <div className={styles.help} aria-live="polite">
       {view==="mine"&&!closed&&<div className={styles.touchModes} role="group" aria-label="터치 조작">
         <button type="button" aria-pressed={!touchSelecting} disabled={pending} onClick={()=>changeTouchMode(false)}>스크롤</button>
         <button type="button" aria-pressed={touchSelecting} disabled={pending} onClick={()=>changeTouchMode(true)}>선택</button>
       </div>}
+      <div className={styles.zoomControls} role="group" aria-label="한 칸의 시간">{[30,60,120].map(value=><button key={value} type="button" disabled={pending} aria-pressed={stepMinutes===value} onClick={()=>zoom(value)}>{durationLabel(value)}</button>)}</div>
+    </div>
+    <div className={styles.help} aria-live="polite">
       {overview.error ? <span>시간 정보를 불러오지 못했어요. <button type="button" onClick={overview.refresh}>다시 불러오기</button></span>
         : overview.loading ? <span>시간 정보 불러오는 중…</span>
         : <span>{view==="all"?`${closed?"집계":"임시 집계"} · 전체 ${overview.data?.participants.length ?? "–"}명`:view!=="mine"?`${overview.participants?.find(member=>member.id===view)?.nickname ?? "참여자"} · 읽기 전용`:closed?"응답이 마감됐어요. 제출한 시간만 확인할 수 있어요.":<><span className={styles.mouseHelp}>드래그로 선택 · 양옆 여백을 밀어 스크롤</span><span className={styles.touchHelp}>{touchSelecting?"탭·드래그로 선택":"밀어서 스크롤"}</span></>}</span>}
@@ -272,7 +254,13 @@ export function AvailabilityEditor({inviteToken,initial}:{inviteToken:string;ini
       </div>
     </div>
     <div className={styles.legend}>{view!=="mine"?<span>{view==="all"?<span className={styles.heatLegend} role="group" aria-label="색상별 가능 인원"><span>0명</span><span className={styles.heatRamp} aria-hidden="true"><i data-heat="0"/>{heatLegend(overview.data?.participants.length??0).map(item=><i key={item.level} data-heat={item.level}/>)}</span><span>{overview.data?.participants.length??"–"}명</span></span>:"제출된 시간 · 읽기 전용"}</span>:<><span><i/>선택한 시간</span><span><i/>선택 불가</span>{stepMinutes>30 && <span className={styles.partialLegend}><i/>일부 선택</span>}</>}</div>
-    <footer className={styles.footer} hidden={view!=="mine"}><button type="button" className={styles.repeatButton} disabled={pending||closed||!selected.some(slot=>localDay(slot)>=week && localDay(slot)<addDays(week,7))} onClick={openRepeat}>이번 주 반복</button><button type="button" className={styles.resetButton} disabled={pending||closed||!futureSlots.length} onClick={()=>setConfirmClear(true)}>초기화</button><button type="button" disabled={pending||closed||submitted} data-submitted={submitted} onClick={submit}>{pending?"제출 중…":submitted?<><span aria-hidden="true">✓ </span>제출 완료</>:"선택 제출"}</button></footer>
+    <footer className={styles.footer} data-readonly={view!=="mine"}>
+      {view==="mine"&&<button ref={repeatButton} type="button" className={styles.repeatButton} disabled={pending||closed} onClick={openRepeat}>주간 반복</button>}
+      <div className={styles.footerDeadline}>
+        <DeadlineCountdown deadline={settings.votingDeadlineAt} serverNow={snapshot.serverNow} closed={closed}/>
+      </div>
+      {view==="mine"&&<button type="button" disabled={pending||closed||submitted} data-submitted={submitted} onClick={submit}>{pending?"제출 중…":submitted?<><span aria-hidden="true">✓ </span>제출 완료</>:"선택 제출"}</button>}
+    </footer>
     <p role="status" className={styles.notice}>{message}</p>
 
       </section>
@@ -290,10 +278,10 @@ export function AvailabilityEditor({inviteToken,initial}:{inviteToken:string;ini
       <p>마감하면 새로 참여하거나 시간을 수정할 수 없어요.{dirty && <> 아직 제출하지 않은 내 선택은 반영되지 않아요.</>}</p>
       <div className={styles.closeActions}><button type="button" data-cancel disabled={pending} onClick={()=>setConfirmClose(false)}>취소</button><button type="button" className={styles.closeConfirm} disabled={pending} onClick={closeVoting}>{pending?"마감 중…":"마감하기"}</button></div>
     </dialog>
-    {repeatWeek && <RepeatDialog slots={draft} settings={settings} now={snapshot.serverNow} sourceWeek={repeatWeek} onApply={applyRepeat} onClose={()=>setRepeatWeek(null)}/> }
+    {repeatWeek && <RepeatDialog slots={draft} settings={settings} now={snapshot.serverNow} sourceWeek={repeatWeek} onApply={applyRepeat} onReset={()=>{setRepeatWeek(null);setConfirmClear(true);}} onClose={()=>setRepeatWeek(null)}/> }
     <dialog ref={clearDialog} className={styles.confirmDialog} aria-labelledby="clear-title" aria-describedby="clear-description" onCancel={()=>setConfirmClear(false)} onClose={()=>setConfirmClear(false)}>
       <h2 id="clear-title">선택한 시간을 초기화할까요?</h2>
-      <p id="clear-description">지난 시간은 유지되며,<br/>되돌리기로 복원할 수 있어요.</p>
+      <p id="clear-description">지난 시간은 유지돼요. 초기화한 내용은 선택 제출을 눌러야 저장돼요.</p>
       <div className={styles.resetChoices}>
         <button type="button" aria-label="이번 주 초기화" disabled={pending||closed||!weekSlots.length} onClick={()=>clearSelection("week")}><strong>이번 주 초기화</strong><span>현재 보고 있는 주의 선택만 삭제</span></button>
         <button type="button" aria-label="전체 초기화" disabled={pending||closed||!futureSlots.length} onClick={()=>clearSelection("all")}><strong>전체 초기화</strong><span>모든 주의 선택 삭제</span></button>

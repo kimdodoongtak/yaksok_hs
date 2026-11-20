@@ -100,18 +100,10 @@
 .zoomControls { display: flex; padding: 3px; border-radius: 8px; background: var(--subtle); }
 .zoomControls button { min-height: 34px; padding: 0 9px; border: 0; color: var(--muted); }
 .zoomControls button[aria-pressed="true"] { background: white; color: var(--accent); box-shadow: 0 1px 3px #24304712; }
-.undoControls { display: flex; gap: 8px; }
-.undoControls button { display: grid; place-items: center; width: 44px; height: 44px; padding: 0; flex-shrink: 0; border: 0; border-radius: 7px; color: var(--accent); background: transparent; }
-.undoControls button:not(:disabled):hover { background: var(--subtle); }
 .timeRange { font-size: 12px; }
 .slot[aria-pressed="mixed"], .slot[aria-pressed="mixed"]:hover { color: var(--accent); background: repeating-linear-gradient(135deg,var(--soft) 0 5px,#f1f4ff 5px 10px); font-size: 10px; border: 1px dashed #93a8f3; border-radius: 4px; }
 .legend .partialLegend i { background: repeating-linear-gradient(135deg,#93a8f3 0 2px,#f1f4ff 2px 4px); border-color: #93a8f3; }
 
-.editAction { position: relative; display: inline-flex; }
-.tooltip { position: absolute; z-index: 10; bottom: 100%; left: 0; padding: 9px 12px; border-radius: 7px; background: var(--ink); color: white; font-size: 12px; line-height: 1.5; white-space: nowrap; box-shadow: 0 3px 12px #24304722; }
-@media (max-width: 899px), (hover: none) {
-  .tooltip { display: none; }
-}
 
 .footer { justify-content: flex-end; }
 .footer .resetButton { background: transparent; color: var(--muted); font-weight: 500; margin-right: 8px; }
@@ -227,15 +219,15 @@
 .weekHeading > span { font-size: 10px; }
 .editTools { margin: 10px 0 8px; gap: 8px; }
 .editTools button { border-radius: 100px; color: var(--ink); }
-.undoControls { gap: 6px; }
-.undoControls button { width: 42px; min-height: 36px; height: 36px; background: transparent; color: var(--muted); border-color: var(--line); }
-.undoControls svg { width: 19px; height: 19px; stroke-width: 1.8; }
 .zoomControls { background: var(--subtle); border-radius: 100px; }
 .zoomControls button { min-height: 32px; padding: 0 9px; font-size: 11px; }
 .zoomControls button[aria-pressed="true"] { color: var(--accent); }
 .help { display: flex; align-items: center; min-height: 32px; margin: 0 0 4px; font-size: 11px; }
 .help button { min-height: 32px; color: var(--accent); text-decoration: underline; }
-.touchModes, .touchHelp { display: none; }
+.touchHelp { display: none; }
+.touchModes { display: flex; flex-shrink: 0; padding: 2px; border-radius: 8px; background: var(--subtle); }
+.editTools .touchModes button { min-width: 50px; min-height: 40px; padding: 0 8px; border: 0; border-radius: 6px; color: var(--muted); font-size: 12px; font-weight: 600; }
+.editTools .touchModes button[aria-pressed="true"] { color: var(--accent); background: white; box-shadow: 0 1px 3px #24304718; }
 .scroll[data-touch-selecting="true"] .slot:not(:disabled) { touch-action: none; }
 @media (any-pointer: coarse) {
   .help { min-height: 44px; gap: 10px; }
@@ -395,13 +387,17 @@
 .topBar > .headerAction { grid-column: 3; grid-row: 1; justify-self: end; }
 .topBar > :global(.journey-header) { padding: 0; }
 .header .headingRow { margin-top: 22px; }
+.calendarTopRow { display: grid; grid-template-columns: 60px minmax(0,1fr) 60px; align-items: center; gap: 6px; margin-bottom: 12px; }
+.calendarTopRow .viewSwitch { width: 100%; max-width: 240px; justify-self: center; margin-bottom: 0; }
+.calendarTopRow .mobileInfoButton { grid-column: 1; grid-row: 1; width: 44px; justify-content: center; }
+.calendarTopRow .viewSwitch { grid-column: 2; grid-row: 1; }
 
 /* One document scroll; controls and dates remain above the time rows. */
 .calendarControls { position: sticky; top: 60px; z-index: 10; background: var(--paper); padding-top: 4px; }
 .dayHeaders { display: grid; grid-template-columns: 44px repeat(7,minmax(0,1fr)); min-height: 64px; }
 .dayHeaders > :is(.corner,.day) { position: static; }
 .scroll { overflow: visible; border-radius: 0; }
-.slot, .readCell > span[role="button"] { scroll-margin-top: calc(60px + var(--calendar-controls-height,260px) + 8px); scroll-margin-bottom: 90px; }
+.slot, .readCell > span[role="button"] { scroll-margin-top: calc(var(--calendar-top-offset,60px) + var(--calendar-controls-height,260px) + 8px); scroll-margin-bottom: 120px; }
 .footer[hidden] { display: flex; visibility: hidden; pointer-events: none; }
 @media (max-width: 359px) { .dayHeaders { grid-template-columns: 38px repeat(7,minmax(0,1fr)); } }
 .scrollMargin { display: none; }
@@ -437,7 +433,9 @@
 .slot[aria-pressed="true"]:not([data-block-end="true"]) { border-bottom-color: var(--soft); }
 .headerAction :is(button,a) { background: var(--accent); border-radius: 8px; }
 @media (max-width: 899px) {
-  .topBar { min-height: 60px; gap: 8px; }
+  .topBar { display: none; }
+  .calendarPage { --calendar-top-offset: 0px; }
+  .calendarControls { top: 0; }
   .topBar > :global(.journey-header) { display: none; }
   .topBar > .headerAction svg { display: block; flex-shrink: 0; }
   .topBar > .headerAction :is(button,a) { gap: 6px; min-height: 44px; padding: 6px 0; border-radius: 4px; background: transparent; color: var(--muted); font-size: 13px; font-weight: 500; white-space: nowrap; }
@@ -448,4 +446,30 @@
   /* Keep the page heading available to assistive technology without taking calendar space. */
   .header { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
   .header :global(.journey-stages) { display: none; }
+}
+
+/* Keep remaining time beside submission and the host action beside the tabs. */
+.footer { display: grid; grid-template-columns: auto minmax(0,1fr) auto; gap: 8px; }
+.footer .repeatButton { margin-right: 0; }
+.footerDeadline { display: flex; flex-direction: column; align-items: center; justify-content: center; min-width: 0; }
+.calendarTopRow .headerAction { grid-column: 3; grid-row: 1; justify-self: end; }
+.calendarTopRow .headerAction :is(button,a) { min-height: 44px; padding: 4px 6px; gap: 4px; background: transparent; color: var(--muted); font-size: 12px; font-weight: 500; white-space: nowrap; }
+.calendarTopRow .headerAction a { color: var(--accent); }
+.calendarTopRow .headerAction svg { display: none; }
+.footer[data-readonly="true"] { grid-template-columns: minmax(0,1fr); }
+.editTools { flex-wrap: nowrap; min-height: 44px; }
+.editTools .zoomControls { margin-left: auto; }
+.editTools .zoomControls button { min-height: 40px; }
+.help { min-height: 32px; }
+@media (max-width: 359px) {
+  .footer { gap: 6px; }
+  .footer > button { padding-inline: 10px; font-size: 12px; }
+  .footer .repeatButton { padding-inline: 8px; }
+  .footerDeadline .deadlineCountdown strong { font-size: 11px; }
+  .calendarTopRow .headerAction :is(button,a) { font-size: 11px; padding-inline: 0; }
+  .calendarTopRow { grid-template-columns: 56px minmax(0,1fr) 56px; gap: 4px; }
+  .calendarTopRow .mobileInfoButton { width: 36px; }
+  .editTools { gap: 6px; }
+  .editTools .touchModes button { min-width: 46px; padding-inline: 6px; }
+  .editTools .zoomControls button { padding-inline: 7px; }
 }

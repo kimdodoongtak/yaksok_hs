@@ -11,7 +11,6 @@ type Drag = {
   x: number;
   y: number;
   lastSlot?: string;
-  selection: Set<string>;
 };
 export function useSlotDrag(
   grid: RefObject<HTMLDivElement | null>,
@@ -19,7 +18,6 @@ export function useSlotDrag(
   setDraft: Dispatch<SetStateAction<Set<string>>>,
   canEdit: (day: string, minute: number) => boolean,
   onEdit: () => void,
-  onCommit: (before: Set<string>, after: Set<string>) => void,
   stepMinutes = 30,
 ) {
   const drag = useRef<Drag | null>(null);
@@ -50,7 +48,6 @@ export function useSlotDrag(
         if (current.value) next.add(slot); else next.delete(slot);
       }
     }
-    current.selection = next;
     setDraft(next);
   }
   function visibleBottom(container: HTMLDivElement) {
@@ -84,7 +81,7 @@ export function useSlotDrag(
     const editableMinutes = Array.from({length: stepMinutes / 30}, (_, i) => minute + i * 30).filter(m => canEdit(day, m));
     if (!event.isPrimary || event.button !== 0 || !editableMinutes.length) return;
     cancelDrag();
-    drag.current = {pointerId: event.pointerId, day, minute, value: !editableMinutes.every(m => draft.has(slotAt(day, m))), base: new Set(draft), selection: new Set(draft), x: event.clientX, y: event.clientY};
+    drag.current = {pointerId: event.pointerId, day, minute, value: !editableMinutes.every(m => draft.has(slotAt(day, m))), base: new Set(draft), x: event.clientX, y: event.clientY};
     grid.current?.setPointerCapture(event.pointerId);
     event.currentTarget.focus({preventScroll: true});
     onEdit();
@@ -99,7 +96,6 @@ export function useSlotDrag(
   function finish(event: PointerEvent<HTMLDivElement>) {
     if (drag.current?.pointerId !== event.pointerId) return;
     move(event);
-    if(drag.current)onCommit(drag.current.base,drag.current.selection);
     cancelDrag();
   }
   return {start, cancelDrag, handlers: {

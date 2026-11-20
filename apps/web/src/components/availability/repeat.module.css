@@ -29,6 +29,8 @@
 .dialog footer button { flex: 1; min-height: 46px; padding: 10px 16px; border-radius: 8px; background: var(--subtle); color: var(--muted); font-size: 14px; }
 .dialog footer .apply { flex: 2; background: var(--accent); color: white; font-weight: 600; }
 .dialog button:disabled { opacity: .4; }
+.resetSection { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 16px; padding-top: 8px; border-top: 1px solid var(--line); font-size: 12px; color: var(--muted); }
+.resetSection button { min-width: 64px; min-height: 44px; padding: 8px 12px; color: var(--ink); font-size: 13px; border: 1px solid var(--line); border-radius: 8px; }
 .dialog :is(button,input,summary):focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 @media (max-width: 359px) { .dialog { padding: 20px; } .source summary { font-size: 12px; } .disclosure { font-size: 11px; } .weeks label { font-size: 13px; } }
 
