@@ -20,7 +20,7 @@
 .day strong { display: block; width: 30px; line-height: 30px; margin: 2px auto 0; color: var(--ink); font-size: 17px; font-weight: 600; border-radius: 50%; }
 .day strong[data-today="true"] { background: var(--accent); color: white; }
 .time { touch-action: pan-y; position: sticky; left: 0; z-index: 1; background: white; color: var(--muted); font-size: 12px; font-weight: 500; font-variant-numeric: tabular-nums; padding: 9px 2px 0; text-align: center; border-bottom: 1px solid var(--subtle); }
-.slot { min-height: 36px; border-left: 1px solid var(--line); border-bottom: 1px solid var(--subtle); font-size: 12px; color: var(--accent); user-select: none; touch-action: none; }
+.slot { min-height: 36px; border-left: 1px solid var(--line); border-bottom: 1px solid var(--subtle); font-size: 12px; color: var(--accent); user-select: none; touch-action: pan-y; }
 .slot[data-hour="true"] { border-top: 1px solid var(--line); }
 .slot:hover:not(:disabled) { background: #f1f4ff; }
 .slot[aria-pressed="true"], .slot[aria-pressed="true"]:hover { background: var(--soft); box-shadow: inset 2px 0 var(--accent); }
@@ -235,6 +235,17 @@
 .zoomControls button[aria-pressed="true"] { color: var(--accent); }
 .help { display: flex; align-items: center; min-height: 32px; margin: 0 0 4px; font-size: 11px; }
 .help button { min-height: 32px; color: var(--accent); text-decoration: underline; }
+.touchModes, .touchHelp { display: none; }
+.scroll[data-touch-selecting="true"] .slot:not(:disabled) { touch-action: none; }
+@media (any-pointer: coarse) {
+  .help { min-height: 44px; gap: 10px; }
+  .touchModes { display: flex; flex-shrink: 0; padding: 2px; border-radius: 8px; background: var(--subtle); }
+  .touchModes button { min-width: 50px; min-height: 44px; padding: 0 8px; border-radius: 6px; color: var(--muted); font-size: 12px; font-weight: 600; text-decoration: none; }
+  .touchModes button[aria-pressed="true"] { color: var(--accent); background: white; box-shadow: 0 1px 3px #24304718; }
+  .touchModes button:disabled { opacity: .5; }
+  .touchHelp { display: inline; }
+  .mouseHelp { display: none; }
+}
 .scroll { border: 0; border-radius: 0; }
 .grid { grid-template-columns: 38px repeat(7,minmax(0,1fr)); }
 .corner, .day { background: var(--paper); border: 0; }

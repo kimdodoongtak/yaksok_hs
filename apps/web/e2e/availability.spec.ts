@@ -31,6 +31,64 @@ async function fixture(context:BrowserContext){
   const slot=(time:string,dayValue=start)=>new Date(`${dayValue}T${time}:00+09:00`).toISOString();
   return {link,promise,member,start,end,slot,path:`/p/${link.inviteToken}/availability`};
 }
+for(const width of [320,393])test(`모바일 ${width}px 기본 스크롤에서 시간 칸을 탭하거나 밀어도 선택되지 않는다`,async({browser})=>{
+  const context=await browser.newContext({viewport:{width,height:640},hasTouch:true,isMobile:true});
+  try {
+    const f=await fixture(context),page=await context.newPage();
+    await page.goto(`http://127.0.0.1:3100${f.path}`);
+    const grid=page.getByLabel("주별 가능 시간");
+    const cell=grid.locator(`button[data-day="${f.start}"][data-minute="540"]`);
+    await cell.tap();
+    await expect(cell).toHaveAttribute("aria-pressed","false");
+    const client=await context.newCDPSession(page);
+    const box=(await cell.boundingBox())!;
+    const x=box.x+box.width/2,y=box.y+box.height/2+100;
+    await client.send("Input.dispatchTouchEvent",{type:"touchStart",touchPoints:[{x,y}]});
+    for(let i=1;i<=8;i++)await client.send("Input.dispatchTouchEvent",{type:"touchMove",touchPoints:[{x,y:y-i*15}]});
+    await client.send("Input.dispatchTouchEvent",{type:"touchEnd",touchPoints:[]});
+    await expect.poll(()=>page.evaluate(()=>window.scrollY)).toBeGreaterThan(30);
+    await expect(grid.locator('button[aria-pressed="true"]')).toHaveCount(0);
+    await expect(page.getByRole("button",{name:"되돌리기",exact:true})).toBeDisabled();
+  } finally {await context.close();}
+});
+test("모바일 선택 전환으로 편집하고 스크롤 복귀 후 선택과 이력을 보존한다",async({browser})=>{
+  const context=await browser.newContext({viewport:{width:393,height:640},hasTouch:true,isMobile:true});
+  try {
+    const f=await fixture(context),page=await context.newPage();
+    await page.goto(`http://127.0.0.1:3100${f.path}`);
+    const modes=page.getByRole("group",{name:"터치 조작",exact:true});
+    const scroll=modes.getByRole("button",{name:"스크롤",exact:true});
+    const select=modes.getByRole("button",{name:"선택",exact:true});
+    await expect(scroll).toHaveAttribute("aria-pressed","true");
+    await select.tap();await expect(select).toHaveAttribute("aria-pressed","true");
+    const grid=page.getByLabel("주별 가능 시간");
+    const cell=grid.locator(`button[data-day="${f.start}"][data-minute="540"]`);
+    await cell.tap();await expect(cell).toHaveAttribute("aria-pressed","true");
+    await scroll.tap();await cell.tap();await expect(cell).toHaveAttribute("aria-pressed","true");
+    await page.getByRole("button",{name:"되돌리기",exact:true}).tap();
+    await expect(cell).toHaveAttribute("aria-pressed","false");
+    await page.getByRole("button",{name:"복구하기",exact:true}).tap();
+    await expect(cell).toHaveAttribute("aria-pressed","true");
+    for(const width of [320,393]){
+      await page.setViewportSize({width,height:640});
+      await page.evaluate(()=>window.scrollTo(0,0));
+      expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+      const fourth=(await grid.locator(`button[data-day="${f.start}"][data-minute="720"]`).boundingBox())!;
+      const footer=(await page.locator("footer").boundingBox())!;
+      expect(fourth.y+fourth.height).toBeLessThanOrEqual(footer.y);
+      await page.screenshot({path:`test-results/calendar-mode-scroll-${width}.png`});
+      await select.tap();
+      await page.screenshot({path:`test-results/calendar-mode-select-${width}.png`});
+      await scroll.tap();
+    }
+    await page.evaluate(()=>window.scrollTo(0,300));
+    await expect(scroll).toBeInViewport();await select.tap();
+    await page.getByRole("button",{name:"전체 시간",exact:true}).tap();
+    await expect(modes).not.toBeVisible();
+    await page.getByRole("button",{name:"내 시간",exact:true}).tap();
+    await expect(scroll).toHaveAttribute("aria-pressed","true");
+  } finally {await context.close();}
+});
 test("2시간 보기에서도 시간 칸 높이를 유지한다",async({page,context})=>{
   const f=await fixture(context);await page.setViewportSize({width:393,height:640});await page.goto(f.path);
   const cell=()=>page.getByLabel("주별 가능 시간").locator(`button[data-day="${f.start}"]`).first();
@@ -103,11 +161,16 @@ test("모바일 터치로 선택·해제하고 제출한다",async({browser})=>{
   const context=await browser.newContext({viewport:{width:393,height:852},hasTouch:true,isMobile:true});
   try {
     const f=await fixture(context),page=await context.newPage();await page.goto(`http://127.0.0.1:3100${f.path}`);await page.getByRole("button",{name:"30분",exact:true}).click();
+    await page.getByRole("button",{name:"선택",exact:true}).tap();
     const cell=page.getByRole("button",{name:`${f.start} 09:00`,exact:true});
     await cell.tap();await expect(cell).toHaveAttribute("aria-pressed","true");
     await cell.tap();await expect(cell).toHaveAttribute("aria-pressed","false");
     await cell.tap();await page.getByRole("button",{name:"선택 제출",exact:true}).tap();
     await expect(page.getByRole("status")).toContainText("제출했어요");
+    await expect(page.getByRole("button",{name:"스크롤",exact:true})).toHaveAttribute("aria-pressed","true");
+    await cell.tap();await expect(cell).toHaveAttribute("aria-pressed","true");
+    await page.reload();
+    await expect(page.getByRole("button",{name:"스크롤",exact:true})).toHaveAttribute("aria-pressed","true");
   } finally {await context.close();}
 });
 test("제출 응답이 유실돼도 선택을 유지하고 재시도 때 중복 저장하지 않는다",async({page,context})=>{
@@ -191,6 +254,7 @@ test("모바일 손가락 드래그로 연속 시간을 선택·해제하고 시
   const context=await browser.newContext({viewport:{width:393,height:852},hasTouch:true,isMobile:true});
   try {
     const f=await fixture(context),page=await context.newPage();await page.goto(`http://127.0.0.1:3100${f.path}`);await page.getByRole("button",{name:"30분",exact:true}).click();
+    await page.getByRole("button",{name:"선택",exact:true}).tap();
     const cell=(time:string)=>page.getByRole("button",{name:`${f.start} ${time}`,exact:true});
     const client=await context.newCDPSession(page);
     const start=await cell("09:00").boundingBox(),end=await cell("10:30").boundingBox();
@@ -225,6 +289,7 @@ test("모바일 드래그 중 가장자리 자동 스크롤과 제출을 유지�
   try {
     const f=await fixture(context),page=await context.newPage();
     await page.goto(`http://127.0.0.1:3100${f.path}`);await page.getByRole("button",{name:"30분",exact:true}).click();
+    await page.getByRole("button",{name:"선택",exact:true}).tap();
     const start=await page.getByRole("button",{name:`${f.start} 09:00`,exact:true}).boundingBox();
     const grid=await page.getByLabel("주별 가능 시간").boundingBox(),footer=await page.locator("footer").boundingBox();
     if(!start||!grid||!footer)throw new Error("시간표 없음");
@@ -245,6 +310,7 @@ for(const width of [320,393])test(`모바일 ${width}px 오른쪽 하단을 밀�
     const f=await fixture(context),page=await context.newPage();
     await page.goto(`http://127.0.0.1:3100${f.path}`);
     await page.getByRole("button",{name:"30분",exact:true}).click();
+    await page.getByRole("button",{name:"선택",exact:true}).tap();
     const grid=page.getByLabel("주별 가능 시간");
     const lastDay=grid.locator('button[data-minute="540"]').last();
     await lastDay.tap();

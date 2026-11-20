@@ -34,6 +34,7 @@ export function AvailabilityEditor({inviteToken,initial}:{inviteToken:string;ini
   },[]);
   const [week,setWeek]=useState(()=>weekStart(initial.settings.dateRangeStart));
   const [view,setView]=useState("mine");
+  const [touchSelecting,setTouchSelecting]=useState(false);
   const [confirmClose,setConfirmClose]=useState(false);
   const closeDialog=useRef<HTMLDialogElement>(null);
   const overview=useOverview(inviteToken,snapshot.participantId,week,["mine","all"].includes(view)?undefined:view,5,JSON.stringify(settingsRevision(snapshot)));
@@ -134,7 +135,8 @@ export function AvailabilityEditor({inviteToken,initial}:{inviteToken:string;ini
     } catch {setMessage("마감하지 못했어요. 다시 시도해 주세요.");}
     finally {setConfirmClose(false);busy.current=false;setPending(false);}
   }
-  function changeView(next:string){cancelDrag(true);setView(next);setSidebarOpen(false);}
+  function changeView(next:string){cancelDrag(true);if(next!==view)setTouchSelecting(false);setView(next);setSidebarOpen(false);}
+  function changeTouchMode(selecting:boolean){cancelDrag(true);setTouchSelecting(selecting);}
   const participantProps={participants:overview.participants,onSelect:(id:string)=>changeView(id===snapshot.participantId?"mine":id),selectedId:view==="mine"?snapshot.participantId:view};
   function cellMinutes(minute:number){return Array.from({length:Math.min(stepMinutes,settings.dailyEndMinute-minute)/30},(_,i)=>minute+i*30);}
   function cellState(day:string,minute:number):boolean|"mixed"{
@@ -201,7 +203,7 @@ export function AvailabilityEditor({inviteToken,initial}:{inviteToken:string;ini
         const next=result.ok?result.snapshot:result.snapshot!;
         applySnapshot(next,true);
       }
-      if(result.ok){overview.refresh();setMessage(result.snapshot.slots.length?"가능 시간을 제출했어요.":"가능한 시간 없음으로 제출했어요.");}
+      if(result.ok){setTouchSelecting(false);overview.refresh();setMessage(result.snapshot.slots.length?"가능 시간을 제출했어요.":"가능한 시간 없음으로 제출했어요.");}
       else if(result.code==="AVAILABILITY_VERSION_CONFLICT")setMessage("다른 기기에서 응답이 변경됐어요. 최신 선택을 불러왔어요.");
       else if(result.code==="VOTING_CLOSED")router.replace(`/p/${inviteToken}/candidates`);
       else if(["UNAUTHORIZED","LINK_EXPIRED","PROMISE_CANCELLED","DRAFT_EXPIRED","INVALID_LINK","NOT_AVAILABLE"].includes(result.code))router.replace(`/p/${inviteToken}`);
@@ -245,21 +247,25 @@ export function AvailabilityEditor({inviteToken,initial}:{inviteToken:string;ini
       <div className={styles.zoomControls} role="group" aria-label="한 칸의 시간">{[30,60,120].map(value=><button key={value} type="button" disabled={pending} aria-pressed={stepMinutes===value} onClick={()=>zoom(value)}>{durationLabel(value)}</button>)}</div>
     </div>
     <div className={styles.help} aria-live="polite">
+      {view==="mine"&&!closed&&<div className={styles.touchModes} role="group" aria-label="터치 조작">
+        <button type="button" aria-pressed={!touchSelecting} disabled={pending} onClick={()=>changeTouchMode(false)}>스크롤</button>
+        <button type="button" aria-pressed={touchSelecting} disabled={pending} onClick={()=>changeTouchMode(true)}>선택</button>
+      </div>}
       {overview.error ? <span>시간 정보를 불러오지 못했어요. <button type="button" onClick={overview.refresh}>다시 불러오기</button></span>
         : overview.loading ? <span>시간 정보 불러오는 중…</span>
-        : <span>{view==="all"?`${closed?"집계":"임시 집계"} · 전체 ${overview.data?.participants.length ?? "–"}명`:view!=="mine"?`${overview.participants?.find(member=>member.id===view)?.nickname ?? "참여자"} · 읽기 전용`:closed?"응답이 마감됐어요. 제출한 시간만 확인할 수 있어요.":"드래그로 선택 · 양옆 여백을 밀어 스크롤"}</span>}
+        : <span>{view==="all"?`${closed?"집계":"임시 집계"} · 전체 ${overview.data?.participants.length ?? "–"}명`:view!=="mine"?`${overview.participants?.find(member=>member.id===view)?.nickname ?? "참여자"} · 읽기 전용`:closed?"응답이 마감됐어요. 제출한 시간만 확인할 수 있어요.":<><span className={styles.mouseHelp}>드래그로 선택 · 양옆 여백을 밀어 스크롤</span><span className={styles.touchHelp}>{touchSelecting?"탭·드래그로 선택":"밀어서 스크롤"}</span></>}</span>}
     </div>
     <div className={styles.dayHeaders}>
         <div className={styles.corner}/>{days.map((day,index)=><div className={styles.day} key={day} data-day-heading><span>{["일","월","화","수","목","금","토"][index]}</span><strong data-today={day===localDay(snapshot.serverNow)}>{Number(day.slice(8))}</strong></div>)}
     </div>
     </div>
-    <div className={styles.scroll} ref={grid} aria-label="주별 가능 시간" {...dragHandlers}>
+    <div className={styles.scroll} ref={grid} aria-label="주별 가능 시간" data-touch-selecting={touchSelecting&&view==="mine"&&!closed} {...dragHandlers}>
       <div className={styles.grid} style={{gridAutoRows:50}}>
         {minutes.map(minute=><div className={styles.row} key={minute}>
           <div className={styles.time}>{stepMinutes>30 ? <span className={styles.timeRange}>{compactTimeLabel(minute)} ~ {compactTimeLabel(Math.min(minute+stepMinutes,settings.dailyEndMinute))}</span> : timeLabel(minute)}</div>
           {days.map(day=>{if(view!=="mine")return <HeatmapCell key={day} blocks={blocksByDay[day]} day={day} minute={minute} stepMinutes={stepMinutes} endMinute={settings.dailyEndMinute} startMinute={settings.dailyStartMinute} valid={day>=settings.dateRangeStart&&day<=settings.dateRangeEnd} data={overview.data} all={view==="all"}/>;
           const active=cellState(day,minute),enabled=cellMinutes(minute).some(m=>editable(day,m));return <button key={day} type="button" className={styles.slot} style={{minHeight:44}} data-day={day} data-minute={minute} data-hour={minute%60===0} data-block-start={active===true && cellState(day,minute-stepMinutes)!==true} data-block-end={active===true && cellState(day,minute+stepMinutes)!==true} aria-label={`${day} ${timeLabel(minute)}${stepMinutes>30?`–${timeLabel(Math.min(minute+stepMinutes,settings.dailyEndMinute))}`:""}`} aria-pressed={active} disabled={!enabled}
-            onPointerDown={event=>startDrag(event,day,minute)}
+            onPointerDown={event=>{if(event.pointerType==="mouse"||touchSelecting)startDrag(event,day,minute);}}
             onClick={event=>{if(event.detail===0)toggle(day,minute);}}
             onKeyDown={event=>move(event,day,minute)}>{active?<span aria-hidden="true">{active==="mixed"?"일부":"✓"}</span>:null}</button>;})}
         </div>)}
