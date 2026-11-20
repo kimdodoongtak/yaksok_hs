@@ -1,0 +1,298 @@
+{
+  "fileKey": "ZjcFr02Eo3878EKLEVhNgc",
+  "sessionId": "e61fceeb-9f0b-414c-a847-1c2fd218c4e3",
+  "pageId": "4:131",
+  "boardId": "8:296",
+  "account": "iriskimhs@gmail.com",
+  "status": "all_37_created_followup_partially_applied",
+  "scope": "전체 37개 화면/상태를 빨강 티켓 디자인으로 재구성; 화면별 필수 기능·권한/예외·다음 이동 유지",
+  "screens": [
+    {
+      "sourceId": "1:2771",
+      "number": "00",
+      "cardId": "8:303",
+      "screenId": "8:305",
+      "noteId": "8:331"
+    },
+    {
+      "sourceId": "1:33",
+      "number": "01",
+      "cardId": "8:338",
+      "screenId": "8:340",
+      "noteId": "8:374"
+    },
+    {
+      "sourceId": "1:60",
+      "number": "02",
+      "cardId": "8:381",
+      "screenId": "8:383",
+      "noteId": "8:435"
+    },
+    {
+      "sourceId": "1:119",
+      "number": "03",
+      "cardId": "8:442",
+      "screenId": "8:444",
+      "noteId": "8:589"
+    },
+    {
+      "sourceId": "1:270",
+      "number": "04",
+      "cardId": "8:596",
+      "screenId": "8:598",
+      "noteId": "8:641"
+    },
+    {
+      "sourceId": "1:308",
+      "number": "05",
+      "cardId": "8:648",
+      "screenId": "8:650",
+      "noteId": "8:740"
+    },
+    {
+      "sourceId": "1:337",
+      "number": "06",
+      "cardId": "8:770",
+      "screenId": "8:772",
+      "noteId": "8:813"
+    },
+    {
+      "sourceId": "1:372",
+      "number": "07",
+      "cardId": "8:820",
+      "screenId": "8:822",
+      "noteId": "8:864"
+    },
+    {
+      "sourceId": "1:404",
+      "number": "08",
+      "cardId": "8:871",
+      "screenId": "8:873",
+      "noteId": "8:913"
+    },
+    {
+      "sourceId": "1:438",
+      "number": "09",
+      "cardId": "8:920",
+      "screenId": "8:922",
+      "noteId": "8:958"
+    },
+    {
+      "sourceId": "1:462",
+      "number": "10",
+      "cardId": "8:965",
+      "screenId": "8:967",
+      "noteId": "8:1010"
+    },
+    {
+      "sourceId": "1:492",
+      "number": "11",
+      "cardId": "8:1017",
+      "screenId": "8:1019",
+      "noteId": "8:1062"
+    },
+    {
+      "sourceId": "1:522",
+      "number": "12",
+      "cardId": "8:1072",
+      "screenId": "8:1074",
+      "noteId": "8:1186"
+    },
+    {
+      "sourceId": "1:691",
+      "number": "13",
+      "cardId": "8:1193",
+      "screenId": "8:1195",
+      "noteId": "8:1321"
+    },
+    {
+      "sourceId": "1:869",
+      "number": "14",
+      "cardId": "8:1328",
+      "screenId": "8:1330",
+      "noteId": "8:1459"
+    },
+    {
+      "sourceId": "1:1050",
+      "number": "15",
+      "cardId": "8:1466",
+      "screenId": "8:1468",
+      "noteId": "8:1593"
+    },
+    {
+      "sourceId": "1:1225",
+      "number": "16",
+      "cardId": "8:1600",
+      "screenId": "8:1602",
+      "noteId": "8:1735"
+    },
+    {
+      "sourceId": "1:1407",
+      "number": "17",
+      "cardId": "8:1742",
+      "screenId": "8:1744",
+      "noteId": "8:1953"
+    },
+    {
+      "sourceId": "1:1571",
+      "number": "18",
+      "cardId": "8:2388",
+      "screenId": "8:2390",
+      "noteId": "8:2596"
+    },
+    {
+      "sourceId": "1:1728",
+      "number": "19",
+      "cardId": "8:2603",
+      "screenId": "8:2605",
+      "noteId": "8:2816"
+    },
+    {
+      "sourceId": "1:1896",
+      "number": "20",
+      "cardId": "8:2823",
+      "screenId": "8:2825",
+      "noteId": "8:2947"
+    },
+    {
+      "sourceId": "1:2070",
+      "number": "21",
+      "cardId": "8:2954",
+      "screenId": "8:2956",
+      "noteId": "8:2996"
+    },
+    {
+      "sourceId": "1:2123",
+      "number": "22",
+      "cardId": "8:3003",
+      "screenId": "8:3005",
+      "noteId": "8:3063"
+    },
+    {
+      "sourceId": "1:2171",
+      "number": "23",
+      "cardId": "8:3070",
+      "screenId": "8:3072",
+      "noteId": "8:3105"
+    },
+    {
+      "sourceId": "1:2196",
+      "number": "24",
+      "cardId": "9:1343",
+      "screenId": "9:1345",
+      "noteId": "9:1396"
+    },
+    {
+      "sourceId": "1:2261",
+      "number": "25",
+      "cardId": "9:1403",
+      "screenId": "9:1405",
+      "noteId": "9:1494"
+    },
+    {
+      "sourceId": "1:2355",
+      "number": "26",
+      "cardId": "9:1501",
+      "screenId": "9:1503",
+      "noteId": "9:1551"
+    },
+    {
+      "sourceId": "1:2408",
+      "number": "27",
+      "cardId": "9:1558",
+      "screenId": "9:1560",
+      "noteId": "9:1610"
+    },
+    {
+      "sourceId": "1:2449",
+      "number": "28",
+      "cardId": "9:1617",
+      "screenId": "9:1619",
+      "noteId": "9:1685"
+    },
+    {
+      "sourceId": "1:2498",
+      "number": "29",
+      "cardId": "9:1692",
+      "screenId": "9:1694",
+      "noteId": "9:1769"
+    },
+    {
+      "sourceId": "1:2554",
+      "number": "30",
+      "cardId": "9:1816",
+      "screenId": "9:1818",
+      "noteId": "9:1894"
+    },
+    {
+      "sourceId": "1:2614",
+      "number": "31",
+      "cardId": "9:1901",
+      "screenId": "9:1903",
+      "noteId": "9:1951"
+    },
+    {
+      "sourceId": "1:2649",
+      "number": "32",
+      "cardId": "9:1958",
+      "screenId": "9:1960",
+      "noteId": "9:2035"
+    },
+    {
+      "sourceId": "1:2705",
+      "number": "33",
+      "cardId": "9:2042",
+      "screenId": "9:2044",
+      "noteId": "9:2047"
+    },
+    {
+      "sourceId": "1:2720",
+      "number": "34",
+      "cardId": "9:2054",
+      "screenId": "9:2056",
+      "noteId": "9:2059"
+    },
+    {
+      "sourceId": "1:2735",
+      "number": "35",
+      "cardId": "9:2066",
+      "screenId": "9:2068",
+      "noteId": "9:2071"
+    },
+    {
+      "sourceId": "1:2750",
+      "number": "36",
+      "cardId": "9:2079",
+      "screenId": "9:2081",
+      "noteId": "9:2112"
+    }
+  ],
+  "validation": {
+    "screenCount": 37,
+    "noteCount": 37,
+    "missing": [],
+    "overflow": [],
+    "fonts": [
+      "Noto Sans KR"
+    ],
+    "images": [
+      {
+        "id": "9:1408",
+        "name": "image",
+        "w": 353,
+        "h": 174
+      }
+    ],
+    "allSixSectionsVisuallyReviewed": true,
+    "postFixSections": [
+      "8:1069",
+      "8:2385",
+      "9:1813"
+    ],
+    "latestRevisionVisuallyVerified": false
+  },
+  "originalBoardPreserved": "1:23",
+  "overviewBoard": "4:252",
+  "appChanged": false,
+  "latest_revision_status": "cute-update-status.json"
+}

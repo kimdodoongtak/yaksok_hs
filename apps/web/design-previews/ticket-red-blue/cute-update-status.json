@@ -1,0 +1,60 @@
+{
+  "fileKey": "ZjcFr02Eo3878EKLEVhNgc",
+  "sessionId": "e61fceeb-9f0b-414c-a847-1c2fd218c4e3",
+  "pageId": "4:131",
+  "boardId": "8:296",
+  "status": "partially_applied_mcp_quota_blocked",
+  "appliedScreens": [
+    "15 reset",
+    "16 participant drawer",
+    "17 heatmap",
+    "18 participant time",
+    "19 animal tooltip"
+  ],
+  "appliedResult": {
+    "avatarComponentIds": [
+      "14:1551",
+      "14:1560",
+      "14:1569",
+      "14:1578"
+    ],
+    "bounds": [
+      {
+        "id": "14:1587",
+        "x": 0,
+        "y": 479,
+        "width": 393,
+        "height": 373
+      },
+      {
+        "id": "14:1618",
+        "width": 321,
+        "height": 852
+      },
+      {
+        "id": "14:1929",
+        "x": 240,
+        "y": 480,
+        "width": 133,
+        "height": 233
+      }
+    ]
+  },
+  "figmaVisualVerification": false,
+  "pending": [
+    "24 mini-ticket confirmation bottom sheet",
+    "25 and overview confirmed stamp",
+    "33 cancellation stamp",
+    "34 expiry stamp",
+    "35 invalid-link stamp",
+    "36 exit stamp",
+    "avatar row geometry verification and compact adjustment"
+  ],
+  "nativePlugin": "apps/web/design-previews/ticket-red-blue/cute-update-plugin.zip",
+  "nativePluginSyntaxCheck": "Docker Node.js 24 node --check exit 0",
+  "nativePluginFigmaExecution": "not run",
+  "preview": "apps/web/design-previews/ticket-red-blue/cute-pending-preview.png",
+  "previewScope": "HTML mockup of pending stamps and confirmation sheet; not a Figma screenshot",
+  "blockingError": "Figma MCP tool call limit on Starter plan",
+  "account": "iriskimhs@gmail.com"
+}

@@ -1,0 +1,25 @@
+// Initializer: prepend figma-cute-common.js.
+const stampSpecs=[['confirmed','확정','CONFIRMED','accent',76],['cancelled','운행취소','CANCELLED','accent',132],['expired','운행종료','EXPIRED','ink',132],['invalid','노선없음','NO ROUTE','muted',132],['left','하차','CHECKED OUT','accent',132]];
+let stampRow=masters.children.find(n=>n.name==='도장 / 약속 상태');const stamps={};
+if(!stampRow){stampRow=row(masters,'도장 / 약속 상태',1000,38);stampRow.paddingTop=20;stampRow.paddingBottom=20;for(const [key,label,english,color,size]of stampSpecs){const c=track(figma.createComponent());stampRow.appendChild(c);c.name='도장 / '+key;c.resize(size,size);c.fills=[];c.clipsContent=false;c.description='약속 상태를 표현하는 장식 도장. 상태 문구와 함께 사용하며 개인 정보를 표시하지 않습니다.';const ink=palette[color];svg(c,'이중 원형 테두리',`<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 132 132" fill="none" stroke="${ink}" stroke-linecap="round"><circle cx="66" cy="66" r="59" stroke-width="2.7"/><circle cx="66" cy="66" r="55" stroke-width="1.15"/><circle cx="66" cy="66" r="60.7" stroke-width=".55" stroke-dasharray="31 1.8 8 2.2 49 1.2"/><path d="M28 20l3 1m69 9 1 2M16 84l1 3m97-20 1 3M47 121l3-1" stroke-width="1.4"/></svg>`);const scale=size/132;const top=text(c,'YAKSOK LINE',7*scale,700,color,size,'CENTER');top.letterSpacing={unit:'PIXELS',value:1.7*scale};top.x=0;top.y=38*scale;const main=text(c,label,(key==='confirmed'?27:23)*scale,700,color,size,'CENTER');main.x=0;main.y=53*scale;const bottom=text(c,english,6.7*scale,700,color,size,'CENTER');bottom.letterSpacing={unit:'PIXELS',value:1*scale};bottom.x=0;bottom.y=88*scale;stamps[key]=c;}}else for(const n of stampRow.children)stamps[n.name.split(' / ')[1]]=n;
+function stamp(parent,key,x,y,angle=-9){const n=track(stamps[key].createInstance());parent.appendChild(n);n.name='상태 도장 · '+key;n.rotation=angle;n.x=x;n.y=y;return n;}
+// Confirming a candidate: bottom sheet with a miniature meeting ticket.
+const confirm=await figma.getNodeByIdAsync('9:1345');kill(await figma.getNodeByIdAsync('9:1386'));
+const cp=bottomPanel(confirm,'확정 확인 / 미니 티켓');cp.itemSpacing=16;closeHeading(cp,'이 시간으로 확정할까요?',345);
+const mini=stack(cp,'BOARDING PASS / 확정 전 요약',345,0,'paper');mini.cornerRadius=16;mini.clipsContent=true;
+const strip=row(mini,'티켓 띠',345,8,'accent',12);const bt=text(strip,'BOARDING PASS',10,700,'white',233);bt.letterSpacing={unit:'PIXELS',value:1};text(strip,'약속행',11,700,'white',80,'RIGHT');
+const ticketBody=stack(mini,'날짜와 시간',345,10,null,16);text(ticketBody,'11월 23일 (월)',12,400,'muted',313);const details=row(ticketBody,'시간과 인원',313,12);text(details,'13:00 → 15:00',24,700,'accent',200);const chip=stack(details,'참석 가능 인원',101,0,'soft',8);chip.cornerRadius=16;text(chip,'4명 전원 가능',11,700,'accent',85,'CENTER');
+for(const value of ['확정하면 참여자 모두 같은 약속 결과를 볼 수 있어요.','확정 후에도 재조율로 시간을 다시 정할 수 있어요.']){const r=row(cp,'확정 안내',345,10);text(r,'•',15,700,'accent',8);text(r,value,13,400,'ink',327);}
+button(cp,'이 시간으로 확정  ✓',345);text(cp,'다른 시간 보기',14,700,'muted',345,'CENTER');const confirmBounds=finishPanel(cp);
+// Same stamped treatment in the full result and the five-screen overview.
+for(const id of ['9:1405','4:745']){const s=await figma.getNodeByIdAsync(id);for(const n of [...s.children]){if(n.x>=295&&n.x<=310&&n.y>=420&&n.y<480&&(n.type==='ELLIPSE'||n.type==='TEXT'))kill(n);if(n.type==='TEXT'&&n.characters==='13:00 → 15:00'){n.fontSize=27;n.resize(215,n.height);mutated.push(n.id);}}stamp(s,'confirmed',268,411,-7);mutated.push(s.id);}
+// End states: decorative stamps, with no private appointment details exposed.
+const exits=[['9:2044','cancelled','취소된 약속입니다.'],['9:2056','expired','만료된 약속입니다'],['9:2068','invalid','유효하지 않은 초대 링크입니다.'],['9:2081','left','약속에서 나왔어요']];
+for(const [id,key,title]of exits){const s=await figma.getNodeByIdAsync(id);for(const n of [...s.children])kill(n);s.fills=paint('paper');const logo=row(s,'약속행',160,8);logo.x=24;logo.y=24;const mark=track(figma.createFrame());logo.appendChild(mark);mark.resize(11,25);mark.fills=paint('ink');mark.cornerRadius=5;rect(mark,'빨강 신호',3,4,5,7,'accent',3);text(logo,'약속행',16,700,'ink',130);stamp(s,key,126,224,-9);const content=stack(s,'종료 상태 안내',345,14);content.x=24;content.y=405;text(content,title,23,700,'ink',345,'CENTER');if(key==='left'){text(content,'민수님이 방장을 이어받았어요.',13,400,'muted',345,'CENTER');const action=button(s,'처음으로',345);action.fills=paint('ink');action.x=24;action.y=778;}mutated.push(s.id);}
+await note('9:1396',2,'하단 패널의 미니 티켓에서 날짜·시간·참석 인원을 확인한다. 확정 후 재조율 가능 안내와 확정/다른 시간 보기 동작을 제공한다.');
+await note('9:1494',2,'기차 사진·SEE YOU SOON 표지, 날짜·시간·소요 시간·참석자, 원형 확정 도장, 결과 링크 복사를 제공한다.');
+await note('9:2047',2,'로그인 없이 취소 상태 문구와 장식용 운행취소 도장을 표시한다. 일정·참여자 등 개인 정보는 노출하지 않는다.');
+await note('9:2059',2,'만료 상태 문구와 장식용 운행종료 도장을 표시하고 약속 정보 접근을 막는다.');
+await note('9:2071',2,'유효하지 않은 초대 링크 문구와 장식용 노선없음 도장을 표시한다.');
+await note('9:2112',2,'하차 도장과 나가기 완료 안내를 표시한다. 방장 승계가 있었다면 후임 이름을 안내하고 처음으로 이동한다.');
+return {createdNodeIds:created,mutatedNodeIds:mutated,removedNodeIds:removed,stampComponentIds:Object.values(stamps).map(n=>n.id),confirmBounds};

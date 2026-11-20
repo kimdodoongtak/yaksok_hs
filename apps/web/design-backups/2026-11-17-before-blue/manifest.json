@@ -1,0 +1,27 @@
+{
+  "name": "파란색 임시 전환 직전 빨강 디자인",
+  "date": "2026-11-17",
+  "git_commit": "60967f0cae69b14a9f03d7aa5157d2b96be3ef31",
+  "archive": "red-app.zip",
+  "sha256": "041fdf24d42d7fd4eaf5705bd026fd17bc51da93d5742cc652e8b5b70cbf1b44",
+  "verified": true,
+  "files": 177,
+  "style_files": [
+    "apps/web/src/app/globals.css",
+    "apps/web/src/components/availability/availability.module.css",
+    "apps/web/src/components/availability/repeat.module.css",
+    "apps/web/src/components/confirmation/candidates.module.css",
+    "apps/web/src/components/confirmation/confirmation.module.css",
+    "apps/web/src/components/participant-access/access.module.css",
+    "apps/web/src/components/participants/participants.module.css",
+    "apps/web/src/components/promise-settings/settings.module.css",
+    "apps/web/src/components/promise-status/cancellation.module.css",
+    "apps/web/src/components/ui/invitation-actions.module.css"
+  ],
+  "exclusions": [
+    "실제 환경 변수",
+    "DB 데이터",
+    "의존성 및 빌드 결과",
+    "사용자 미추적 파일"
+  ]
+}

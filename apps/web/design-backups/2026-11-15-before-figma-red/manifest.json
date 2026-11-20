@@ -1,0 +1,1073 @@
+{
+  "name": "Figma 빨강 디자인 적용 전 앱 기준",
+  "created_at": "2026-11-15T18:42:57.000309+09:00",
+  "git_commit": "e804d375c3b745dbf73810d94f65f47bade73e7e",
+  "tracked_app_worktree_clean": true,
+  "app_design_changed": false,
+  "figma_target": "https://www.figma.com/design/ZjcFr02Eo3878EKLEVhNgc?node-id=8-296",
+  "archives": [
+    {
+      "file": "current-app.zip",
+      "file_count": 157,
+      "bytes": 2245312,
+      "sha256": "d7af7ee746bd2b7861718d3bbb5e6d1011a9dada3f94b4b7b53fe66cc9c6e978",
+      "entries": [
+        {
+          "path": "apps/web/.env.example",
+          "bytes": 548,
+          "sha256": "152b0373a40498ad2811fccc5d89aefccd1d9fd2a922eecaebea760370fdbe2f"
+        },
+        {
+          "path": "apps/web/.node-version",
+          "bytes": 3,
+          "sha256": "68ca3fba3b7e864770cb61aeb306d4bd4354b68ab4dd38450860c5d823e42a53"
+        },
+        {
+          "path": "apps/web/.nvmrc",
+          "bytes": 3,
+          "sha256": "68ca3fba3b7e864770cb61aeb306d4bd4354b68ab4dd38450860c5d823e42a53"
+        },
+        {
+          "path": "apps/web/README.md",
+          "bytes": 1429,
+          "sha256": "ba8a0c254f2f442941a57d47e5517387f8e2c11f0e50df090ea1f0036ba87e75"
+        },
+        {
+          "path": "apps/web/e2e/availability.spec.ts",
+          "bytes": 41067,
+          "sha256": "6e2b49f4c7d72f1d62a48001dbf5c5d445d8bcaded04d8739659cc192f99cae2"
+        },
+        {
+          "path": "apps/web/e2e/cancellation.spec.ts",
+          "bytes": 16233,
+          "sha256": "a450f4689e197d4c89a745a70c0bf5df1b8a6bb19b362d9350405ea641c82a70"
+        },
+        {
+          "path": "apps/web/e2e/candidates.spec.ts",
+          "bytes": 22640,
+          "sha256": "120beb3c53b1298abf44a0982a444339a9b40afa4b4c64e2ec873561b8491980"
+        },
+        {
+          "path": "apps/web/e2e/confirmation.spec.ts",
+          "bytes": 15685,
+          "sha256": "79ca032c9e78c476cc6f8c4bbfa7bd6427a86f802af37e8e0f49cf524b77de45"
+        },
+        {
+          "path": "apps/web/e2e/invitation.spec.ts",
+          "bytes": 9418,
+          "sha256": "d9e65a14232182d69376f410d79043a8013bfe6cbbfa137cd1f23a40ee11f18a"
+        },
+        {
+          "path": "apps/web/e2e/participant-access.spec.ts",
+          "bytes": 12037,
+          "sha256": "7a8fa60786b5188c6a4d0730230d898c433cfb6073680246344cc369dcbdf341"
+        },
+        {
+          "path": "apps/web/e2e/participant-management.spec.ts",
+          "bytes": 11656,
+          "sha256": "a3c311b82381c22aa9013088bc3444e9a9b73dbc70c6f97a431f6be1115376c5"
+        },
+        {
+          "path": "apps/web/e2e/promise-settings.spec.ts",
+          "bytes": 20151,
+          "sha256": "83211feadfa7cb4762f90e3e1e82ec4de79284a6d7c5e82f23e53a462c9ac4d9"
+        },
+        {
+          "path": "apps/web/e2e/rescheduling.spec.ts",
+          "bytes": 13633,
+          "sha256": "6d8fda8fd1bdcf605b8807651b43fe9dc04399941184234fc32b7e3025ac5e1a"
+        },
+        {
+          "path": "apps/web/eslint.config.mjs",
+          "bytes": 448,
+          "sha256": "5369a5d28b6b136ff36ee079ef134c30bbc12b70a35f05d96575e205eab291cf"
+        },
+        {
+          "path": "apps/web/next.config.ts",
+          "bytes": 193,
+          "sha256": "6bcdb2492ddfc7e5712c7b8936bd8a42e0403d61753d4ba0f8986e4bcb6a93c5"
+        },
+        {
+          "path": "apps/web/package-lock.json",
+          "bytes": 338301,
+          "sha256": "8bc3550803f72d731f2ebbd0b8d29bcd61bbf257640031ff72436611cfc83bd7"
+        },
+        {
+          "path": "apps/web/package.json",
+          "bytes": 1611,
+          "sha256": "46fddd6121dd1a546f02b8b21df9f8fb01c69fb83a7c1addb6abfd624ee9f82e"
+        },
+        {
+          "path": "apps/web/playwright.config.ts",
+          "bytes": 520,
+          "sha256": "08677002fd63bedbb7d96c6432d7bc41b8ff0aa2534efa646b8410fb513e76de"
+        },
+        {
+          "path": "apps/web/postcss.config.mjs",
+          "bytes": 87,
+          "sha256": "f8ed6853d2d91797f125edbb2af4052bd0adc52ba638d0de65d696a62d1ad3f7"
+        },
+        {
+          "path": "apps/web/prisma/migrations/20261112153821_invitation_base/migration.sql",
+          "bytes": 2828,
+          "sha256": "e923bc386883caf3ce56a2bc428f83b305f920e8f8e4312c5a0fc96886d3822b"
+        },
+        {
+          "path": "apps/web/prisma/migrations/20261112154714_promise_constraints/migration.sql",
+          "bytes": 1498,
+          "sha256": "91760a611f9f1db38be8027205f3c7bd36281f68b8947d2a24226ef7c5ec70e5"
+        },
+        {
+          "path": "apps/web/prisma/migrations/20261112154808_participant_constraints/migration.sql",
+          "bytes": 463,
+          "sha256": "76849d60f89985fa8bc2ef99b972a2c87b4259d26f2df62a04f4af60051401e7"
+        },
+        {
+          "path": "apps/web/prisma/migrations/20261114074409_participant_auth_attempts/migration.sql",
+          "bytes": 571,
+          "sha256": "39e8aa9df74b6e0ca7688f20e220f340bec81f77b2080c728e051879e7b5d225"
+        },
+        {
+          "path": "apps/web/prisma/migrations/20261114101841_participant_available_slots/migration.sql",
+          "bytes": 862,
+          "sha256": "3d852603286380c5d6607075b9f73e8bf8af5424aafeebc630b9a71b78d2c9e9"
+        },
+        {
+          "path": "apps/web/prisma/migrations/migration_lock.toml",
+          "bytes": 128,
+          "sha256": "99836963713b4f5b269ad49af0ed3d7b0b2e336115c2f92dc9ac683d139d0900"
+        },
+        {
+          "path": "apps/web/prisma/schema.prisma",
+          "bytes": 3659,
+          "sha256": "ae1165f7069a2d676db2760cb8f505b2711e017adc956ba68a5aed3923657764"
+        },
+        {
+          "path": "apps/web/prisma.config.ts",
+          "bytes": 231,
+          "sha256": "58b800ad44c3fa7b0e6ed9cd990d782c48edf173bd24010dbf14f34f93a925bc"
+        },
+        {
+          "path": "apps/web/public/images/ticket-train.png",
+          "bytes": 2072824,
+          "sha256": "48c9fd171590fa41ae696d8d16ba18a962c1cf088823bdae7f2893dad34e7715"
+        },
+        {
+          "path": "apps/web/scripts/browser-server.mjs",
+          "bytes": 906,
+          "sha256": "bb5942ea3d3fd32b0c4fe4a5e3108b9ea8f9d9037be13a836b5951e551b749e6"
+        },
+        {
+          "path": "apps/web/scripts/issue-local-invite.mjs",
+          "bytes": 1006,
+          "sha256": "3d2eddc30a1f0af40d1c4db20f6128c5dd0a42f39560f730f84ffc037ecafb83"
+        },
+        {
+          "path": "apps/web/scripts/register-typescript.mjs",
+          "bytes": 453,
+          "sha256": "161509c9c1e59115617ddef0b2f52813e35b6dd3672397bdd6c75d72b66ba98c"
+        },
+        {
+          "path": "apps/web/scripts/setup-test-database.mjs",
+          "bytes": 2179,
+          "sha256": "df54ffbde68f67844d771c1ecb42440e977629405c5478ebf9529cad314654f1"
+        },
+        {
+          "path": "apps/web/scripts/test-database.mjs",
+          "bytes": 923,
+          "sha256": "86e8aa220f01ca54889b78734c495a94bf4c01351e79db7d071b6efba40b8289"
+        },
+        {
+          "path": "apps/web/scripts/test-integration.mjs",
+          "bytes": 952,
+          "sha256": "d44066e61b68670463e70c98a20184f3b78edab58e24f4e0537c5ddb3f09c25f"
+        },
+        {
+          "path": "apps/web/src/actions/availability.ts",
+          "bytes": 811,
+          "sha256": "f3c1c7e65eb45b88ad74498fa8e04d510d71cf17576228454da67cd6778e6055"
+        },
+        {
+          "path": "apps/web/src/actions/cancellation.ts",
+          "bytes": 753,
+          "sha256": "dae16811a7f363ed890523aa807b3ca55873ee6159dd457632ba6553f5fe1f34"
+        },
+        {
+          "path": "apps/web/src/actions/confirmation.ts",
+          "bytes": 840,
+          "sha256": "b4fee2854bbab96f559980e240db876debd30638e8e265e6254eaa07baade4dc"
+        },
+        {
+          "path": "apps/web/src/actions/invitation.ts",
+          "bytes": 2271,
+          "sha256": "91e5df2a47bd6ce37f084f2d4b01e68ab0bce6a1a20ab0b1ae2c71830d7383b7"
+        },
+        {
+          "path": "apps/web/src/actions/participant-access.ts",
+          "bytes": 4676,
+          "sha256": "7c542988bbf40eb8bfc860450218a3747eaf973a297563900e5de399394d2ea0"
+        },
+        {
+          "path": "apps/web/src/actions/participant-management.ts",
+          "bytes": 1378,
+          "sha256": "6618f0b10b57e44b2d925cd02baf82345535fa25653e0e7a74594f97a0795a21"
+        },
+        {
+          "path": "apps/web/src/actions/promise-settings.ts",
+          "bytes": 2727,
+          "sha256": "ffb5032b4d4b67675ebddd47e62b801e61ee50970bb9b1926292d42b3f9095dc"
+        },
+        {
+          "path": "apps/web/src/actions/promise-status.ts",
+          "bytes": 827,
+          "sha256": "7aa004e034b779d3b439870900055f02201e8502eb8888f948809fbef894b480"
+        },
+        {
+          "path": "apps/web/src/actions/rescheduling.ts",
+          "bytes": 910,
+          "sha256": "5d0da8e2373fdced130b77d8a0489d777379e7222949b24c3c55672e76ec850c"
+        },
+        {
+          "path": "apps/web/src/app/globals.css",
+          "bytes": 107,
+          "sha256": "09547cb52ce9223fe445819ba1d7fe835f6a59b1a473f59cd3890434ac85b0d8"
+        },
+        {
+          "path": "apps/web/src/app/layout.tsx",
+          "bytes": 422,
+          "sha256": "c97ee6949d98009bb7a051d187a25079e6fea753c3139b2970a4e3ee7657fd7e"
+        },
+        {
+          "path": "apps/web/src/app/p/[inviteToken]/availability/page.tsx",
+          "bytes": 1265,
+          "sha256": "a4401c7134a1f67f687223db392fda9fbb240c371766205561cb6d5e38eebaaa"
+        },
+        {
+          "path": "apps/web/src/app/p/[inviteToken]/availability/state/route.ts",
+          "bytes": 1750,
+          "sha256": "c05efb479504573992955b0f7e6493982a4dea098884cd76fa06a340b6bac770"
+        },
+        {
+          "path": "apps/web/src/app/p/[inviteToken]/candidates/page.tsx",
+          "bytes": 1241,
+          "sha256": "ab37e8b4a191ef96764333ff2733724feeb2d1fc428e6b82fccc7d47061eebb5"
+        },
+        {
+          "path": "apps/web/src/app/p/[inviteToken]/overview/route.ts",
+          "bytes": 1151,
+          "sha256": "c1855be3fca9dd7956ecc92dd2b46f8c6cbc7cf96d9bd0f3aa8a4dd22997a036"
+        },
+        {
+          "path": "apps/web/src/app/p/[inviteToken]/page.tsx",
+          "bytes": 446,
+          "sha256": "db53b42b26cf096f1df220f7543a1668640b8d701fa9b6e877e34477012c0edc"
+        },
+        {
+          "path": "apps/web/src/app/p/[inviteToken]/participants/page.tsx",
+          "bytes": 1038,
+          "sha256": "7aabeeb5cdaa179d71c6fbbd7bd3ab086f4e2309efc35c56041a1264f88d7e6c"
+        },
+        {
+          "path": "apps/web/src/app/p/[inviteToken]/participants/state/route.ts",
+          "bytes": 857,
+          "sha256": "7d493bb5383fa8dc2fb5bcc9d5530c472c0aee7bcc2067522aa08bac8528e8aa"
+        },
+        {
+          "path": "apps/web/src/app/p/[inviteToken]/result/page.tsx",
+          "bytes": 1064,
+          "sha256": "4b62bfa401d4137f4003112545cfb800795d445788a00f0039754c31933f724f"
+        },
+        {
+          "path": "apps/web/src/app/p/[inviteToken]/result/state/route.ts",
+          "bytes": 799,
+          "sha256": "b2beb778b615219b8eb087e8aab92fc5dc8e070dcc34b4e3d5636809a4e6340f"
+        },
+        {
+          "path": "apps/web/src/app/p/[inviteToken]/settings/edit/page.tsx",
+          "bytes": 1207,
+          "sha256": "18a9e4574ad2a169278a1833a7073eec554960ddf84888871e467bfcf9d6397b"
+        },
+        {
+          "path": "apps/web/src/app/p/[inviteToken]/settings/page.tsx",
+          "bytes": 459,
+          "sha256": "aad3f5b2f0489772589be422e5e4e9432567f75730bba7d50b3c9735da8514d5"
+        },
+        {
+          "path": "apps/web/src/app/p/[inviteToken]/state/route.ts",
+          "bytes": 863,
+          "sha256": "1fdebc17a770f17d23433a7ab6b7e04f7f467a4b55f2d88bde881ec6a736f742"
+        },
+        {
+          "path": "apps/web/src/app/page.tsx",
+          "bytes": 769,
+          "sha256": "3b0bbf7da54b8382c86ca83ebac2c919382ee292c3525664dca3467a730d9025"
+        },
+        {
+          "path": "apps/web/src/components/availability/availability-editor.tsx",
+          "bytes": 22423,
+          "sha256": "42fbec1798ceac76a44123449afedfca8a40477f8c05cbf688733840cfc72317"
+        },
+        {
+          "path": "apps/web/src/components/availability/availability-sidebar.tsx",
+          "bytes": 2726,
+          "sha256": "01dcf69cea4c184cb58a104c6886074a02c28150d2d6382b42d38d40b3f29daf"
+        },
+        {
+          "path": "apps/web/src/components/availability/availability.module.css",
+          "bytes": 19502,
+          "sha256": "b4f111f134b5408b0d19aec35a4b0bfb19b585fa15988656e68c7809857180af"
+        },
+        {
+          "path": "apps/web/src/components/availability/calendar.ts",
+          "bytes": 807,
+          "sha256": "741bfdf7d9e53fcdb055ec5f50e974543804eb012d6830c6b56742d32e4e9e30"
+        },
+        {
+          "path": "apps/web/src/components/availability/candidate-list.tsx",
+          "bytes": 2430,
+          "sha256": "5b857eb6000b5c1625b8360534b2cce987d9595586eda9a0c0aba3b11195dcda"
+        },
+        {
+          "path": "apps/web/src/components/availability/edit-button.tsx",
+          "bytes": 873,
+          "sha256": "6a5cc98344a8a1cb33e0c012001c242e8a6ce37054044f7a621a370bc6b9f9bb"
+        },
+        {
+          "path": "apps/web/src/components/availability/heatmap-cell.tsx",
+          "bytes": 6287,
+          "sha256": "8818216445811f16fc71601a8bbd267be38b1703bcdfcd87c2cf92e45db2faa9"
+        },
+        {
+          "path": "apps/web/src/components/availability/heatmap-scale.test.ts",
+          "bytes": 700,
+          "sha256": "21e5ec6fb61f26a2cf5db99fecb4bde0d911f1be516db5cb6881cd429ff78132"
+        },
+        {
+          "path": "apps/web/src/components/availability/heatmap-scale.ts",
+          "bytes": 521,
+          "sha256": "58025b5775e573750adc6083caba7f9f4a62bb3f78f18abedd68a50bfa812f47"
+        },
+        {
+          "path": "apps/web/src/components/availability/repeat-dialog.tsx",
+          "bytes": 5256,
+          "sha256": "b0d56ba62f81c16894a95bf93576571dd11ecca2ec5154a191f7c73742e129d3"
+        },
+        {
+          "path": "apps/web/src/components/availability/repeat.module.css",
+          "bytes": 3176,
+          "sha256": "a61e1d4f76b0eea9b43305f4f185db3b05149394569ec1f7a0f9d1f3c4450f40"
+        },
+        {
+          "path": "apps/web/src/components/availability/repeat.test.ts",
+          "bytes": 2020,
+          "sha256": "4967f0ecbc23c88528e430f1f2cecb1464907d65d61c6de618fe21716d85ea6c"
+        },
+        {
+          "path": "apps/web/src/components/availability/repeat.ts",
+          "bytes": 1201,
+          "sha256": "30d6b8ad75deaa01c33f8afd58aba193b4c3fb6be5e740b9502990f0840b006e"
+        },
+        {
+          "path": "apps/web/src/components/availability/use-overview.ts",
+          "bytes": 2385,
+          "sha256": "172c1063f3a38b71e323de1011cd54309bd0013cc7334fb118fa2b7152da5456"
+        },
+        {
+          "path": "apps/web/src/components/availability/use-slot-drag.ts",
+          "bytes": 4555,
+          "sha256": "2f41a8a8d9b54d8314f7b64d7495991c1dd887cf65b7ac0d7b89ef0d0bf75af6"
+        },
+        {
+          "path": "apps/web/src/components/confirmation/candidates-screen.tsx",
+          "bytes": 2163,
+          "sha256": "1b5d74d684c91a38e57d45736353c7c125ba60529d602f56e3072a547d185bcb"
+        },
+        {
+          "path": "apps/web/src/components/confirmation/candidates.module.css",
+          "bytes": 983,
+          "sha256": "20319ff7f03ab1486f536e54190d4d0be6b1199bc1e7f59e5513ac4e2b15803f"
+        },
+        {
+          "path": "apps/web/src/components/confirmation/confirm-dialog.tsx",
+          "bytes": 2513,
+          "sha256": "50afd24e9bb9f76ae3801113bea2001b896fd92d5e01c547785ed8aa02d11ce0"
+        },
+        {
+          "path": "apps/web/src/components/confirmation/confirmation-ticket.tsx",
+          "bytes": 5477,
+          "sha256": "096d2fee76c669cf6e47b9deb178c602d981397293df69e7bfeecd6896b2e965"
+        },
+        {
+          "path": "apps/web/src/components/confirmation/confirmation.module.css",
+          "bytes": 6930,
+          "sha256": "676b79b7a0437b164f03dc4d702265a1ece9bb8e030109237a7a9f8da6deb0a2"
+        },
+        {
+          "path": "apps/web/src/components/confirmation/format.ts",
+          "bytes": 496,
+          "sha256": "0f4aec2c779dd787b75ec7f9746e912c9619e2ec4388c2dea11ee7d7218e617b"
+        },
+        {
+          "path": "apps/web/src/components/confirmation/ticket-art.tsx",
+          "bytes": 2209,
+          "sha256": "9da4c32cf8cb654657d4a98a57347215f72b06d2678b416b80b3f6b50fb8c1b4"
+        },
+        {
+          "path": "apps/web/src/components/invitation/abandon-form.tsx",
+          "bytes": 975,
+          "sha256": "085836368c2723fd9df8ee891f32852c031592e8eb975537039966156829b34b"
+        },
+        {
+          "path": "apps/web/src/components/invitation/invitation-page.tsx",
+          "bytes": 1578,
+          "sha256": "c5df117899518fecedc6a7cfaa7372680f430021d05ead6382793618c6cdeca4"
+        },
+        {
+          "path": "apps/web/src/components/invitation/live-invitation.tsx",
+          "bytes": 5341,
+          "sha256": "5643f724f40daeb852d6192c26a46033e6cc76b8615348dd4bb6adaa9c4e6a8f"
+        },
+        {
+          "path": "apps/web/src/components/invitation/registration-form.tsx",
+          "bytes": 1930,
+          "sha256": "c22fb6da1d474ce7fc590b7c9560396c86615d6b8755a08e1664811f0df25e3f"
+        },
+        {
+          "path": "apps/web/src/components/participant-access/access-panel.tsx",
+          "bytes": 6550,
+          "sha256": "38ebd3cb4e62d1bd8d479aae26f0ec5fdd9d4f39512b2ea62f996152d896cfed"
+        },
+        {
+          "path": "apps/web/src/components/participant-access/access.module.css",
+          "bytes": 2238,
+          "sha256": "4ff91be0d43683beb77798e420a85a86e6fa358ea7047a1edbb9efc1c2fceed0"
+        },
+        {
+          "path": "apps/web/src/components/participants/participants-panel.tsx",
+          "bytes": 9341,
+          "sha256": "02c31af9b83bc61585ea47791a2769816d221bfe9cef38d642dbffe651b7fa4e"
+        },
+        {
+          "path": "apps/web/src/components/participants/participants.module.css",
+          "bytes": 3254,
+          "sha256": "c8d030f494b93918594d87386f0eba144a7db256c5e859c0e4c91631b97c1241"
+        },
+        {
+          "path": "apps/web/src/components/promise-settings/daily-time-picker.tsx",
+          "bytes": 2564,
+          "sha256": "713a0837af63781a5697c7ee3d3d85c64a40bf16ec076169cd4d03abc86242d2"
+        },
+        {
+          "path": "apps/web/src/components/promise-settings/date-range-picker.tsx",
+          "bytes": 8005,
+          "sha256": "f228cfbd73ad32f42066255bf2fd43578ac1c162d7e516d1914948f5fd1f985a"
+        },
+        {
+          "path": "apps/web/src/components/promise-settings/duration-picker.tsx",
+          "bytes": 2026,
+          "sha256": "a30e0a9120fa115527fbec7f8e9b2ad051d4a6a2bc1307fd53d7133a6b7e604c"
+        },
+        {
+          "path": "apps/web/src/components/promise-settings/invitation-ticket.tsx",
+          "bytes": 3687,
+          "sha256": "becfea781106691ae8ca3634b6df0cba07ff3e5e573d20361b11bf0c71f3b41e"
+        },
+        {
+          "path": "apps/web/src/components/promise-settings/participant-limit-field.tsx",
+          "bytes": 2582,
+          "sha256": "d7330a9646508da783d5638feb600a789daf9f6e7e80e40c465998ad82d12125"
+        },
+        {
+          "path": "apps/web/src/components/promise-settings/ready-invitation.tsx",
+          "bytes": 1858,
+          "sha256": "9c67e614e08964972c92f45c7a0803bb31f17d36cf68825ddf1f510a63af8c2d"
+        },
+        {
+          "path": "apps/web/src/components/promise-settings/rescheduling-form.tsx",
+          "bytes": 5262,
+          "sha256": "e55f33bcebc3a669dcfd1eb069c8bfd63b567d1f95e3043d4f6db0007ce32b23"
+        },
+        {
+          "path": "apps/web/src/components/promise-settings/settings-form.tsx",
+          "bytes": 7950,
+          "sha256": "a8859a693e3eecee935769e830c9ddd05023afc7af7aaf7c92cf9b629dac4b2c"
+        },
+        {
+          "path": "apps/web/src/components/promise-settings/settings.module.css",
+          "bytes": 10474,
+          "sha256": "cbb98e93a58975924732a4b326498023e4f470e362ac9cd54bc657f39426353c"
+        },
+        {
+          "path": "apps/web/src/components/promise-settings/time-adjust-buttons.tsx",
+          "bytes": 922,
+          "sha256": "59df1bd96987cc0f58d6f46f2a73af529c47f41b571b13868ad9588025f8a896"
+        },
+        {
+          "path": "apps/web/src/components/promise-status/cancel-promise-button.tsx",
+          "bytes": 2753,
+          "sha256": "7f1b22fbdcaaa6ac3aeface9fa405e3f202a231163125a52fdf5ef863052c8ca"
+        },
+        {
+          "path": "apps/web/src/components/promise-status/cancellation.module.css",
+          "bytes": 1088,
+          "sha256": "bb58671ccf32b2bd0a5e4f2bb5d57c657f1e5a3d813abee509d73ca9aaf505fe"
+        },
+        {
+          "path": "apps/web/src/components/promise-status/promise-access-guard.tsx",
+          "bytes": 2452,
+          "sha256": "675cfaacc9c52afa006b58d233d91dc8471a484bd67a59f9c52001f987714b19"
+        },
+        {
+          "path": "apps/web/src/lib/availability/availability.integration.test.ts",
+          "bytes": 12463,
+          "sha256": "5a308013e67e85a88f0ff9551ad2a07c3905f0fa72daf82ac37e7c798912e94c"
+        },
+        {
+          "path": "apps/web/src/lib/availability/availability.test.ts",
+          "bytes": 1400,
+          "sha256": "a91dec5bfb8eb8e63aaff8c64610d5de241edbe2770f72779d4c0e2fc281508f"
+        },
+        {
+          "path": "apps/web/src/lib/availability/policy.ts",
+          "bytes": 1147,
+          "sha256": "a41babf8dec5626bb4bd01c8bdeaf995cb9e6b3727e84c607cd4077dd220d3e8"
+        },
+        {
+          "path": "apps/web/src/lib/availability/runtime.ts",
+          "bytes": 183,
+          "sha256": "9cfff4d2251d32f9fb0b138ca38095fdafb24182c742dc1d3ea091421cb9e49e"
+        },
+        {
+          "path": "apps/web/src/lib/availability/service.ts",
+          "bytes": 4777,
+          "sha256": "40b9a6df27f0c707c7e801d23bdec4092af2549bd70f88580d7913cefcee55a6"
+        },
+        {
+          "path": "apps/web/src/lib/availability/view.ts",
+          "bytes": 504,
+          "sha256": "1eff7b2d16183edf05235ca771c590a7b0ce5614bdd2e0e3e4eddc59765ec18c"
+        },
+        {
+          "path": "apps/web/src/lib/cancellation/cancellation.integration.test.ts",
+          "bytes": 12662,
+          "sha256": "d342204614bb62d5e561a5c9eca80bf482e53a23dab9099100e9ad46d07cc19d"
+        },
+        {
+          "path": "apps/web/src/lib/cancellation/runtime.ts",
+          "bytes": 183,
+          "sha256": "c823a04c19ab4c928645c357ca8f346d12e19c95b4dffc322873bd92ddcd3f14"
+        },
+        {
+          "path": "apps/web/src/lib/cancellation/service.ts",
+          "bytes": 1188,
+          "sha256": "9b95a91d9f0ee4be5d5636e9329ba48e023b21f23e705f1843b7c40785715ba1"
+        },
+        {
+          "path": "apps/web/src/lib/cancellation/transaction.ts",
+          "bytes": 511,
+          "sha256": "9e2632334e4d0f5b25316a7778713e769a9665f1a6938a4d98b33f9f152b02b7"
+        },
+        {
+          "path": "apps/web/src/lib/candidates/candidates.integration.test.ts",
+          "bytes": 13023,
+          "sha256": "04d468e6cfa41f3e91b0c247cf9fe78c8702ffe601c69904dfedff9615a8d37f"
+        },
+        {
+          "path": "apps/web/src/lib/candidates/candidates.test.ts",
+          "bytes": 3203,
+          "sha256": "8db493ac5e2f52a3b162299f53b243ada95a88b1f42d3f1f774ad1c906a73a7e"
+        },
+        {
+          "path": "apps/web/src/lib/candidates/policy.ts",
+          "bytes": 2563,
+          "sha256": "bbb0fdfeed6d4584c427bdf57ebc80fc1afead3a0e193dcc282b6cc7dd35824b"
+        },
+        {
+          "path": "apps/web/src/lib/candidates/runtime.ts",
+          "bytes": 177,
+          "sha256": "160c6db8f5a333142d4a0c4ecece3ab2dc23dec8eed155b2485ded2f36f754ca"
+        },
+        {
+          "path": "apps/web/src/lib/candidates/service.ts",
+          "bytes": 4886,
+          "sha256": "1551867e4a04044e1f0da2d4dcbafbee9af4ccca47b5becd3ca9b3c3c5cc0c46"
+        },
+        {
+          "path": "apps/web/src/lib/candidates/view.ts",
+          "bytes": 831,
+          "sha256": "70d68dda99d76dc31b94ca4eb4e1eb5dc3ac9039dfef37ceb0020b5221ef0215"
+        },
+        {
+          "path": "apps/web/src/lib/confirmation/confirmation.integration.test.ts",
+          "bytes": 12187,
+          "sha256": "16e8fbb3c5bf3dc6d89da4b061a8507f5fefc721b83a409e6666c08c5db59c3a"
+        },
+        {
+          "path": "apps/web/src/lib/confirmation/runtime.ts",
+          "bytes": 181,
+          "sha256": "b24adbdfb8b123398c6ca69da9d06de493db0c485904fc7f4fe8c0c6534af4bf"
+        },
+        {
+          "path": "apps/web/src/lib/confirmation/service.ts",
+          "bytes": 4087,
+          "sha256": "a5075a71b0ac0ca7c2425073142ae1d8192dbbf00f76f2d37e9c934c2599a500"
+        },
+        {
+          "path": "apps/web/src/lib/confirmation/view.ts",
+          "bytes": 395,
+          "sha256": "ffa4afb12eb769484e1a790b4179ccbbaf28fc99ab45e536f95e005fe4b7c873"
+        },
+        {
+          "path": "apps/web/src/lib/invitation/cookie.ts",
+          "bytes": 487,
+          "sha256": "6c63cdb9f4e0112738ce735aad41d89d061252dc649c6b061d09bad4f64286ea"
+        },
+        {
+          "path": "apps/web/src/lib/invitation/infrastructure.test.ts",
+          "bytes": 1363,
+          "sha256": "42c7321178b1ab0e2669fa303d1cfca43077e27da2bbce63e26b0b1da7fa7bb9"
+        },
+        {
+          "path": "apps/web/src/lib/invitation/invitation.integration.test.ts",
+          "bytes": 24630,
+          "sha256": "5bc53a171875e2c50963a8bbca96ad98b6b43b98b772574e02ad57d68516df71"
+        },
+        {
+          "path": "apps/web/src/lib/invitation/invitation.test.ts",
+          "bytes": 2348,
+          "sha256": "18bc848523dfcc0a1c74344d4ecee8e31e64e0298e3d9720b32ac23ff80f9e9b"
+        },
+        {
+          "path": "apps/web/src/lib/invitation/policy.ts",
+          "bytes": 1773,
+          "sha256": "d608b6a6211093bb2295118189d4632ccc3cfedaa5fc07f6ab2ceb890c1dfa2d"
+        },
+        {
+          "path": "apps/web/src/lib/invitation/runtime.ts",
+          "bytes": 177,
+          "sha256": "56b224e63ccb3e4f29593767d17ef5dcdc1f076347502b16b22507c9b68d8943"
+        },
+        {
+          "path": "apps/web/src/lib/invitation/security.test.ts",
+          "bytes": 494,
+          "sha256": "cb0be1497e2f53e81d471988f5be3631d545dd4e0ac6caa931b36142c05f1cc4"
+        },
+        {
+          "path": "apps/web/src/lib/invitation/security.ts",
+          "bytes": 1080,
+          "sha256": "c1baf5d54b40df7b39049477b9d468496625ba28a6f05cabbd517cf4d51c5976"
+        },
+        {
+          "path": "apps/web/src/lib/invitation/service.ts",
+          "bytes": 10256,
+          "sha256": "e027bf325a8b53e27717ac9b8df07218784fc3aeaf3288fceb12e6731507e83b"
+        },
+        {
+          "path": "apps/web/src/lib/participant-access/participant-access.integration.test.ts",
+          "bytes": 21531,
+          "sha256": "108832718b8d66a4c9d4222c266c4d9dc875b558305308b7d87e26a102ae92c6"
+        },
+        {
+          "path": "apps/web/src/lib/participant-access/participant-access.test.ts",
+          "bytes": 1327,
+          "sha256": "e3a021af4ee5424513db8718b28e100be458df1ae16ea7341acface05940b75f"
+        },
+        {
+          "path": "apps/web/src/lib/participant-access/request-policy.ts",
+          "bytes": 825,
+          "sha256": "469f91e2fa7b39d1d158ed175772dba2db7f11355a447a5080cf87c69f2eb56e"
+        },
+        {
+          "path": "apps/web/src/lib/participant-access/runtime.ts",
+          "bytes": 1178,
+          "sha256": "3d96d3cb0cc9bbb3c05884a4e9e5984edff005887fdeed7d7f28742c12ef252c"
+        },
+        {
+          "path": "apps/web/src/lib/participant-access/service.ts",
+          "bytes": 13301,
+          "sha256": "b9931c9ea11fe9c65c886890d1ff96e3438e5755653991170e4f23b98acd578e"
+        },
+        {
+          "path": "apps/web/src/lib/participant-access/session.ts",
+          "bytes": 1812,
+          "sha256": "e0de3f1acd9cce783f82b83fceb77e700feb3e9f4b1aea358dd29dcb79a3715e"
+        },
+        {
+          "path": "apps/web/src/lib/participant-access/view.ts",
+          "bytes": 185,
+          "sha256": "63309ce378a8f5a8514eb2a8b66d752485f8e04445534838b1a9650aaf8eb4f4"
+        },
+        {
+          "path": "apps/web/src/lib/participant-management/participant-management.integration.test.ts",
+          "bytes": 16703,
+          "sha256": "79c18ee3af740e247606c15124240b5c90ab67032659ebc8294624d003940cf5"
+        },
+        {
+          "path": "apps/web/src/lib/participant-management/runtime.ts",
+          "bytes": 210,
+          "sha256": "626cfee12aedfe48642c00075c67e27623797d972a3fd30662b216195533f8e1"
+        },
+        {
+          "path": "apps/web/src/lib/participant-management/service.ts",
+          "bytes": 5025,
+          "sha256": "9ef8e2ef4318a2dce79746ea1d722e4a3556b87d287986ec8f12b8754ced2a91"
+        },
+        {
+          "path": "apps/web/src/lib/participant-management/view.ts",
+          "bytes": 272,
+          "sha256": "0291367d22d937a9b69b7edba4ac040defcd2c08b92b9871da203858144eab3d"
+        },
+        {
+          "path": "apps/web/src/lib/prisma.ts",
+          "bytes": 648,
+          "sha256": "f04fcfcb46b4b81bab3a963f920b34c420dfde8c250c68cc7e738a160d66e279"
+        },
+        {
+          "path": "apps/web/src/lib/promise-settings/policy.ts",
+          "bytes": 7444,
+          "sha256": "d8076a560a8a2499aa1ae63cbba6002f20a4f4f5b33b70ee847f408d4118a85b"
+        },
+        {
+          "path": "apps/web/src/lib/promise-settings/promise-settings.integration.test.ts",
+          "bytes": 9286,
+          "sha256": "a9788e130c8246bc0e14ed1af623825c3f7b87167169f216f96ffb2a5151978b"
+        },
+        {
+          "path": "apps/web/src/lib/promise-settings/promise-settings.test.ts",
+          "bytes": 6573,
+          "sha256": "190b6fac7a6de9abd7fcf9028158e1bba985b07e40f7edfd4b4a8a98d1329fd0"
+        },
+        {
+          "path": "apps/web/src/lib/promise-settings/runtime.ts",
+          "bytes": 193,
+          "sha256": "a2e5893eab215e4e779893d64d625a9a7c9459b67bcd99778586acc949d5e582"
+        },
+        {
+          "path": "apps/web/src/lib/promise-settings/service.ts",
+          "bytes": 5031,
+          "sha256": "2d95da6ab9f56cfa862ce3a09a20f59d107fdc8be33667b96e67f24c3ef1cd16"
+        },
+        {
+          "path": "apps/web/src/lib/rescheduling/policy.ts",
+          "bytes": 729,
+          "sha256": "483f1df04f0a9a11c8a84db49da16426e3d4eff10676da2eee1081c63741c206"
+        },
+        {
+          "path": "apps/web/src/lib/rescheduling/rescheduling.integration.test.ts",
+          "bytes": 16614,
+          "sha256": "5399a44189a9e8c82064ebf43aa444d050ef3cab5349c6c9d1078a0abda4d47c"
+        },
+        {
+          "path": "apps/web/src/lib/rescheduling/rescheduling.test.ts",
+          "bytes": 840,
+          "sha256": "3e1b445e7d19d7dc0e22bad1cbfdaa871f0e63189776e26b7a957fd353617ede"
+        },
+        {
+          "path": "apps/web/src/lib/rescheduling/runtime.ts",
+          "bytes": 181,
+          "sha256": "99849d747b28768aec50b8784f7a2955b86acb180b2f92ef1bf8299ab8f4832b"
+        },
+        {
+          "path": "apps/web/src/lib/rescheduling/service.ts",
+          "bytes": 5132,
+          "sha256": "3ef49004fa9fba76e89e97e52c28e36fb4acca59c1e6c18eb815d19cec890f5f"
+        },
+        {
+          "path": "apps/web/src/testing/server-only.ts",
+          "bytes": 100,
+          "sha256": "98f74702c29612d6e081ca6fe5f0ac241ebaeea5efdcb65d82c47d11cd0272ed"
+        },
+        {
+          "path": "apps/web/tsconfig.json",
+          "bytes": 776,
+          "sha256": "73fa59c0afe9e891448fc69d7ce14c2682739f8da76e1bcf5d159bfd63aa1c33"
+        },
+        {
+          "path": "apps/web/vercel.json",
+          "bytes": 147,
+          "sha256": "9fd4ea9e9bbb01391e7e946e1b2d3e2af2dd003b27067dadcdcaf4f20b799fb1"
+        },
+        {
+          "path": "apps/web/vitest.config.ts",
+          "bytes": 365,
+          "sha256": "4e16abefa4f48ec5ba69ececca2b3441ebbd6a1ca19bcecec808686a27d04c8d"
+        },
+        {
+          "path": "apps/web/vitest.integration.config.ts",
+          "bytes": 495,
+          "sha256": "044c76bc22e9376ad89a36a35f3c5fc6f80b2dddf4a9d80d537a2ee46e3c1fdb"
+        }
+      ],
+      "verified": true
+    },
+    {
+      "file": "figma-design-work.zip",
+      "file_count": 41,
+      "bytes": 21252526,
+      "sha256": "08e927824dd552a83416c68de830dae7c6673f7022e8ef34043d14897acc77f5",
+      "entries": [
+        {
+          "path": "apps/web/design-previews/ticket-red-blue/all-storyboard-source.json",
+          "bytes": 46685,
+          "sha256": "d457e1903be80b5390e952552530454349c453c09540fc401ddbce88b476e422"
+        },
+        {
+          "path": "apps/web/design-previews/ticket-red-blue/blue-01.svg",
+          "bytes": 8440,
+          "sha256": "01b50b7f3d2925a3f5f22858ca0d9829e5485642780be6c7eca344c696b41bc9"
+        },
+        {
+          "path": "apps/web/design-previews/ticket-red-blue/blue-02.svg",
+          "bytes": 13476,
+          "sha256": "288b4e2cc81498a726c2b726cc0e54eef0c34cb3f734cfb54eaa9cc9e26c838b"
+        },
+        {
+          "path": "apps/web/design-previews/ticket-red-blue/blue-03.svg",
+          "bytes": 22592,
+          "sha256": "a07ad3d1055ebf0311af0ae1b4b91a9a148e0417193183538bae72bfb0af0627"
+        },
+        {
+          "path": "apps/web/design-previews/ticket-red-blue/blue-04.svg",
+          "bytes": 6977,
+          "sha256": "16614f48917ae3fdb86b1c8fb7cfbd9c1d14a44c8cc461399475b9bea559eba9"
+        },
+        {
+          "path": "apps/web/design-previews/ticket-red-blue/blue-05.svg",
+          "bytes": 2777135,
+          "sha256": "62ec4c1dc2af3f1b05efe83b8777ae1b3c9180eeca5f192d8eb922bfb3a2af48"
+        },
+        {
+          "path": "apps/web/design-previews/ticket-red-blue/blue-components.svg",
+          "bytes": 6387,
+          "sha256": "758de20c8a65e25d089bb1d5cc7f2463531f506526b666e89417b77bdb7ace90"
+        },
+        {
+          "path": "apps/web/design-previews/ticket-red-blue/build.py",
+          "bytes": 19359,
+          "sha256": "a6af6fb9ee0ba807353af26ecef86510199769c63e22ebd53955e0714f2aabe7"
+        },
+        {
+          "path": "apps/web/design-previews/ticket-red-blue/cute-pending-preview.html",
+          "bytes": 7396,
+          "sha256": "0d96a23283ee0d5010b030d25fc2e0b12970d42d84611b7f3594bca5b0f6e5fc"
+        },
+        {
+          "path": "apps/web/design-previews/ticket-red-blue/cute-pending-preview.png",
+          "bytes": 148822,
+          "sha256": "82ad61b88a5b5d0240ac4e80c3edcb5a5969fb4b5fe6f925f9dfa0c365e60c0a"
+        },
+        {
+          "path": "apps/web/design-previews/ticket-red-blue/cute-update-plugin/code.js",
+          "bytes": 15406,
+          "sha256": "c9c8236394645b38bf8aa8e462a38a3318321a0178c47347791824706689d1d8"
+        },
+        {
+          "path": "apps/web/design-previews/ticket-red-blue/cute-update-plugin/manifest-settings.json",
+          "bytes": 228,
+          "sha256": "3f01b5ce5403250cd087f5affd55178b20b2cf371230d171502662c796f17469"
+        },
+        {
+          "path": "apps/web/design-previews/ticket-red-blue/cute-update-plugin/사용방법.txt",
+          "bytes": 1359,
+          "sha256": "01a5024a4efb4e6e1dcfeae33ca96d5c51bf867e64f54054977ed9ed4bdb4c07"
+        },
+        {
+          "path": "apps/web/design-previews/ticket-red-blue/cute-update-plugin.zip",
+          "bytes": 7720,
+          "sha256": "29515f007a21185ce10bb898020c89d9c1bc75aecfdb804d54cefb3a083d7fec"
+        },
+        {
+          "path": "apps/web/design-previews/ticket-red-blue/cute-update-status.json",
+          "bytes": 1594,
+          "sha256": "dee655110a48427ed13527a04f6ca54253521ee319ea16b261cd68fde55b383c"
+        },
+        {
+          "path": "apps/web/design-previews/ticket-red-blue/figma-all-red-polish.js",
+          "bytes": 5329,
+          "sha256": "d65619f36f6a276013419f8ccd56e7974043864529bfd30b2a3d1a4205c45686"
+        },
+        {
+          "path": "apps/web/design-previews/ticket-red-blue/figma-all-red.js",
+          "bytes": 21763,
+          "sha256": "ab6b8f376e1c7bf544fd0ae553325a8e5eb810213f80e357583c1563cf1060df"
+        },
+        {
+          "path": "apps/web/design-previews/ticket-red-blue/figma-code.js",
+          "bytes": 2911153,
+          "sha256": "3e2a2f4ed4a389d387d1c030e0ec9755e8bc83841700128350dd37e4692e3145"
+        },
+        {
+          "path": "apps/web/design-previews/ticket-red-blue/figma-cute-common.js",
+          "bytes": 7140,
+          "sha256": "21198829c618e9912a368ced9ecded129a46cb0981263910ded79fceee4894d6"
+        },
+        {
+          "path": "apps/web/design-previews/ticket-red-blue/figma-cute-panels.js",
+          "bytes": 7079,
+          "sha256": "e6435e651b7f914d26e37cfdcdcd9944cb27ba6035b1b26ce069120571eeb56e"
+        },
+        {
+          "path": "apps/web/design-previews/ticket-red-blue/figma-cute-stamps.js",
+          "bytes": 6051,
+          "sha256": "ff02904ce776ab897506bbe34cb8280d6787c7d53b84e5106539021dc61a0757"
+        },
+        {
+          "path": "apps/web/design-previews/ticket-red-blue/figma-data.json",
+          "bytes": 2903429,
+          "sha256": "c8c3d45b884b63063a18dc81d439c7d82000a1404990c15b09dd1f5b3a674d92"
+        },
+        {
+          "path": "apps/web/design-previews/ticket-red-blue/figma-import.zip",
+          "bytes": 6125386,
+          "sha256": "cc34beb420ad6d6a62d94fdb05154c7fdb3f192d157133747283fa34ad7161ae"
+        },
+        {
+          "path": "apps/web/design-previews/ticket-red-blue/figma-red-ready.js",
+          "bytes": 46730,
+          "sha256": "52a3917c93bf4b87cf120499903afc6ae1abaebd7cfd92aea6add11873e530b3"
+        },
+        {
+          "path": "apps/web/design-previews/ticket-red-blue/figma-red-storyboard.js",
+          "bytes": 10965,
+          "sha256": "01dd539341f270f33788c77309e859508f2739b782bd20f4e7a1d9f782ba7006"
+        },
+        {
+          "path": "apps/web/design-previews/ticket-red-blue/figma-renderer.js",
+          "bytes": 7709,
+          "sha256": "180a1bfef1e1bf13f22f15bcd0955bb8cef4db07df92b2e91eaf0cb6bd059c22"
+        },
+        {
+          "path": "apps/web/design-previews/ticket-red-blue/index.html",
+          "bytes": 10263,
+          "sha256": "97fab70f2adf1a0b639b247d18a19372431695574f5720c5905d628142c1784f"
+        },
+        {
+          "path": "apps/web/design-previews/ticket-red-blue/package.py",
+          "bytes": 5895,
+          "sha256": "849df17545654bb15e73948f0e75791bbd0f9447c3f48a245974f963ea6b82bd"
+        },
+        {
+          "path": "apps/web/design-previews/ticket-red-blue/preview-blue.png",
+          "bytes": 315889,
+          "sha256": "8c173337c78a137895692fec7afbb074461ba4c6d38c7f78ce8f82a9d4ea6d7c"
+        },
+        {
+          "path": "apps/web/design-previews/ticket-red-blue/preview-red.png",
+          "bytes": 315361,
+          "sha256": "13707da73ee7a2b92761df8988ce6ed94a7bd4a68a6fa4a9528e5efe63ed372f"
+        },
+        {
+          "path": "apps/web/design-previews/ticket-red-blue/red-01.svg",
+          "bytes": 8440,
+          "sha256": "89bbf6718f41deb9247d0d3c2595d2c560e24122dcc441cbe2d65513d84c3bf4"
+        },
+        {
+          "path": "apps/web/design-previews/ticket-red-blue/red-02.svg",
+          "bytes": 13476,
+          "sha256": "ea1ec317e0910805921e858c82e07a1a9ef8fa51a2f014922a7353946037fe05"
+        },
+        {
+          "path": "apps/web/design-previews/ticket-red-blue/red-03.svg",
+          "bytes": 22592,
+          "sha256": "b652e4446f41b6b30c0bfbf17ac331d715eef4915cf9ca48aab1ba0d146bcefa"
+        },
+        {
+          "path": "apps/web/design-previews/ticket-red-blue/red-04.svg",
+          "bytes": 6977,
+          "sha256": "d62c216e972ab97530ae506a8769265f1ebeb2b9a32aed9f1074543794097d90"
+        },
+        {
+          "path": "apps/web/design-previews/ticket-red-blue/red-05.svg",
+          "bytes": 2777135,
+          "sha256": "fafe60ab9a44ff376132d808dbccf43c78bdd30e753034f4971e9d0b0ed59bff"
+        },
+        {
+          "path": "apps/web/design-previews/ticket-red-blue/red-components.svg",
+          "bytes": 6386,
+          "sha256": "0dab540084597c15210ec5f9435ba4c4241dea5f5be5b2ef1fbbd754e3fd8377"
+        },
+        {
+          "path": "apps/web/design-previews/ticket-red-blue/red-storyboard-import.js",
+          "bytes": 2841623,
+          "sha256": "365d1372dc1e6983e0a4ba509d41e091f26a10dbe947227b80424d576b3252b4"
+        },
+        {
+          "path": "apps/web/design-previews/ticket-red-blue/red-storyboard-status.txt",
+          "bytes": 2324,
+          "sha256": "31eec4c34f7249bc2b8d8372956821f40693ce946d78ecccd49cbc3edd9c4160"
+        },
+        {
+          "path": "apps/web/design-previews/ticket-red-blue/red-storyboard.zip",
+          "bytes": 4077690,
+          "sha256": "9d1b6852298ec4504ac599ee2cd7dc354e724ed3ef3ad5313ef2dcc859eb6039"
+        },
+        {
+          "path": "apps/web/design-previews/ticket-red-blue/storyboard-coverage.json",
+          "bytes": 6185,
+          "sha256": "9c5a03aeec8df19c60ce51ef16f19f81b942851327264624133ac8c46e8952e8"
+        },
+        {
+          "path": "apps/web/design-previews/ticket-red-blue/사용방법.txt",
+          "bytes": 2169,
+          "sha256": "b77939288bbbd76513a942022974d76a0c6963f99f840ef52e6ed8eb2e69d694"
+        }
+      ],
+      "verified": true
+    }
+  ],
+  "ui_paths": [
+    "apps/web/public/images/ticket-train.png",
+    "apps/web/src/app/globals.css",
+    "apps/web/src/app/layout.tsx",
+    "apps/web/src/app/p/[inviteToken]/availability/page.tsx",
+    "apps/web/src/app/p/[inviteToken]/candidates/page.tsx",
+    "apps/web/src/app/p/[inviteToken]/page.tsx",
+    "apps/web/src/app/p/[inviteToken]/participants/page.tsx",
+    "apps/web/src/app/p/[inviteToken]/result/page.tsx",
+    "apps/web/src/app/p/[inviteToken]/settings/edit/page.tsx",
+    "apps/web/src/app/p/[inviteToken]/settings/page.tsx",
+    "apps/web/src/app/page.tsx",
+    "apps/web/src/components/availability/availability-editor.tsx",
+    "apps/web/src/components/availability/availability-sidebar.tsx",
+    "apps/web/src/components/availability/availability.module.css",
+    "apps/web/src/components/availability/candidate-list.tsx",
+    "apps/web/src/components/availability/edit-button.tsx",
+    "apps/web/src/components/availability/heatmap-cell.tsx",
+    "apps/web/src/components/availability/repeat-dialog.tsx",
+    "apps/web/src/components/availability/repeat.module.css",
+    "apps/web/src/components/confirmation/candidates-screen.tsx",
+    "apps/web/src/components/confirmation/candidates.module.css",
+    "apps/web/src/components/confirmation/confirm-dialog.tsx",
+    "apps/web/src/components/confirmation/confirmation-ticket.tsx",
+    "apps/web/src/components/confirmation/confirmation.module.css",
+    "apps/web/src/components/confirmation/ticket-art.tsx",
+    "apps/web/src/components/invitation/abandon-form.tsx",
+    "apps/web/src/components/invitation/invitation-page.tsx",
+    "apps/web/src/components/invitation/live-invitation.tsx",
+    "apps/web/src/components/invitation/registration-form.tsx",
+    "apps/web/src/components/participant-access/access-panel.tsx",
+    "apps/web/src/components/participant-access/access.module.css",
+    "apps/web/src/components/participants/participants-panel.tsx",
+    "apps/web/src/components/participants/participants.module.css",
+    "apps/web/src/components/promise-settings/daily-time-picker.tsx",
+    "apps/web/src/components/promise-settings/date-range-picker.tsx",
+    "apps/web/src/components/promise-settings/duration-picker.tsx",
+    "apps/web/src/components/promise-settings/invitation-ticket.tsx",
+    "apps/web/src/components/promise-settings/participant-limit-field.tsx",
+    "apps/web/src/components/promise-settings/ready-invitation.tsx",
+    "apps/web/src/components/promise-settings/rescheduling-form.tsx",
+    "apps/web/src/components/promise-settings/settings-form.tsx",
+    "apps/web/src/components/promise-settings/settings.module.css",
+    "apps/web/src/components/promise-settings/time-adjust-buttons.tsx",
+    "apps/web/src/components/promise-status/cancel-promise-button.tsx",
+    "apps/web/src/components/promise-status/cancellation.module.css",
+    "apps/web/src/components/promise-status/promise-access-guard.tsx"
+  ],
+  "exclusions": [
+    "실제 환경 변수 파일",
+    "DB 데이터",
+    "의존성·빌드 결과물",
+    "사용자 .vscode 설정"
+  ],
+  "figma_backup_scope": "로컬 시안·생성 스크립트·진행 기록만 보관. Figma 클라우드 파일 자체의 .fig 내보내기는 아님."
+}
