@@ -108,7 +108,7 @@ test("방장이 확인 후 마감하면 전체 기간 후보 5개와 더 보기�
   await db.promiseRecord.update({where:{id:f.promise.id},data:{durationMinutes:30}});
   const friend=await db.participant.create({data:{promiseId:f.promise.id,nickname:"친구둘",normalizedNickname:"친구둘",role:"member",passwordHash:"unused",availabilitySubmittedAt:new Date()}});
   const nextWeek=new Date(new Date(f.start).getTime()+7*86400000).toISOString().slice(0,10);
-  const times=["09:00","09:30","10:00","10:30","11:00","11:30"];
+  const times=["09:00","10:00","11:00","12:00","13:00","14:00"];
   for(const member of [f.member,friend]){
     await db.participant.update({where:{id:member.id},data:{availabilitySubmittedAt:new Date()}});
     await db.participantAvailableSlot.createMany({data:times.map(time=>({participantId:member.id,slotStartAt:new Date(f.slot(time,nextWeek))}))});
@@ -298,9 +298,11 @@ test("모바일 범례는 색상별 인원수이며 누르는 동안만 해당 3
     await db.promiseRecord.update({where:{id:f.promise.id},data:{dailyEndMinute:1440}});
     await db.participant.update({where:{id:f.member.id},data:{availabilitySubmittedAt:new Date()}});
     await db.participantAvailableSlot.create({data:{participantId:f.member.id,slotStartAt:new Date(f.slot("09:00"))}});
+    await db.participantAvailableSlot.createMany({data:["10:00","11:00"].map(time=>({participantId:f.member.id,slotStartAt:new Date(f.slot(time))}))});
     for(const [nickname,time,submitted] of [["선택친구","09:00",true],["다른시간","09:30",true],["미제출친구","09:00",false],["미선택친구",null,true]] as const){
       const person=await db.participant.create({data:{promiseId:f.promise.id,nickname,normalizedNickname:nickname,role:"member",passwordHash:"unused",availabilitySubmittedAt:submitted?new Date():null}});
       if(time)await db.participantAvailableSlot.create({data:{participantId:person.id,slotStartAt:new Date(f.slot(time))}});
+      if(submitted)await db.participantAvailableSlot.createMany({data:(nickname==="미선택친구"?["11:00"]:["10:00","11:00"]).map(time=>({participantId:person.id,slotStartAt:new Date(f.slot(time))}))});
     }
     await page.goto(`http://127.0.0.1:3100${f.path}`);await page.getByRole("button",{name:"전체 시간",exact:true}).tap();
     const legend=page.getByRole("group",{name:"색상별 가능 인원",exact:true});

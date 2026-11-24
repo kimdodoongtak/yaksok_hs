@@ -75,7 +75,7 @@ export function createReschedulingService(db: PrismaClient, clock?: () => Date) 
           }
           await tx.promiseRecord.update({
             where: { id: access.promise.id },
-            data: { ...value, status: "collecting", confirmedStartAt: null, dateRangeStart: new Date(value.dateRangeStart), dateRangeEnd: new Date(value.dateRangeEnd) },
+            data: { ...value, status: "collecting", confirmedStartAt: null, confirmedEndAt: null, dateRangeStart: new Date(value.dateRangeStart), dateRangeEnd: new Date(value.dateRangeEnd) },
           });
           // 세션 만료 시각은 설정 변경/재조율과 독립적으로 유지한다.
           return { ok: true as const };

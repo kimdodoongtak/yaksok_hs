@@ -49,8 +49,8 @@ test("시간 직접 입력은 숫자 키패드·화살표·단계 이동·저장
   await page.getByRole("button", { name: "방장으로 시작하기" }).click();
   const start = page.getByRole("textbox", { name: "하루 시작", exact: true });
   const end = page.getByRole("textbox", { name: "하루 종료", exact: true });
-  const hours = page.getByRole("textbox", { name: "소요 시간 (시간)", exact: true });
-  const minutes = page.getByRole("textbox", { name: "소요 시간 (분)", exact: true });
+  const hours = page.getByRole("textbox", { name: "최소 소요 시간 (시간)", exact: true });
+  const minutes = page.getByRole("textbox", { name: "최소 소요 시간 (분)", exact: true });
   for (const field of [start, end, hours, minutes]) await expect(field).toHaveAttribute("inputmode", "numeric");
   await start.fill("930"); await start.press("Enter");
   await expect(start).toHaveValue("09:30");
@@ -60,13 +60,13 @@ test("시간 직접 입력은 숫자 키패드·화살표·단계 이동·저장
   await hours.fill("3"); await minutes.fill("30"); await minutes.blur();
   await expect(hours).toHaveValue("03");
   await expect(page.locator('[name="durationMinutes"]')).toHaveValue("210");
-  await page.getByRole("button", { name: "소요 시간 30분 늘리기" }).click();
+  await page.getByRole("button", { name: "최소 소요 시간 30분 늘리기" }).click();
   await expect(hours).toHaveValue("04"); await expect(minutes).toHaveValue("00");
   await page.evaluate(() => document.fonts.ready);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await page.screenshot({ path: "test-results/settings-direct-time-320.png", fullPage: true });
   await page.getByRole("button", { name: "다음", exact: true }).click();
-  await expect(page.getByText(/매일 09:30–18:00 · 소요 4시간/)).toBeVisible();
+  await expect(page.getByText(/매일 09:30–18:00 · 최소 4시간/)).toBeVisible();
   await page.getByRole("button", { name: "이전", exact: true }).click();
   await expect(start).toHaveValue("09:30"); await expect(hours).toHaveValue("04");
   await page.getByRole("button", { name: "다음", exact: true }).click();
@@ -84,7 +84,7 @@ test("모바일 시간 직접 입력은 숫자 칸 터치로 포커스하고 편
     const start = page.getByRole("textbox", { name: "하루 시작", exact: true });
     await start.tap(); await expect(start).toBeFocused();
     await start.fill("1030"); await start.press("Enter"); await expect(start).toHaveValue("10:30");
-    const minutes = page.getByRole("textbox", { name: "소요 시간 (분)", exact: true });
+    const minutes = page.getByRole("textbox", { name: "최소 소요 시간 (분)", exact: true });
     await minutes.tap(); await expect(minutes).toBeFocused();
     await minutes.fill("30"); await minutes.press("Enter");
     await expect(page.locator('[name="durationMinutes"]')).toHaveValue("150");
@@ -98,8 +98,8 @@ test("시간 직접 입력 오류는 값을 보존하고 다음 단계를 막으
   await page.getByRole("button", { name: "방장으로 시작하기" }).click();
   const start = page.getByRole("textbox", { name: "하루 시작", exact: true });
   const end = page.getByRole("textbox", { name: "하루 종료", exact: true });
-  const hours = page.getByRole("textbox", { name: "소요 시간 (시간)", exact: true });
-  const minutes = page.getByRole("textbox", { name: "소요 시간 (분)", exact: true });
+  const hours = page.getByRole("textbox", { name: "최소 소요 시간 (시간)", exact: true });
+  const minutes = page.getByRole("textbox", { name: "최소 소요 시간 (분)", exact: true });
   await start.fill("915"); await start.blur();
   await expect(start).toHaveAttribute("aria-invalid", "true"); await expect(start).toHaveValue("915");
   await page.getByRole("button", { name: "다음", exact: true }).click();
@@ -116,7 +116,7 @@ test("시간 직접 입력 오류는 값을 보존하고 다음 단계를 막으
   await hours.fill("0"); await minutes.fill("30"); await minutes.blur();
   await expect(page.locator('[name="durationMinutes"]')).toHaveValue("30");
   await minutes.fill("15"); await minutes.blur();
-  await page.getByRole("button", { name: "소요 시간 30분 늘리기" }).click();
+  await page.getByRole("button", { name: "최소 소요 시간 30분 늘리기" }).click();
   await expect(hours).toHaveValue("01"); await expect(minutes).toHaveValue("00");
   await page.getByRole("button", { name: "다음", exact: true }).click();
   await expect(page.getByRole("button", { name: "모집 시작", exact: true })).toBeVisible();
@@ -203,7 +203,7 @@ test("단계별 오류를 복구하고 수정한 입력을 유지한다", async 
   await page.getByRole("button", { name: "모집 시작", exact: true }).click();
   await expect(page.getByRole("heading", { name: "날짜와 시간" })).toBeFocused();
   await expect(page.getByText("소요 시간은 하루 시간 범위 안에서 30분 단위로 입력해 주세요.")).toBeVisible();
-  await page.getByRole("button", { name: "소요 시간 30분 늘리기" }).click();
+  await page.getByRole("button", { name: "최소 소요 시간 30분 늘리기" }).click();
   await page.getByRole("button", { name: "다음", exact: true }).click();
   await expect(page.getByRole("spinbutton", { name: "정원", exact: true })).toHaveValue("6");
   await expect(page.locator('input[name="votingDeadline"]')).toHaveValue(deadline);
@@ -226,7 +226,7 @@ test("방장이 모바일 설정을 완료하면 세션이 연장되고 초대 �
   await expect(page.getByRole("button", { name: "약속 날짜 선택", exact: true })).toBeVisible();
   await expect(page.getByRole("button", { name: "모집 시작", exact: true })).toHaveCount(0);
   await expect(page.getByRole("grid", { name: "날짜 범위 달력" })).not.toBeVisible();
-  await expect(page.getByRole("button", { name: "소요 시간 30분 늘리기" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "최소 소요 시간 30분 늘리기" })).toBeVisible();
   await page.screenshot({ path: "test-results/promise-settings-step-1-393.png", fullPage: true });
   for (const width of [320, 1280]) {
     await page.setViewportSize({ width, height: 852 });
@@ -292,12 +292,12 @@ test("방장이 모바일 설정을 완료하면 세션이 연장되고 초대 �
   await endUp.click();
   await expect(dailyEnd).toHaveValue("24:00");
 
-  const durationPicker = page.getByRole("group", { name: "소요 시간" });
+  const durationPicker = page.getByRole("group", { name: "최소 소요 시간" });
   await expect(durationPicker.getByRole("button")).toHaveCount(2);
   const durationValue = page.locator('input[name="durationMinutes"]');
   const durationLabel = durationPicker.getByRole("status");
-  const durationUp = durationPicker.getByRole("button", { name: "소요 시간 30분 늘리기" });
-  const durationDown = durationPicker.getByRole("button", { name: "소요 시간 30분 줄이기" });
+  const durationUp = durationPicker.getByRole("button", { name: "최소 소요 시간 30분 늘리기" });
+  const durationDown = durationPicker.getByRole("button", { name: "최소 소요 시간 30분 줄이기" });
   await expect(durationLabel).toHaveAccessibleName("2시간");
   await durationUp.click();
   await expect(durationLabel).toHaveAccessibleName("2시간 30분");
@@ -440,7 +440,7 @@ test("설정 단계를 바꾸면 스크롤을 맨 위로 옮기고 입력값과 
   await page.getByLabel("닉네임").fill("스크롤방장");
   await page.getByLabel("PIN").fill("1234");
   await page.getByRole("button", { name: "방장으로 시작하기" }).click();
-  await page.getByRole("button", { name: "소요 시간 30분 늘리기" }).click();
+  await page.getByRole("button", { name: "최소 소요 시간 30분 늘리기" }).click();
   for (let attempt = 0; attempt < 2; attempt++) {
     await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
     await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(0);
@@ -448,7 +448,7 @@ test("설정 단계를 바꾸면 스크롤을 맨 위로 옮기고 입력값과 
     await expect(page.getByRole("heading", { name: "모집 설정", exact: true })).toBeFocused();
     await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
     await expect(page.getByRole("heading", { name: "약속 설정", exact: true })).toBeInViewport();
-    await expect(page.getByText(/매일 .*소요 2시간 30분/)).toBeVisible();
+    await expect(page.getByText(/매일 .*최소 2시간 30분/)).toBeVisible();
     await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
     await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(0);
     await page.getByRole("button", { name: "이전", exact: true }).click();
@@ -472,7 +472,7 @@ test("설정 진입 시 날짜·시간·소요 시간과 다음 버튼이 첫 �
     page.getByRole("button", { name: "약속 날짜 선택", exact: true }),
     page.getByRole("button", { name: "하루 시작 30분 늘리기" }),
     page.getByRole("button", { name: "하루 종료 30분 늘리기" }),
-    page.getByRole("button", { name: "소요 시간 30분 늘리기" }),
+    page.getByRole("button", { name: "최소 소요 시간 30분 늘리기" }),
     page.getByRole("button", { name: "다음", exact: true }),
   ]) {
     const bounds = await control.boundingBox();

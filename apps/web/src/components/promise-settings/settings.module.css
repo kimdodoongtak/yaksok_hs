@@ -335,8 +335,9 @@
   .stepProgress { padding-bottom: 6px; }
   .stepProgress > span[aria-current] { padding-block: 6px; }
   .form .stepPanel { margin-top: 4px; }
-  .form .card { padding-block: 16px; }
-  .dateSection { padding-bottom: 12px; }
+  .form .card { padding-block: 12px; }
+  .help { margin-top: 4px; line-height: 1.5; }
+  .dateSection { padding-bottom: 10px; }
   .timeSection { padding-block: 10px; margin-bottom: 10px; }
   .timeRange { margin-top: 8px; }
   .durationBox { margin-top: 8px; }

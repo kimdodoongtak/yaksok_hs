@@ -185,7 +185,7 @@
 .legend .heatLegend { display: flex; align-items: center; gap: 8px; color: var(--muted); white-space: nowrap; }
 .legend .heatRamp { display: flex; gap: 0; width: 112px; height: 12px; overflow: hidden; border: 1px solid var(--line); border-radius: 2px; }
 .legend .heatRamp i { flex: 1; width: auto; height: 100%; border: 0; border-radius: 0; }
-.legend .heatLegend i[data-heat="0"] { background: var(--subtle); }
+.legend .heatLegend i[data-heat="0"] { background: var(--heat-0); }
 .legend .heatLegend i[data-heat="1"] { background: #f1f4ff; }
 .legend .heatLegend i[data-heat="2"] { background: var(--soft); }
 .legend .heatLegend i[data-heat="3"] { background: var(--accent); border-color: var(--accent); }
@@ -266,8 +266,9 @@
 .readCell > span + span { border: 0; }
 .readCell > span[data-heat="1"] { --cell-fill: var(--heat-1); background: var(--cell-fill); }
 .readCell > span[data-heat="2"] { --cell-fill: var(--heat-2); background: var(--cell-fill); color: var(--heat-ink); }
-.readCell > span[data-heat="3"] { --cell-fill: var(--heat-3); background: var(--cell-fill); color: var(--heat-ink); }
-.readCell > span[data-heat="4"] { --cell-fill: var(--heat-4); background: var(--cell-fill); color: var(--heat-ink); }
+.readCell > span[data-heat="3"] { --cell-fill: var(--heat-3); background: var(--cell-fill); color: white; }
+.readCell > span[data-heat="4"] { --cell-fill: var(--heat-4); background: var(--cell-fill); color: white; }
+.heatCandidate:is([data-heat="3"], [data-heat="4"]) .candidateCaption { color: white; }
 .readCell > span[data-connected-before="true"] { margin-top: 0; border-top-left-radius: 0; border-top-right-radius: 0; box-shadow: 0 -1px 0 var(--cell-fill); }
 .readCell > span[data-connected-after="true"] { margin-bottom: 0; border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
 .readCell > span[data-outside="true"] { --cell-fill: var(--subtle); background: var(--cell-fill); border-radius: 8px; }
@@ -371,7 +372,7 @@
 .readCell > span[data-heat="0"] { margin-block: 2px; border-radius: 8px; box-shadow: none; }
 .readCell > span[data-heat="0"]:has(+ span[data-heat="0"]) { margin-bottom: 0; border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
 .readCell > span[data-heat="0"] + span[data-heat="0"] { margin-top: 0; border-top-left-radius: 0; border-top-right-radius: 0; box-shadow: 0 -1px 0 var(--cell-fill); }
-.readCell[data-all="true"] > span[data-heat="0"] { --cell-fill: var(--subtle); background: var(--cell-fill); }
+.readCell[data-all="true"] > span[data-heat="0"] { --cell-fill: var(--heat-0); background: var(--cell-fill); }
 .slotPeople[data-layout="three"]::after { display: none; }
 @media (max-width: 479px) { .confirmDialog { max-width: none; } }
 .header :global(.brand) { color: var(--ink); font-size: 15px; padding: 0; }
@@ -669,3 +670,18 @@
   .calendarColumn .calendarControls::before, .calendarColumn .calendarControls::after, .calendarColumn .footer::before { inset-inline: -16px; }
   .calendarColumn .toolbar strong { font-size: 16px; }
 }
+
+/* 후보 구간을 누르면 명단을 펼치고, 확정은 별도 버튼에서 진행한다. */
+.candidates .candidateItem { display: block; padding: 0; overflow: hidden; }
+.candidateToggle { display: grid; grid-template-columns: 28px minmax(0,1fr) auto; align-items: center; gap: 10px; width: 100%; min-height: 104px; padding: 18px 16px; text-align: left; cursor: pointer; border-radius: 18px; }
+.candidateToggle:focus-visible { outline: 2px solid var(--accent); outline-offset: -3px; }
+.candidateWhen { display: grid; gap: 6px; min-width: 0; }
+.candidateWhen > span { color: var(--muted); font-size: 12px; }
+.candidates .candidateWhen strong { color: var(--ink); font-size: 18px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.candidateWhen .rosterHint { color: var(--accent); font-size: 11px; }
+.candidates .candidateRoster { margin: 0 16px 16px; padding-top: 14px; border-top: 1px solid var(--line); }
+.candidateRoster p { color: var(--muted); font-size: 12px; }
+.candidateRoster ul { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.candidates .candidateRoster li { display: block; min-height: 0; max-width: 100%; padding: 7px 11px; border: 0; border-radius: 12px; background: var(--paper); color: var(--ink); font-size: 13px; line-height: 1.5; overflow-wrap: anywhere; }
+.candidateItem .selectCandidate { position: static; width: calc(100% - 32px); height: auto; min-height: 44px; margin: 0 16px 16px; padding: 10px; border-radius: 12px; color: var(--accent); background: var(--soft); }
+@media (max-width: 359px) { .candidateToggle { grid-template-columns: 24px minmax(0,1fr) auto; gap: 8px; padding-inline: 12px; } .candidates .candidateWhen strong { font-size: 16px; } .candidateToggle .candidateCount { padding-inline: 6px; font-size: 11px; } }

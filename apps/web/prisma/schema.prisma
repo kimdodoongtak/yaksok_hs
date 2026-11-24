@@ -27,6 +27,7 @@ model PromiseRecord {
   votingDeadlineAt DateTime? @map("voting_deadline_at") @db.Timestamptz(3)
   status String @default("draft") @db.VarChar(16)
   confirmedStartAt DateTime? @map("confirmed_start_at") @db.Timestamptz(3)
+  confirmedEndAt DateTime? @map("confirmed_end_at") @db.Timestamptz(3)
   cancelledAt DateTime? @map("cancelled_at") @db.Timestamptz(3)
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
   link PromiseLink @relation(fields:[promiseLinkId], references:[id], onDelete:Restrict)

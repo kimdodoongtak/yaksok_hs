@@ -110,7 +110,7 @@ it("마감 GET은 DB를 쓰지 않고 전체 범위 상위 5개·더 보기·시
   await db.promiseRecord.update({where:{id:f.promise.id},data:{durationMinutes:30}});
   current=new Date("2026-11-15T00:00:00Z");
   expect(await service.read(f.input)).toMatchObject({ok:true,snapshot:{status:"closed",candidates:[]}});
-  const times=Array.from({length:10},(_,i)=>new Date(new Date(second).getTime()+i*1800000));
+  const times=Array.from({length:10},(_,i)=>new Date(new Date(second).getTime()+i*3600000));
   for(const member of [f.host,f.member]){
     await db.participant.update({where:{id:member.id},data:{availabilitySubmittedAt:at}});
     await db.participantAvailableSlot.createMany({data:times.map(slotStartAt=>({participantId:member.id,slotStartAt}))});
@@ -124,7 +124,7 @@ it("마감 GET은 DB를 쓰지 않고 전체 범위 상위 5개·더 보기·시
   const more=await service.read({...f.input,limit:10});if(!more.ok)throw new Error("실패");
   expect(more.snapshot.candidates).toHaveLength(10);expect(more.snapshot.candidates.slice(0,5)).toEqual(firstPage.snapshot.candidates);expect(more.snapshot.hasMore).toBe(false);
   current=new Date("2026-11-15T01:00:00Z");
-  const later=await service.read({...f.input,limit:10});if(!later.ok)throw new Error("실패");expect(later.snapshot.candidates).toHaveLength(8);
+  const later=await service.read({...f.input,limit:10});if(!later.ok)throw new Error("실패");expect(later.snapshot.candidates).toHaveLength(9);
   expect((await db.promiseRecord.findUniqueOrThrow({where:{id:f.promise.id}})).status).toBe("collecting");
   for(const input of [{limit:0},{limit:5000},{week:"2026-02-30"}])expect(await service.read({...f.input,...input})).toMatchObject({ok:false,code:"INVALID_INPUT"});
 });
@@ -216,4 +216,23 @@ it("월별 조회는 다른 주의 제출도 포함하되 다음 달과 잘못�
   for(const month of ["2026-13","2026-00","2026-1","invalid"]){
     expect(await service.read({...f.input,month})).toEqual({ok:false,code:"INVALID_INPUT"});
   }
+});
+
+it("연속 후보를 페이지 계산 전에 묶고 주간 범위 밖 후보의 전체 참석 명단도 반환한다",async()=>{
+  const f=await fixture();
+  await db.promiseRecord.update({where:{id:f.promise.id},data:{status:"closed",durationMinutes:60}});
+  for(const member of [f.host,f.member]){
+    await db.participant.update({where:{id:member.id},data:{availabilitySubmittedAt:at}});
+    await db.participantAvailableSlot.createMany({data:Array.from({length:8},(_,i)=>({participantId:member.id,slotStartAt:new Date(Date.parse(first)+i*1800000)}))});
+  }
+  const waiting=await db.participant.create({data:{promiseId:f.promise.id,nickname:"미제출",normalizedNickname:"미제출",passwordHash:"hidden",role:"member"}});
+  await db.participantAvailableSlot.createMany({data:Array.from({length:8},(_,i)=>({participantId:waiting.id,slotStartAt:new Date(Date.parse(first)+i*1800000)}))});
+  const service=createCandidatesService(db,()=>at);
+  const result=await service.read({...f.input,week:"2026-11-22",limit:1});
+  expect(result.ok).toBe(true);if(!result.ok)throw Error("조회 실패");
+  expect(result.snapshot.candidates).toEqual([{startAt:first,endAt:"2026-11-15T04:00:00.000Z",count:2,participantIds:[f.host.id,f.member.id].sort()}]);
+  expect(result.snapshot.hasMore).toBe(false);
+  expect(result.snapshot.slotParticipantIndexes).toEqual({});
+  expect(JSON.stringify(result)).not.toMatch(/passwordHash|sessionToken|availabilitySubmittedAt/);
+  expect(await service.read({inviteToken:f.link.inviteToken})).toMatchObject({ok:false,code:"UNAUTHORIZED"});
 });

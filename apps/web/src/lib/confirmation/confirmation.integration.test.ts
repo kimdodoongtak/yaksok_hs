@@ -25,8 +25,8 @@ afterAll(async()=>{
 async function fixture(){
   const link=await db.promiseLink.create({data:{inviteToken:newToken(),createdAt:at}});links.push(link.id);
   const promise=await db.promiseRecord.create({data:{promiseLinkId:link.id,status:"closed",participantLimit:5,dateRangeStart:new Date("2026-11-16"),dateRangeEnd:new Date("2026-11-18"),dailyStartMinute:540,dailyEndMinute:1440,durationMinutes:60,votingDeadlineAt:at}});
-  const host=await db.participant.create({data:{promiseId:promise.id,nickname:"방장",normalizedNickname:"방장",passwordHash:"hidden",role:"host",availabilitySubmittedAt:at}});
-  const friend=await db.participant.create({data:{promiseId:promise.id,nickname:"친구",normalizedNickname:"친구",passwordHash:"hidden",role:"member",availabilitySubmittedAt:at}});
+  const host=await db.participant.create({data:{promiseId:promise.id,nickname:"방장",normalizedNickname:"방장",passwordHash:"hidden",role:"host",availabilitySubmittedAt:at,createdAt:at}});
+  const friend=await db.participant.create({data:{promiseId:promise.id,nickname:"친구",normalizedNickname:"친구",passwordHash:"hidden",role:"member",availabilitySubmittedAt:at,createdAt:new Date(at.getTime()+1)}});
   const hostToken=newToken(),friendToken=newToken();
   for(const [id,token] of [[host.id,hostToken],[friend.id,friendToken]]){
     await db.participantSession.create({data:{participantId:id,sessionTokenHash:tokenHash(token),expiresAt:new Date("2026-11-22")}});
@@ -133,4 +133,42 @@ it("저장 오류는 마감 전환까지 롤백하고 확정 후 소요 시간 �
   expect(await service.confirm(f.input)).toEqual({ok:true});
   expect(await createPromiseSettingsService(db,()=>at).startCollection({...f.input,settings:{participantLimit:5,dateRangeStart:"2026-11-16",dateRangeEnd:"2026-11-18",dailyStart:"09:00",dailyEnd:"24:00",durationMinutes:120,votingDeadline:"2026-11-15T12:00"}})).toMatchObject({ok:false,code:"NOT_DRAFT"});
   expect(await db.promiseRecord.findUniqueOrThrow({where:{id:f.promise.id}})).toMatchObject({status:"confirmed",durationMinutes:60,confirmedStartAt:new Date(startAt)});
+});
+
+it("최소 소요 시간보다 긴 후보 전체를 확정하고 실제 종료·길이·전체 구간 명단을 보존한다",async()=>{
+  const f=await fixture(),service=createConfirmationService(db,()=>at),endAt="2026-11-16T01:30:00.000Z";
+  const partial=await db.participant.create({data:{promiseId:f.promise.id,nickname:"일부친구",normalizedNickname:"일부친구",role:"member",passwordHash:"hidden",availabilitySubmittedAt:at}});
+  await db.participantAvailableSlot.createMany({data:[later,"2026-11-16T01:00:00.000Z"].map(slotStartAt=>({participantId:partial.id,slotStartAt:new Date(slotStartAt)}))});
+  // 명단이 바뀌는 지점을 지나면 같은 후보가 아니므로 일부친구 제출은 아래 결과 조회에서만 추가한다.
+  await db.participant.update({where:{id:partial.id},data:{availabilitySubmittedAt:null}});
+  expect(await service.confirm({...f.input,endAt})).toEqual({ok:true});
+  expect(await service.read(f.input)).toMatchObject({ok:true,snapshot:{startAt,endAt,durationMinutes:90,attendees:[{id:f.host.id,nickname:"방장"},{id:f.friend.id,nickname:"친구"}]}});
+  expect(await db.promiseRecord.findUniqueOrThrow({where:{id:f.promise.id}})).toMatchObject({durationMinutes:60,confirmedStartAt:new Date(startAt),confirmedEndAt:new Date(endAt)});
+  await db.participant.update({where:{id:partial.id},data:{availabilitySubmittedAt:at}});
+  expect(await service.read(f.input)).toMatchObject({ok:true,snapshot:{attendees:[{id:f.host.id,nickname:"방장"},{id:f.friend.id,nickname:"친구"}]}});
+  expect(await service.confirm({...f.input,endAt})).toEqual({ok:true});
+  expect(await service.confirm({...f.input,endAt:"2026-11-16T01:00:00.000Z"})).toEqual({ok:false,code:"ALREADY_CONFIRMED"});
+});
+
+it("종료 조작은 최소 길이·30분 경계·후보 범위·전체 교집합을 검증한다",async()=>{
+  const f=await fixture(),service=createConfirmationService(db,()=>at);
+  for(const endAt of [null,123,"bad",startAt,later,"2026-11-16T01:01:00.000Z"]){
+    expect(await service.confirm({...f.input,endAt})).toMatchObject({ok:false,code:"INVALID_INPUT"});
+  }
+  for(const endAt of ["2026-11-16T02:00:00.000Z","2026-11-17T00:00:00.000Z"]){
+    expect(await service.confirm({...f.input,endAt})).toMatchObject({ok:false,code:"CANDIDATE_INVALID"});
+  }
+  await db.participantAvailableSlot.deleteMany({where:{participantId:f.friend.id,slotStartAt:new Date("2026-11-16T01:00:00.000Z")}});
+  expect(await service.confirm({...f.input,endAt:"2026-11-16T01:30:00.000Z"})).toMatchObject({ok:false,code:"CANDIDATE_INVALID"});
+  expect(await db.promiseRecord.findUniqueOrThrow({where:{id:f.promise.id}})).toMatchObject({status:"closed",confirmedStartAt:null,confirmedEndAt:null});
+});
+
+it("같은 시작과 다른 종료를 동시에 확정해도 한 구간만 저장한다",async()=>{
+  const f=await fixture();let release!:()=>void;const gate=new Promise<void>(r=>{release=r;});
+  const ends=["2026-11-16T01:00:00.000Z","2026-11-16T01:30:00.000Z"];
+  const promises=[db,otherDb].map((client,index)=>gate.then(()=>createConfirmationService(client,()=>at).confirm({...f.input,endAt:ends[index]})));
+  release();const results=await Promise.all(promises);
+  expect(results.filter(result=>result.ok)).toHaveLength(1);
+  expect(results.filter(result=>!result.ok)).toEqual([{ok:false,code:"ALREADY_CONFIRMED"}]);
+  expect((await db.promiseRecord.findUniqueOrThrow({where:{id:f.promise.id}})).confirmedEndAt?.toISOString()).toBe(ends[results.findIndex(result=>result.ok)]);
 });

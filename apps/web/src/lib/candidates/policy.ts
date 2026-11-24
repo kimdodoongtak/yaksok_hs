@@ -1,9 +1,10 @@
 import type { SlotSettings } from "../availability/policy";
 export type Candidate = { startAt: string; endAt: string; count: number };
+export type CandidateRange = Candidate & { participantIds: string[] };
 export type CandidateMember = { id: string; active: boolean; submitted: boolean; slots: string[] };
 export type CandidateSettings = SlotSettings & { durationMinutes: number };
 const halfHour = 1800000;
-export function calculateCandidates(members: CandidateMember[], settings: CandidateSettings, now: Date): { candidates: Candidate[]; heatmap: Record<string, number>; participantIdsBySlot: Record<string, string[]> } {
+export function calculateCandidates(members: CandidateMember[], settings: CandidateSettings, now: Date): { candidates: Candidate[]; candidateRanges: CandidateRange[]; heatmap: Record<string, number>; participantIdsBySlot: Record<string, string[]> } {
   const peopleBySlot = new Map<number, Set<string>>();
   for (const member of members) {
     if (!member.active || !member.submitted) continue;
@@ -19,6 +20,8 @@ export function calculateCandidates(members: CandidateMember[], settings: Candid
   }
   const heatmap = Object.fromEntries([...peopleBySlot].map(([time, people]) => [new Date(time).toISOString(), people.size]));
   const candidates: Candidate[] = [];
+  const candidateRanges: CandidateRange[] = [];
+  let previousStart = NaN;
   const endDay = new Date(`${settings.dateRangeEnd}T00:00:00+09:00`).getTime();
   for (let day = new Date(`${settings.dateRangeStart}T00:00:00+09:00`).getTime(); day <= endDay; day += 86400000) {
     for (let minute = settings.dailyStartMinute; minute + settings.durationMinutes <= settings.dailyEndMinute; minute += 30) {
@@ -28,9 +31,18 @@ export function calculateCandidates(members: CandidateMember[], settings: Candid
         for (let time = start + halfHour; time < end; time += halfHour) if (!peopleBySlot.get(time)?.has(id)) return false;
         return true;
       });
-      if (people.length >= 2) candidates.push({ startAt: new Date(start).toISOString(), endAt: new Date(end).toISOString(), count: people.length });
+      if (people.length >= 2) {
+        const candidate = { startAt: new Date(start).toISOString(), endAt: new Date(end).toISOString(), count: people.length };
+        candidates.push(candidate);
+        const participantIds = people.sort(), previous = candidateRanges.at(-1);
+        if (previous && previousStart >= day && start - previousStart === halfHour && previous.participantIds.length === participantIds.length && previous.participantIds.every((id, index) => id === participantIds[index])) {
+          previous.endAt = candidate.endAt;
+        } else candidateRanges.push({ ...candidate, participantIds });
+        previousStart = start;
+      }
     }
   }
   candidates.sort((a, b) => b.count - a.count || a.startAt.localeCompare(b.startAt));
-  return { candidates, heatmap, participantIdsBySlot: Object.fromEntries([...peopleBySlot].map(([time, people]) => [new Date(time).toISOString(), [...people]])) };
+  candidateRanges.sort((a, b) => b.count - a.count || a.startAt.localeCompare(b.startAt));
+  return { candidates, candidateRanges, heatmap, participantIdsBySlot: Object.fromEntries([...peopleBySlot].map(([time, people]) => [new Date(time).toISOString(), [...people]])) };
 }

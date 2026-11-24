@@ -44,7 +44,7 @@ export function InvitationTicket({ settings, animate }: {
               <dd>{settings.dailyStart}–{settings.dailyEnd}</dd>
             </div>
             <div>
-              <dt className={styles.ticketLabel}>소요 시간</dt>
+              <dt className={styles.ticketLabel}>최소 소요 시간</dt>
               <dd>{duration}</dd>
             </div>
           </dl>

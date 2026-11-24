@@ -23,7 +23,7 @@ export function DurationPicker({ initialValue, error, onEdit }: {
   const [inputError, setInputError] = useState<string | null>(null);
   const duration = parseDurationEntry(parts.hours, parts.minutes);
   const message = inputError || error;
-  const label = duration === null ? "소요 시간 입력 중" : [Math.floor(duration / 60) ? `${Math.floor(duration / 60)}시간` : "", duration % 60 ? `${duration % 60}분` : ""].filter(Boolean).join(" ");
+  const label = duration === null ? "최소 소요 시간 입력 중" : [Math.floor(duration / 60) ? `${Math.floor(duration / 60)}시간` : "", duration % 60 ? `${duration % 60}분` : ""].filter(Boolean).join(" ");
 
   function commit(value: number) {
     setLastValid(value);
@@ -34,7 +34,8 @@ export function DurationPicker({ initialValue, error, onEdit }: {
 
   return (
     <fieldset>
-      <legend className="text-sm font-semibold">소요 시간</legend>
+      <legend className="text-sm font-semibold">최소 소요 시간</legend>
+      <p className={styles.help}>이 시간 이상 함께할 수 있는 구간을 찾아요.</p>
       <input type="hidden" name="durationMinutes" value={duration ?? ""} />
       <output aria-label={label} className="sr-only">{label}</output>
       <div className={styles.durationBox} data-invalid={Boolean(message)}>
@@ -43,13 +44,13 @@ export function DurationPicker({ initialValue, error, onEdit }: {
             <label key={part.name} className={styles.flipUnit}>
               <input type="text" inputMode="numeric" enterKeyHint="done" autoComplete="off" spellCheck={false} maxLength={2}
                 className={`${styles.flipFace} ${styles.durationInput}`}
-                aria-label={`소요 시간 (${part.label})`} aria-invalid={Boolean(message)} aria-describedby={message ? "durationMinutes-error" : undefined}
+                aria-label={`최소 소요 시간 (${part.label})`} aria-invalid={Boolean(message)} aria-describedby={message ? "durationMinutes-error" : undefined}
                 value={parts[part.name]}
                 onFocus={event => event.currentTarget.select()}
                 onChange={event => { setParts(current => ({ ...current, [part.name]: event.target.value })); setInputError(null); onEdit?.(); }}
                 onBlur={() => {
                   if (duration !== null) commit(duration);
-                  else setInputError("소요 시간은 30분~24시간 사이로, 분은 00 또는 30으로 입력해 주세요.");
+                  else setInputError("최소 소요 시간은 30분~24시간 사이로, 분은 00 또는 30으로 입력해 주세요.");
                 }}
                 onKeyDown={event => { if (event.key === "Enter") { event.preventDefault(); event.currentTarget.blur(); } }}
               />
@@ -58,7 +59,7 @@ export function DurationPicker({ initialValue, error, onEdit }: {
           ))}
         </div>
         <TimeAdjustButtons
-          label="소요 시간"
+          label="최소 소요 시간"
           value={duration ?? lastValid}
           min={MIN_DURATION}
           max={MAX_DURATION}

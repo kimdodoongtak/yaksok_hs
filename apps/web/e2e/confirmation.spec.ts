@@ -35,20 +35,42 @@ async function fixture(context:BrowserContext){
   for(const person of [member,friend])await db.participantAvailableSlot.createMany({data:["09:00","09:30","10:00"].map(time=>({participantId:person.id,slotStartAt:new Date(slot(time))}))});
   return {link,promise,member,friend,start,end,slot,path:`/p/${link.inviteToken}/availability`};
 }
-test("방장은 두 번째 후보를 확인 후 확정하고 결과 링크를 공유한다",async({page,context})=>{
-  const f=await fixture(context);await page.setViewportSize({width:393,height:852});await page.goto(f.path);
-  await page.getByRole("button",{name:"이 시간 선택",exact:true}).nth(1).click();
+test("방장은 후보 전체에서 시작·종료를 조절해 더 긴 약속을 확정한다",async({page,context})=>{
+  const f=await fixture(context);
+  for(const person of [f.member,f.friend])await db.participantAvailableSlot.createMany({data:["10:30","11:00"].map(time=>({participantId:person.id,slotStartAt:new Date(f.slot(time))}))});
+  await page.setViewportSize({width:393,height:852});await page.goto(f.path);
+  await page.getByRole("button",{name:"이 시간 선택",exact:true}).first().click();
   const dialog=page.getByRole("dialog",{name:"이 시간으로 확정할까요?",exact:true});
-  await expect(dialog).toContainText("09:30");await expect(dialog).toContainText("10:30");
+  await expect(dialog.getByLabel("선택한 시작 시간",{exact:true})).toHaveText("09:00");
+  await expect(dialog.getByLabel("선택한 종료 시간",{exact:true})).toHaveText("11:30");
+  await expect(dialog.getByRole("button",{name:"시작 시간 30분 앞당기기",exact:true})).toBeDisabled();
+  await expect(dialog.getByRole("button",{name:"종료 시간 30분 늦추기",exact:true})).toBeDisabled();
+  await dialog.getByRole("button",{name:"시작 시간 30분 늦추기",exact:true}).click();
+  await dialog.getByRole("button",{name:"종료 시간 30분 앞당기기",exact:true}).click();
+  await expect(dialog).toContainText("09:30");await expect(dialog.getByLabel("선택한 종료 시간",{exact:true})).toHaveText("11:00");
+  await dialog.getByRole("button",{name:"종료 시간 30분 앞당기기",exact:true}).click();
+  await expect(dialog.getByRole("button",{name:"종료 시간 30분 앞당기기",exact:true})).toBeDisabled();
+  await expect(dialog.getByRole("button",{name:"시작 시간 30분 늦추기",exact:true})).toBeDisabled();
+  await dialog.getByRole("button",{name:"종료 시간 30분 늦추기",exact:true}).click();
+  for(const width of [320,393,1280]){
+    await page.setViewportSize({width,height:852});
+    expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+    await page.screenshot({path:`test-results/candidate-time-adjust-${width}.png`,fullPage:true});
+  }
   await dialog.getByRole("button",{name:"취소",exact:true}).click();
   expect((await db.promiseRecord.findUniqueOrThrow({where:{id:f.promise.id}})).status).toBe("closed");
-  await page.getByRole("button",{name:"이 시간 선택",exact:true}).nth(1).click();
-  await dialog.getByRole("button",{name:"확정하기",exact:true}).click();
+  await page.getByRole("button",{name:"이 시간 선택",exact:true}).first().click();
+  await dialog.getByRole("button",{name:"시작 시간 30분 늦추기",exact:true}).click();
+  await dialog.getByRole("button",{name:"종료 시간 30분 앞당기기",exact:true}).click();
+  await dialog.getByRole("button",{name:/ · .* 확정$/,exact:false}).click();
   await expect(page).toHaveURL(`/p/${f.link.inviteToken}/result`);
   await expect(page.getByRole("heading",{name:"약속 확정",exact:true})).toBeVisible();
-  await expect(page.getByLabel("확정 시간",{exact:true})).toHaveText("09:30 ~ 10:30");
+  await expect(page.getByLabel("확정 시간",{exact:true})).toHaveText("09:30 ~ 11:00");
   await expect(page.getByRole("list",{name:"참석자",exact:true})).toHaveText("테스트친구확정친구");
-  expect((await db.promiseRecord.findUniqueOrThrow({where:{id:f.promise.id}})).confirmedStartAt?.toISOString()).toBe(f.slot("09:30"));
+  expect(await db.promiseRecord.findUniqueOrThrow({where:{id:f.promise.id}})).toMatchObject({confirmedStartAt:new Date(f.slot("09:30")),confirmedEndAt:new Date(f.slot("11:00")),durationMinutes:60});
+  await page.reload();
+  await expect(page.getByLabel("확정 시간",{exact:true})).toHaveText("09:30 ~ 11:00");
+  await expect(page.getByText("소요 1시간 30분",{exact:true})).toBeVisible();
   await page.evaluate(()=>Object.defineProperty(navigator,"clipboard",{configurable:true,value:{writeText:async()=>{throw new Error("denied");}}}));
   await page.getByRole("button",{name:"결과 링크 복사",exact:true}).click();
   await expect(page.getByLabel("결과 링크",{exact:true})).toHaveValue(`http://127.0.0.1:3100/p/${f.link.inviteToken}/result`);
@@ -87,19 +109,19 @@ test("확정 직전 무효 후보는 재조회하고 연결 실패는 재시도�
   await page.getByRole("button",{name:"이 시간 선택",exact:true}).first().click();
   await db.participantAvailableSlot.deleteMany({where:{participantId:f.friend.id}});
   const dialog=page.getByRole("dialog",{name:"이 시간으로 확정할까요?",exact:true});
-  await dialog.getByRole("button",{name:"확정하기",exact:true}).click();
+  await dialog.getByRole("button",{name:/ · .* 확정$/,exact:false}).click();
   await expect(page.getByText("이 후보는 더 이상 확정할 수 없어요. 최신 후보에서 다시 선택해 주세요.",{exact:true})).toBeVisible();
   await expect(page.getByText("함께 가능한 시간이 없어요.",{exact:true})).toBeVisible();
   expect((await db.promiseRecord.findUniqueOrThrow({where:{id:f.promise.id}})).status).toBe("closed");
   await db.participantAvailableSlot.createMany({data:["09:00","09:30"].map(time=>({participantId:f.friend.id,slotStartAt:new Date(f.slot(time))}))});
   await page.reload();await page.getByRole("button",{name:"이 시간 선택",exact:true}).first().click();
   await page.route(`**/p/${f.link.inviteToken}/candidates`,route=>route.request().method()==="POST"?route.abort():route.continue());
-  await dialog.getByRole("button",{name:"확정하기",exact:true}).click();
+  await dialog.getByRole("button",{name:/ · .* 확정$/,exact:false}).click();
   await expect(dialog.getByRole("alert")).toContainText("다시 시도");
   await page.unroute(`**/p/${f.link.inviteToken}/candidates`);
   let release!:()=>void,started!:()=>void;const gate=new Promise<void>(r=>{release=r;}),ready=new Promise<void>(r=>{started=r;});
   await page.route(`**/p/${f.link.inviteToken}/candidates`,async route=>{if(route.request().method()!=="POST"){await route.continue();return;}started();await gate;await route.continue();},{times:1});
-  await dialog.getByRole("button",{name:"확정하기",exact:true}).click();await ready;
+  await dialog.getByRole("button",{name:/ · .* 확정$/,exact:false}).click();await ready;
   try {await expect(dialog.getByRole("button",{name:"확정 중…",exact:true})).toBeDisabled();await expect(dialog.getByRole("button",{name:"취소",exact:true})).toBeDisabled();} finally {release();}
   await expect(page).toHaveURL(`/p/${f.link.inviteToken}/result`);
 });
@@ -129,7 +151,25 @@ test("모바일 참여자는 확정 버튼이 없고 방장은 터치로 확정�
     await page.reload();await other.goto(url);await page.bringToFront();
     await page.getByRole("button",{name:"이 시간 선택",exact:true}).first().tap();
     const dialog=page.getByRole("dialog",{name:"이 시간으로 확정할까요?",exact:true});await expect(dialog).toBeVisible();await page.screenshot({path:"test-results/confirmation-dialog-393.png",fullPage:true});
-    await dialog.getByRole("button",{name:"확정하기",exact:true}).tap();await expect(page.getByRole("heading",{name:"약속 확정",exact:true})).toBeVisible();
+    const later=dialog.getByRole("button",{name:"시작 시간 30분 늦추기",exact:true});
+    const hit=await later.boundingBox();if(!hit)throw new Error("조절 버튼 없음");expect(hit.width).toBeGreaterThanOrEqual(44);expect(hit.height).toBeGreaterThanOrEqual(44);
+    await page.setViewportSize({width:320,height:460});
+    await later.scrollIntoViewIfNeeded();const swipe=await later.boundingBox();if(!swipe)throw new Error("조절 버튼 없음");
+    const client=await context.newCDPSession(page),beforeScroll=await dialog.evaluate(el=>el.scrollTop);
+    const x=swipe.x+swipe.width/2,y=swipe.y+swipe.height/2;
+    await client.send("Input.dispatchTouchEvent",{type:"touchStart",touchPoints:[{x,y,radiusX:12,radiusY:12}]});
+    for(let n=1;n<=8;n++)await client.send("Input.dispatchTouchEvent",{type:"touchMove",touchPoints:[{x,y:y-n*10,radiusX:12,radiusY:12}]});
+    await client.send("Input.dispatchTouchEvent",{type:"touchEnd",touchPoints:[]});
+    await expect(dialog.getByLabel("선택한 시작 시간",{exact:true})).toHaveText("09:00");
+    await expect.poll(()=>dialog.evaluate(el=>el.scrollTop)).toBeGreaterThan(beforeScroll);
+    await page.setViewportSize({width:393,height:852});await later.scrollIntoViewIfNeeded();
+    const edge=await later.boundingBox();if(!edge)throw new Error("조절 버튼 없음");
+    await client.send("Input.dispatchTouchEvent",{type:"touchStart",touchPoints:[{x:edge.x+5,y:edge.y+22,radiusX:12,radiusY:12}]});
+    await client.send("Input.dispatchTouchEvent",{type:"touchEnd",touchPoints:[]});
+    await expect(dialog.getByLabel("선택한 시작 시간",{exact:true})).toHaveText("09:30");await expect(later).toBeDisabled();
+    await dialog.getByRole("button",{name:"시작 시간 30분 앞당기기",exact:true}).tap();
+    await dialog.getByRole("button",{name:/ · .* 확정$/,exact:false}).tap();await expect(page.getByRole("heading",{name:"약속 확정",exact:true})).toBeVisible();
+    await expect(page.getByLabel("확정 시간",{exact:true})).toHaveText("09:00 ~ 10:30");
     await other.bringToFront();await other.evaluate(()=>window.dispatchEvent(new Event("focus")));await expect(other).toHaveURL(`http://127.0.0.1:3100/p/${f.link.inviteToken}/result`);
   } finally {await context.close();}
 });
@@ -163,4 +203,56 @@ test("후보 페이지는 모집 중·확정 상태를 안내하고 미인증 �
   await page.goto(path);await expect(page).toHaveURL(`/p/${f.link.inviteToken}/result`);
   await db.participantSession.deleteMany({where:{participantId:f.member.id}});
   await page.goto(path);await expect(page.getByRole("button",{name:"로그인하기",exact:true})).toBeVisible();
+});
+
+test("후보를 터치하면 구간 전체 참석 명단을 펼치고 최신 응답 변경을 반영한다",async({browser})=>{
+  const context=await browser.newContext({hasTouch:true,isMobile:true,viewport:{width:320,height:852}});
+  try {
+    const f=await fixture(context),page=await context.newPage();
+    await db.participant.update({where:{id:f.member.id},data:{role:"member"}});
+    const partial=await db.participant.create({data:{promiseId:f.promise.id,nickname:"잠깐친구",normalizedNickname:"잠깐친구",passwordHash:"unused",role:"member",availabilitySubmittedAt:new Date()}});
+    await db.participantAvailableSlot.create({data:{participantId:partial.id,slotStartAt:new Date(f.slot("09:00"))}});
+    await page.goto(`http://127.0.0.1:3100${f.path}`);
+    const list=page.getByRole("list",{name:"시간 후보",exact:true});
+    await expect(list.locator(':scope > li')).toHaveCount(1);
+    await expect(list).toContainText("09:00 ~ 10:30");
+    const toggle=list.getByRole("button",{name:/참석 가능 명단/});
+    await toggle.tap();await expect(toggle).toHaveAttribute("aria-expanded","true");
+    const roster=page.getByRole("list",{name:"참석 가능한 사람",exact:true});
+    await expect(roster).toHaveText("테스트친구확정친구");
+    await expect(roster).not.toContainText("잠깐친구");
+    await expect(page.getByRole("button",{name:"이 시간 선택",exact:true})).toHaveCount(0);
+    expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+    await page.screenshot({path:"test-results/candidate-roster-320.png",fullPage:true});
+    await page.setViewportSize({width:1280,height:900});
+    await page.screenshot({path:"test-results/candidate-roster-1280.png",fullPage:true});
+    await page.setViewportSize({width:320,height:852});
+    await toggle.tap();await expect(roster).toHaveCount(0);
+    await page.setViewportSize({width:320,height:360});
+    await page.evaluate(()=>window.scrollTo(0,0));
+    const client=await context.newCDPSession(page),box=await toggle.boundingBox();
+    if(!box)throw new Error("후보 버튼 없음");
+    const x=box.x+box.width/2,y=box.y+box.height/2;
+    await client.send("Input.dispatchTouchEvent",{type:"touchStart",touchPoints:[{x,y,radiusX:14,radiusY:14}]});
+    for(let i=1;i<=8;i++)await client.send("Input.dispatchTouchEvent",{type:"touchMove",touchPoints:[{x,y:y-i*12,radiusX:14,radiusY:14}]});
+    await client.send("Input.dispatchTouchEvent",{type:"touchEnd",touchPoints:[]});
+    await expect(toggle).toHaveAttribute("aria-expanded","false");
+    await expect.poll(()=>page.evaluate(()=>window.scrollY)).toBeGreaterThan(0);
+    await page.setViewportSize({width:320,height:852});
+    await toggle.scrollIntoViewIfNeeded();
+    const edge=await toggle.boundingBox();if(!edge)throw new Error("후보 버튼 없음");
+    await client.send("Input.dispatchTouchEvent",{type:"touchStart",touchPoints:[{x:edge.x+9,y:edge.y+18,radiusX:12,radiusY:12}]});
+    await client.send("Input.dispatchTouchEvent",{type:"touchEnd",touchPoints:[]});
+    await expect(roster).toBeVisible();
+    await db.$transaction([
+      db.participantAvailableSlot.createMany({data:["09:30","10:00"].map(time=>({participantId:partial.id,slotStartAt:new Date(f.slot(time))}))}),
+      db.participant.update({where:{id:f.friend.id},data:{status:"cancelled",cancelledAt:new Date()}}),
+    ]);
+    await page.evaluate(()=>window.dispatchEvent(new Event("focus")));
+    await expect(roster).toHaveText("테스트친구잠깐친구");
+    await db.participant.update({where:{id:partial.id},data:{status:"cancelled",cancelledAt:new Date()}});
+    await page.evaluate(()=>window.dispatchEvent(new Event("focus")));
+    await expect(page.getByText("함께 가능한 시간이 없어요.",{exact:true})).toBeVisible();
+    await expect(roster).toHaveCount(0);
+  } finally {await context.close();}
 });

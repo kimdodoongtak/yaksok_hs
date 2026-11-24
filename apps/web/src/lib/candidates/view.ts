@@ -1,5 +1,5 @@
 import type { AvailabilitySnapshot } from "../availability/view";
-import type { Candidate } from "./policy";
+import type { Candidate, CandidateRange } from "./policy";
 export type OverviewSnapshot = {
   participantId: string;
   status: string;
@@ -12,7 +12,7 @@ export type OverviewSnapshot = {
   // 같은 응답의 participants 배열 위치. 요청한 주 또는 월의 제출 슬롯만 포함한다.
   slotParticipantIndexes: Record<string, number[]>;
   weekCandidates: Candidate[];
-  candidates: Candidate[];
+  candidates: CandidateRange[];
   hasMore: boolean;
 };
 export type OverviewResult = { ok: true; snapshot: OverviewSnapshot } | { ok: false; code: string };

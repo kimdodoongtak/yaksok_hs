@@ -147,7 +147,7 @@ export function SettingsForm({ inviteToken, serverNow, initialValues, submitSett
         <div className={styles.review}>
           <p className="mb-2 text-sm font-semibold">선택한 약속 조건</p>
           <p>{review.dateRangeStart.replaceAll("-", ".")} → {review.dateRangeEnd.replaceAll("-", ".")}</p>
-          <p>매일 {review.dailyStart}–{review.dailyEnd} · 소요 {[Math.floor(Number(review.durationMinutes) / 60) ? `${Math.floor(Number(review.durationMinutes) / 60)}시간` : "", Number(review.durationMinutes) % 60 ? `${Number(review.durationMinutes) % 60}분` : ""].filter(Boolean).join(" ")}</p>
+          <p>매일 {review.dailyStart}–{review.dailyEnd} · 최소 {[Math.floor(Number(review.durationMinutes) / 60) ? `${Math.floor(Number(review.durationMinutes) / 60)}시간` : "", Number(review.durationMinutes) % 60 ? `${Number(review.durationMinutes) % 60}분` : ""].filter(Boolean).join(" ")}</p>
           <p className="mt-2 text-xs text-slate-500">수정하려면 이전 단계로 돌아가세요.</p>
         </div>
       </div>

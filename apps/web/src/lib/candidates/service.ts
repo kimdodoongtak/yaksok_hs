@@ -41,7 +41,7 @@ export function createCandidatesService(db: PrismaClient, clock?: () => Date | P
           heatmap: Object.fromEntries(Object.entries(calculated.heatmap).filter(([slot]) => inRange(slot))),
           slotParticipantIndexes: Object.fromEntries(Object.entries(calculated.participantIdsBySlot).filter(([slot]) => inRange(slot)).map(([slot, ids]) => [slot, ids.map(id => memberIndexes.get(id)!)])),
           weekCandidates: ["collecting", "closed"].includes(status) ? calculated.candidates.filter(candidate => inWeek(candidate.startAt)) : [],
-          candidates: status === "closed" ? calculated.candidates.slice(0, limit) : [], hasMore: status === "closed" && calculated.candidates.length > limit,
+          candidates: status === "closed" ? calculated.candidateRanges.slice(0, limit) : [], hasMore: status === "closed" && calculated.candidateRanges.length > limit,
         } };
       },{isolationLevel:"RepeatableRead"}); } catch { return { ok: false, code: "UNAVAILABLE" }; }
     },

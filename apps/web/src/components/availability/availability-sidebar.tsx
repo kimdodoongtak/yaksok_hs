@@ -15,7 +15,7 @@ export function AvailabilitySidebar({snapshot,inviteToken,participants,onSelect,
     <div className={styles.infoCardBody}>
     <p className={styles.range}>{settings.dateRangeStart.slice(5).replace("-",".")} – {settings.dateRangeEnd.slice(5).replace("-",".")}</p>
     <dl className={styles.details}>
-      <div><dt>소요 시간</dt><dd>{durationLabel(settings.durationMinutes)}</dd></div>
+      <div><dt>최소 소요 시간</dt><dd>{durationLabel(settings.durationMinutes)}</dd></div>
       <div><dt>하루 시간</dt><dd>{timeLabel(settings.dailyStartMinute)} – {timeLabel(settings.dailyEndMinute)}</dd></div>
       <div><dt>응답 마감</dt><dd>{deadline}</dd></div>
       <div><dt>정원</dt><dd>{settings.participantLimit}명</dd></div>

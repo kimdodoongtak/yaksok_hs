@@ -75,7 +75,7 @@ test("변경 취소·연결 실패 재시도·중복 클릭 방지와 모바일 
   await expect(page.getByRole("button",{name:"다음",exact:true})).toBeInViewport();await page.screenshot({path:`test-results/rescheduling-${width}.png`,fullPage:true});
  }
  await page.setViewportSize({width:393,height:852});
- await page.getByRole("button",{name:"소요 시간 30분 늘리기",exact:true}).click();await page.getByRole("button",{name:"다음",exact:true}).click();await page.getByRole("button",{name:"변경 내용 확인",exact:true}).click();
+ await page.getByRole("button",{name:"최소 소요 시간 30분 늘리기",exact:true}).click();await page.getByRole("button",{name:"다음",exact:true}).click();await page.getByRole("button",{name:"변경 내용 확인",exact:true}).click();
  const dialog=page.getByRole("dialog",{name:"변경 내용을 적용할까요?",exact:true});await expect(dialog).toContainText("기존 선택과 제출 상태는 유지돼요.");
  await page.keyboard.press("Escape");await expect(dialog).not.toBeVisible();expect((await db.promiseRecord.findUniqueOrThrow({where:{id:f.promise.id}})).durationMinutes).toBe(60);
  await page.getByRole("button",{name:"변경 내용 확인",exact:true}).click();await page.screenshot({path:"test-results/rescheduling-confirm-393.png",fullPage:true});
@@ -103,7 +103,7 @@ for(const changedAfterDialog of [false,true])test(`오래된 설정의 영향이
  await db.promiseRecord.update({where:{id:f.promise.id},data:{status:"collecting",votingDeadlineAt:new Date(`${f.start}T08:00:00+09:00`)}});
  await page.goto(edit);const other=await context.newPage();await other.goto(edit);
  const dialog=page.getByRole("dialog",{name:"변경 내용을 적용할까요?",exact:true});
- async function stageOld(){await page.bringToFront();await page.getByRole("button",{name:"소요 시간 30분 늘리기",exact:true}).click();await page.getByRole("button",{name:"다음",exact:true}).click();await page.getByRole("button",{name:"변경 내용 확인",exact:true}).click();await expect(dialog).toContainText("기존 선택과 제출 상태는 유지돼요.");}
+ async function stageOld(){await page.bringToFront();await page.getByRole("button",{name:"최소 소요 시간 30분 늘리기",exact:true}).click();await page.getByRole("button",{name:"다음",exact:true}).click();await page.getByRole("button",{name:"변경 내용 확인",exact:true}).click();await expect(dialog).toContainText("기존 선택과 제출 상태는 유지돼요.");}
  if(changedAfterDialog)await stageOld();
  await other.getByRole("button",{name:"하루 종료 30분 줄이기",exact:true}).click();await other.getByRole("button",{name:"다음",exact:true}).click();await other.getByRole("button",{name:"변경 내용 확인",exact:true}).click();await other.getByRole("button",{name:"변경 저장",exact:true}).click();await expect(other).toHaveURL(f.path);
  if(!changedAfterDialog)await stageOld();

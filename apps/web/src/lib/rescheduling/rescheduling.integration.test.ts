@@ -51,10 +51,23 @@ it("마감된 모집은 명시적 재조율만 허용하고 확정 재조율은 
  expect(await service.change(f.input)).toMatchObject({ok:false,code:"STATE_CHANGED"});
  expect((await db.promiseRecord.findUniqueOrThrow({where:{id:f.promise.id}})).status).toBe("closed");
  expect(await service.change({...f.input,mode:"reopen"})).toEqual({ok:true});
- await db.promiseRecord.update({where:{id:f.promise.id},data:{status:"confirmed",confirmedStartAt:f.slot("09:00")}});
+ await db.promiseRecord.update({where:{id:f.promise.id},data:{status:"confirmed",confirmedStartAt:f.slot("09:00"),confirmedEndAt:f.slot("11:00")}});
  expect(await service.change(f.input)).toMatchObject({ok:false,code:"STATE_CHANGED"});
  expect(await service.change({...f.input,mode:"reopen",confirmedClear:true})).toEqual({ok:true});
- expect(await db.promiseRecord.findUniqueOrThrow({where:{id:f.promise.id}})).toMatchObject({status:"collecting",confirmedStartAt:null});
+ expect(await db.promiseRecord.findUniqueOrThrow({where:{id:f.promise.id}})).toMatchObject({status:"collecting",confirmedStartAt:null,confirmedEndAt:null});
+});
+it("이전 앱이 확정 시작만 해제해도 종료를 함께 해제하고 기존 응답은 보존한다",async()=>{
+ const f=await fixture();
+ await db.promiseRecord.update({where:{id:f.promise.id},data:{status:"confirmed",confirmedStartAt:f.slot("09:00"),confirmedEndAt:f.slot("11:00")}});
+ const slots=await db.participantAvailableSlot.count({where:{participant:{promiseId:f.promise.id}}});
+ // 배포 전 앱의 재조율 요청은 새 종료 컬럼을 모른다.
+ await db.$executeRaw`UPDATE promises SET status='collecting', confirmed_start_at=NULL WHERE id=${f.promise.id}::uuid`;
+ expect(await db.promiseRecord.findUniqueOrThrow({where:{id:f.promise.id}})).toMatchObject({status:"collecting",confirmedStartAt:null,confirmedEndAt:null,durationMinutes:60});
+ expect(await db.participantAvailableSlot.count({where:{participant:{promiseId:f.promise.id}}})).toBe(slots);
+ // 이전 앱의 다음 확정은 NULL 종료를 허용하고, 새 앱의 명시적 종료 검증은 유지한다.
+ await db.promiseRecord.update({where:{id:f.promise.id},data:{status:"confirmed",confirmedStartAt:f.slot("09:00")}});
+ expect((await db.promiseRecord.findUniqueOrThrow({where:{id:f.promise.id}})).confirmedEndAt).toBeNull();
+ await expect(db.promiseRecord.update({where:{id:f.promise.id},data:{confirmedEndAt:f.slot("09:30")}})).rejects.toThrow();
 });
 it("축소는 범위 밖 active 슬롯만 삭제하고 실제 삭제한 사람의 버전만 증가한다",async()=>{
  const f=await fixture();

@@ -86,7 +86,7 @@ export function HeatmapCell({blocks,day,minute,stepMinutes,endMinute,startMinute
       const time={start:timeLabel(block.startMinute),end:timeLabel(block.endMinute)};
       const height=position(block.endMinute)-position(block.startMinute)-4;
       const compact=height<42;
-      return <div key={block.startMinute} className={styles.heatCandidate} style={{top:position(block.startMinute)-position(minute)+2,height}} role="img" aria-label={`${day} ${time.start}–${time.end} ${block.count}명 · 가능 구간`}>
+      return <div key={block.startMinute} className={styles.heatCandidate} data-heat={heatLevel(block.count,data?.participants.length??0)} style={{top:position(block.startMinute)-position(minute)+2,height}} role="img" aria-label={`${day} ${time.start}–${time.end} ${block.count}명 · 가능 구간`}>
         <span className={styles.candidateCaption} data-compact={compact}><strong>{block.count}명</strong>{height>=28&&(time.start.endsWith(":00")&&time.end.endsWith(":00")?<span className={styles.wholeHours}>{time.start.slice(0,2)}–{time.end.slice(0,2)}</span>:<span>{time.start}<br/>~{time.end}</span>)}</span>
       </div>;
     })}
