@@ -115,12 +115,14 @@ export function SettingsForm({ inviteToken, serverNow, initialValues, submitSett
               initialStart={state.values.dailyStart}
               initialEnd={state.values.dailyEnd}
               errors={errors}
+              onEdit={field => setErrors(current => ({ ...current, [field]: undefined }))}
             />
           </div>
           <DurationPicker
             key={state.values.durationMinutes}
             initialValue={state.values.durationMinutes}
             error={errors.durationMinutes}
+            onEdit={() => setErrors(current => ({ ...current, durationMinutes: undefined }))}
           />
         </div>
       </div>

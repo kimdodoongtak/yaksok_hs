@@ -186,7 +186,7 @@
 .legend .heatLegend { display: flex; align-items: center; gap: 8px; color: var(--muted); white-space: nowrap; }
 .legend .heatRamp { display: flex; gap: 0; width: 112px; height: 12px; overflow: hidden; border: 1px solid var(--line); border-radius: 2px; }
 .legend .heatRamp i { flex: 1; width: auto; height: 100%; border: 0; border-radius: 0; }
-.legend .heatLegend i[data-heat="0"] { background: white; }
+.legend .heatLegend i[data-heat="0"] { background: var(--subtle); }
 .legend .heatLegend i[data-heat="1"] { background: #f1f4ff; }
 .legend .heatLegend i[data-heat="2"] { background: var(--soft); }
 .legend .heatLegend i[data-heat="3"] { background: var(--accent); border-color: var(--accent); }
@@ -368,6 +368,10 @@
 .readCell > span[data-heat="0"] + span[data-heat="0"] { box-shadow: 0 -1px 0 var(--cell-fill); }
 .readCell > span[data-heat="0"]:first-child { margin-top: 3px; border-top-left-radius: 8px; border-top-right-radius: 8px; }
 .readCell > span[data-heat="0"]:last-of-type { margin-bottom: 3px; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px; }
+/* Empty overview cells stay rounded; matching responses retain their continuous shape. */
+.readCell[data-all="true"] > span[data-heat="0"] { --cell-fill: var(--subtle); background: var(--cell-fill); margin-block: 0; border-radius: 0; box-shadow: none; }
+.readCell[data-all="true"] > span[data-heat="0"]:first-child { margin-top: 3px; border-top-left-radius: 9px; border-top-right-radius: 9px; }
+.readCell[data-all="true"] > span[data-heat="0"]:last-of-type { margin-bottom: 3px; border-bottom-left-radius: 9px; border-bottom-right-radius: 9px; }
 .slotPeople[data-layout="three"]::after { display: none; }
 @media (max-width: 479px) { .confirmDialog { max-width: none; } }
 .header :global(.brand) { color: var(--ink); font-size: 15px; padding: 0; }
@@ -522,8 +526,12 @@
 .calendarColumn { min-width: 0; }
 .calendarPage .shell > .calendarTopRow { position: sticky; top: 60px; z-index: 20; min-height: 64px; margin-bottom: 20px; padding-block: 10px; border-bottom: 0; background: var(--paper); }
 .calendarColumn > .panel { min-height: calc(100dvh - 144px); padding: 0 24px; border: 0; border-radius: 28px 28px 0 0; background: white; box-shadow: 0 -6px 28px #2430470d; }
-.calendarColumn .calendarControls { top: 124px; padding-top: 22px; background: white; }
-.calendarColumn .calendarControls::before { content: ""; position: absolute; inset: 0 -24px; z-index: -1; border-radius: 28px 28px 0 0; background: white; }
+.calendarColumn .calendarControls { top: 124px; padding-top: 22px; background: transparent; }
+/* Paint the page behind the rounded cap so the scrolling white sheet cannot fill its corners. */
+.calendarColumn .calendarControls::before,
+.calendarColumn .calendarControls::after { content: ""; position: absolute; inset: 0 -24px; z-index: -1; pointer-events: none; }
+.calendarColumn .calendarControls::before { background: var(--paper); }
+.calendarColumn .calendarControls::after { border-radius: 28px 28px 0 0; background: white; }
 .calendarColumn .editTools { max-width: none; }
 .calendarColumn .help { margin-bottom: 10px; }
 .calendarColumn .dayHeaders { padding-top: 10px; border-top: 1px solid var(--line); }
@@ -533,13 +541,14 @@
 .calendarColumn .notice { padding-bottom: 12px; }
 @media (max-width:899px) {
   .calendarPage { --calendar-top-offset: 64px; padding: 0 8px; }
-  .calendarPage .shell > .calendarTopRow { top: 0; margin-inline: 16px; }
+  /* Cover the sheet behind the sticky navigation, including its side gutters. */
+  .calendarPage .shell > .calendarTopRow { top: 0; margin-inline: -8px; padding-inline: 24px; }
   .calendarColumn .calendarControls { top: 64px; }
   .calendarColumn > .panel { min-height: calc(100dvh - 84px); }
 }
 
 /* Clear information cards inside the invitation drawer and desktop sidebar. */
-.drawer { background: #edf2fb; width: min(368px, calc(100vw - 24px)); }
+.drawer { background: #edf2fb; width: min(340px, calc(100vw - 48px)); }
 .drawerHeader { position: sticky; top: 0; z-index: 5; padding: 20px 20px 10px; background: #edf2fb; }
 .drawerHeader h2 { color: var(--ink); font-size: 22px; font-weight: 800; letter-spacing: -.02em; line-height: 1.4; }
 .drawerHeader button { width: 40px; height: 40px; background: white; color: var(--ink); border: 1px solid #dce3f0; border-radius: 12px; }
@@ -643,7 +652,7 @@
   .calendarColumn > .panel { height: auto; max-height: none; min-height: calc(100dvh - 80px); overflow: visible; border-radius: 20px 20px 0 0; }
   .calendarColumn .scroll { height: auto; max-height: none; overflow: visible; }
   .calendarColumn .calendarControls { display: grid; grid-template-columns: minmax(0, 1fr) 294px; gap: 8px 16px; top: 56px; padding-top: 12px; }
-  .calendarColumn .calendarControls::before { border-radius: 20px 20px 0 0; }
+  .calendarColumn .calendarControls::after { border-radius: 20px 20px 0 0; }
   .calendarColumn .toolbar { align-self: center; }
   .calendarColumn .toolbar > button { width: 36px; height: 36px; }
   .calendarColumn .toolbar strong { font-size: 18px; }
@@ -657,6 +666,6 @@
 @media (min-width: 900px) and (max-width: 1199px) {
   .calendarPage > .shell, .calendarPage .workspace { grid-template-columns: 220px minmax(0, 1fr); gap: 12px 20px; }
   .calendarColumn > .panel { padding-inline: 16px; }
-  .calendarColumn .calendarControls::before, .calendarColumn .footer::before { inset-inline: -16px; }
+  .calendarColumn .calendarControls::before, .calendarColumn .calendarControls::after, .calendarColumn .footer::before { inset-inline: -16px; }
   .calendarColumn .toolbar strong { font-size: 16px; }
 }

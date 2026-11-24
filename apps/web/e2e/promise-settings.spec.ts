@@ -40,6 +40,88 @@ async function fixture() {
   return link;
 }
 
+test("시간 직접 입력은 숫자 키패드·화살표·단계 이동·저장을 함께 지원한다", async ({ page }) => {
+  const link = await fixture();
+  await page.setViewportSize({ width: 320, height: 740 });
+  await page.goto(`/p/${link.inviteToken}`);
+  await page.getByLabel("닉네임").fill("직접입력방장");
+  await page.getByLabel("PIN").fill("1234");
+  await page.getByRole("button", { name: "방장으로 시작하기" }).click();
+  const start = page.getByRole("textbox", { name: "하루 시작", exact: true });
+  const end = page.getByRole("textbox", { name: "하루 종료", exact: true });
+  const hours = page.getByRole("textbox", { name: "소요 시간 (시간)", exact: true });
+  const minutes = page.getByRole("textbox", { name: "소요 시간 (분)", exact: true });
+  for (const field of [start, end, hours, minutes]) await expect(field).toHaveAttribute("inputmode", "numeric");
+  await start.fill("930"); await start.press("Enter");
+  await expect(start).toHaveValue("09:30");
+  await expect(page.getByRole("button", { name: "다음", exact: true })).toBeVisible();
+  await end.fill("18"); await end.blur();
+  await expect(end).toHaveValue("18:00");
+  await hours.fill("3"); await minutes.fill("30"); await minutes.blur();
+  await expect(hours).toHaveValue("03");
+  await expect(page.locator('[name="durationMinutes"]')).toHaveValue("210");
+  await page.getByRole("button", { name: "소요 시간 30분 늘리기" }).click();
+  await expect(hours).toHaveValue("04"); await expect(minutes).toHaveValue("00");
+  await page.evaluate(() => document.fonts.ready);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await page.screenshot({ path: "test-results/settings-direct-time-320.png", fullPage: true });
+  await page.getByRole("button", { name: "다음", exact: true }).click();
+  await expect(page.getByText(/매일 09:30–18:00 · 소요 4시간/)).toBeVisible();
+  await page.getByRole("button", { name: "이전", exact: true }).click();
+  await expect(start).toHaveValue("09:30"); await expect(hours).toHaveValue("04");
+  await page.getByRole("button", { name: "다음", exact: true }).click();
+  await page.getByRole("button", { name: "모집 시작", exact: true }).click();
+  await expect.poll(async () => db.promiseRecord.findUnique({ where: { promiseLinkId: link.id }, select: { status: true, dailyStartMinute: true, dailyEndMinute: true, durationMinutes: true } })).toEqual({ status: "collecting", dailyStartMinute: 570, dailyEndMinute: 1080, durationMinutes: 240 });
+});
+
+test("모바일 시간 직접 입력은 숫자 칸 터치로 포커스하고 편집한다", async ({ browser }) => {
+  const context = await browser.newContext({ viewport: { width: 393, height: 740 }, isMobile: true, hasTouch: true });
+  try {
+    const page = await context.newPage(), link = await fixture();
+    await page.goto(`http://127.0.0.1:3100/p/${link.inviteToken}`);
+    await page.getByLabel("닉네임").fill("터치입력방장"); await page.getByLabel("PIN").fill("1234");
+    await page.getByRole("button", { name: "방장으로 시작하기" }).tap();
+    const start = page.getByRole("textbox", { name: "하루 시작", exact: true });
+    await start.tap(); await expect(start).toBeFocused();
+    await start.fill("1030"); await start.press("Enter"); await expect(start).toHaveValue("10:30");
+    const minutes = page.getByRole("textbox", { name: "소요 시간 (분)", exact: true });
+    await minutes.tap(); await expect(minutes).toBeFocused();
+    await minutes.fill("30"); await minutes.press("Enter");
+    await expect(page.locator('[name="durationMinutes"]')).toHaveValue("150");
+    expect(await start.evaluate(node => parseFloat(getComputedStyle(node).fontSize))).toBeGreaterThanOrEqual(16);
+  } finally { await context.close(); }
+});
+
+test("시간 직접 입력 오류는 값을 보존하고 다음 단계를 막으며 화살표로 복구된다", async ({ page }) => {
+  const link = await fixture(); await page.goto(`/p/${link.inviteToken}`);
+  await page.getByLabel("닉네임").fill("입력오류방장"); await page.getByLabel("PIN").fill("1234");
+  await page.getByRole("button", { name: "방장으로 시작하기" }).click();
+  const start = page.getByRole("textbox", { name: "하루 시작", exact: true });
+  const end = page.getByRole("textbox", { name: "하루 종료", exact: true });
+  const hours = page.getByRole("textbox", { name: "소요 시간 (시간)", exact: true });
+  const minutes = page.getByRole("textbox", { name: "소요 시간 (분)", exact: true });
+  await start.fill("915"); await start.blur();
+  await expect(start).toHaveAttribute("aria-invalid", "true"); await expect(start).toHaveValue("915");
+  await page.getByRole("button", { name: "다음", exact: true }).click();
+  await expect(start).toBeVisible();
+  await page.getByRole("button", { name: "하루 시작 30분 늘리기" }).click();
+  await expect(start).toHaveValue("09:30");
+  await end.fill("0"); await end.blur(); await expect(end).toHaveAttribute("aria-invalid", "true");
+  await end.fill("2400"); await end.blur(); await expect(end).toHaveValue("24:00");
+  await hours.fill("24"); await minutes.fill("30"); await minutes.blur();
+  await expect(minutes).toHaveAttribute("aria-invalid", "true");
+  await expect(page.locator('[name="durationMinutes"]')).toHaveValue("");
+  await hours.fill(""); await page.getByRole("button", { name: "다음", exact: true }).click();
+  await expect(hours).toBeVisible(); await expect(hours).toHaveValue("");
+  await hours.fill("0"); await minutes.fill("30"); await minutes.blur();
+  await expect(page.locator('[name="durationMinutes"]')).toHaveValue("30");
+  await minutes.fill("15"); await minutes.blur();
+  await page.getByRole("button", { name: "소요 시간 30분 늘리기" }).click();
+  await expect(hours).toHaveValue("01"); await expect(minutes).toHaveValue("00");
+  await page.getByRole("button", { name: "다음", exact: true }).click();
+  await expect(page.getByRole("button", { name: "모집 시작", exact: true })).toBeVisible();
+});
+
 function kstDate(daysFromToday: number) {
   const date = new Date(Date.now() + 9 * 60 * 60 * 1000);
   date.setUTCDate(date.getUTCDate() + daysFromToday);

@@ -2,55 +2,70 @@
 
 import { useState } from "react";
 import { TimeAdjustButtons } from "./time-adjust-buttons";
+import { parseDurationEntry } from "./time-entry";
 import styles from "./settings.module.css";
 
 const MIN_DURATION = 30;
 const MAX_DURATION = 24 * 60;
 
-export function DurationPicker({ initialValue, error }: {
+export function DurationPicker({ initialValue, error, onEdit }: {
   initialValue: string;
   error?: string;
+  onEdit?: () => void;
 }) {
   const parsed = Number(initialValue);
-  const [duration, setDuration] = useState(
+  const initialDuration =
     Number.isInteger(parsed)
       ? Math.min(MAX_DURATION, Math.max(MIN_DURATION, parsed))
-      : 120,
-  );
-  const hours = Math.floor(duration / 60);
-  const minutes = duration % 60;
-  const label = [hours ? `${hours}시간` : "", minutes ? `${minutes}분` : ""].filter(Boolean).join(" ");
+      : 120;
+  const [parts, setParts] = useState({ hours: String(Math.floor(initialDuration / 60)).padStart(2, "0"), minutes: String(initialDuration % 60).padStart(2, "0") });
+  const [lastValid, setLastValid] = useState(initialDuration);
+  const [inputError, setInputError] = useState<string | null>(null);
+  const duration = parseDurationEntry(parts.hours, parts.minutes);
+  const message = inputError || error;
+  const label = duration === null ? "소요 시간 입력 중" : [Math.floor(duration / 60) ? `${Math.floor(duration / 60)}시간` : "", duration % 60 ? `${duration % 60}분` : ""].filter(Boolean).join(" ");
+
+  function commit(value: number) {
+    setLastValid(value);
+    setParts({ hours: String(Math.floor(value / 60)).padStart(2, "0"), minutes: String(value % 60).padStart(2, "0") });
+    setInputError(null);
+    onEdit?.();
+  }
 
   return (
     <fieldset>
       <legend className="text-sm font-semibold">소요 시간</legend>
-      <input type="hidden" name="durationMinutes" value={duration} />
-      <div className={styles.durationBox} data-invalid={Boolean(error)}>
-        <output
-          aria-label={label}
-          aria-describedby={error ? "durationMinutes-error" : undefined}
-          className={styles.flipDisplay}
-        >
-          <span aria-hidden="true" className={styles.flipUnit}>
-            <span className={styles.flipFace}>{String(hours).padStart(2, "0")}</span>
-            <span className={styles.flipCaption}>시간</span>
-          </span>
-          <span aria-hidden="true" className={styles.flipUnit}>
-            <span className={styles.flipFace}>{String(minutes).padStart(2, "0")}</span>
-            <span className={styles.flipCaption}>분</span>
-          </span>
-        </output>
+      <input type="hidden" name="durationMinutes" value={duration ?? ""} />
+      <output aria-label={label} className="sr-only">{label}</output>
+      <div className={styles.durationBox} data-invalid={Boolean(message)}>
+        <div className={styles.flipDisplay}>
+          {([{ name: "hours", label: "시간" }, { name: "minutes", label: "분" }] as const).map(part => (
+            <label key={part.name} className={styles.flipUnit}>
+              <input type="text" inputMode="numeric" enterKeyHint="done" autoComplete="off" spellCheck={false} maxLength={2}
+                className={`${styles.flipFace} ${styles.durationInput}`}
+                aria-label={`소요 시간 (${part.label})`} aria-invalid={Boolean(message)} aria-describedby={message ? "durationMinutes-error" : undefined}
+                value={parts[part.name]}
+                onFocus={event => event.currentTarget.select()}
+                onChange={event => { setParts(current => ({ ...current, [part.name]: event.target.value })); setInputError(null); onEdit?.(); }}
+                onBlur={() => {
+                  if (duration !== null) commit(duration);
+                  else setInputError("소요 시간은 30분~24시간 사이로, 분은 00 또는 30으로 입력해 주세요.");
+                }}
+                onKeyDown={event => { if (event.key === "Enter") { event.preventDefault(); event.currentTarget.blur(); } }}
+              />
+              <span className={styles.flipCaption} aria-hidden="true">{part.label}</span>
+            </label>
+          ))}
+        </div>
         <TimeAdjustButtons
           label="소요 시간"
-          value={duration}
+          value={duration ?? lastValid}
           min={MIN_DURATION}
           max={MAX_DURATION}
-          onAdjust={(delta) => setDuration((current) =>
-            Math.min(MAX_DURATION, Math.max(MIN_DURATION, current + delta)),
-          )}
+          onAdjust={delta => commit(Math.min(MAX_DURATION, Math.max(MIN_DURATION, (duration ?? lastValid) + delta)))}
         />
       </div>
-      {error && <p id="durationMinutes-error" role="alert" className="mt-2 text-sm text-red-700">{error}</p>}
+      {message && <p id="durationMinutes-error" role="alert" className="mt-2 text-sm text-red-700">{message}</p>}
     </fieldset>
   );
 }

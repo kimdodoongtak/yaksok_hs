@@ -58,7 +58,7 @@ export function HeatmapCell({blocks,day,minute,stepMinutes,endMinute,startMinute
     const fraction=value===rowMinute?0:(value-rowMinute)/Math.min(stepMinutes,endMinute-rowMinute);
     return (row+fraction)*42;
   };
-  return <div className={styles.readCell} style={{minHeight:36}}>
+  return <div className={styles.readCell} data-all={all} style={{minHeight:36}}>
     {parts.map(part=>{
       const slot=slotAt(day,part),count=data?.heatmap[slot] ?? 0,total=data?.participants.length ?? 0;
       const available=data?.selected?.slots.includes(slot),interactive=all&&valid&&count>0;

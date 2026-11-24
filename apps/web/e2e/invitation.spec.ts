@@ -108,7 +108,7 @@ test("잘못된 입력과 늦은 선점을 안내하고 타인의 초안 참여�
   }
 });
 
-test("열어 둔 설정 화면은 서버의 8분 경고·10분 만료를 반영하고 만료 링크는 문구만 표시한다", async ({
+test("열어 둔 설정 화면은 서버의 8분 경고·10분 만료를 반영하고 만료 링크는 안내와 홈 링크만 표시한다", async ({
   page,
 }) => {
   const link = await fixture();
@@ -137,12 +137,13 @@ test("열어 둔 설정 화면은 서버의 8분 경고·10분 만료를 반영�
     data: { createdAt: new Date("2020-01-01") },
   });
   await expect(page.getByRole("heading")).toHaveText("만료된 약속입니다");
-  await expect(page.getByRole("main").getByRole("link")).toHaveCount(0);
+  await expect(page.getByRole("main").getByRole("link")).toHaveCount(1);
+  await expect(page.getByRole("link", { name: "새 약속 만들기", exact: true })).toHaveAttribute("href", "/");
   await expect(page.getByRole("main").getByRole("button")).toHaveCount(0);
-  // 새 도장과 로고는 장식이다. 공개 본문에는 여전히 만료 안내만 남는다.
+  // 장식과 공개 홈 이동 링크 외에는 만료 안내만 남고 약속 정보는 숨긴다.
   expect(await page.getByRole("main").evaluate(element => {
     const copy = element.cloneNode(true) as HTMLElement;
-    copy.querySelectorAll('[aria-hidden="true"]').forEach(node => node.remove());
+    copy.querySelectorAll('[aria-hidden="true"], a[href="/"]').forEach(node => node.remove());
     return copy.textContent?.trim();
   })).toBe("만료된 약속입니다");
   expect(
@@ -150,12 +151,13 @@ test("열어 둔 설정 화면은 서버의 8분 경고·10분 만료를 반영�
   ).toBe(1);
   await page.reload();
   await expect(page.getByRole("heading")).toHaveText("만료된 약속입니다");
-  await expect(page.getByRole("main").getByRole("link")).toHaveCount(0);
+  await expect(page.getByRole("main").getByRole("link")).toHaveCount(1);
+  await expect(page.getByRole("link", { name: "새 약속 만들기", exact: true })).toHaveAttribute("href", "/");
   await expect(page.getByRole("main").getByRole("button")).toHaveCount(0);
-  // 새 도장과 로고는 장식이다. 공개 본문에는 여전히 만료 안내만 남는다.
+  // 장식과 공개 홈 이동 링크 외에는 만료 안내만 남고 약속 정보는 숨긴다.
   expect(await page.getByRole("main").evaluate(element => {
     const copy = element.cloneNode(true) as HTMLElement;
-    copy.querySelectorAll('[aria-hidden="true"]').forEach(node => node.remove());
+    copy.querySelectorAll('[aria-hidden="true"], a[href="/"]').forEach(node => node.remove());
     return copy.textContent?.trim();
   })).toBe("만료된 약속입니다");
   await expect(page.getByRole("textbox")).toHaveCount(0);

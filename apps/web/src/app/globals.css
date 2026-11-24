@@ -58,6 +58,8 @@ h1, h2, h3 { word-break: keep-all; font-weight: 800; }
 .registration-form > button { background: var(--accent); border-radius: 100px; min-height: 48px; }
 .terminal-state { min-height: 65dvh; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 28px; text-align: center; }
 .terminal-state h1 { font-size: 22px; font-weight: 700; }
+.terminal-create-link { display: inline-flex; align-items: center; justify-content: center; width: min(100%, 240px); min-height: 48px; margin-top: 4px; padding: 12px 24px; border-radius: 14px; background: var(--accent); color: white; font-size: 15px; font-weight: 700; text-decoration: none; touch-action: manipulation; }
+.terminal-create-link:hover { background: var(--accent-hover); }
 .status-stamp { display: flex; flex-direction: column; align-items: center; justify-content: center; flex-shrink: 0; width: 124px; height: 124px; border: 4px double currentColor; border-radius: 50%; outline: 1px solid currentColor; outline-offset: -9px; color: var(--accent); transform: rotate(-12deg); gap: 8px; }
 .status-stamp span, .status-stamp small { font-size: 8px; letter-spacing: .14em; }
 .status-stamp strong { font-size: 23px; line-height: 1.1; }
@@ -78,6 +80,7 @@ h1, h2, h3 { word-break: keep-all; font-weight: 800; }
 .home-create-form > button:hover:not(:disabled) { background: var(--accent-hover); }
 .home-create-form > button:disabled { opacity: .55; }
 .home-create-form > p { margin-top: 12px; color: var(--accent); font-size: 14px; line-height: 1.7; }
+body:has(.settings-flow) { background: #edf2fb; }
 .app-entry:has(.settings-flow) .journey-header { padding-bottom: 12px; }
 .app-entry:has(.settings-flow) .journey-stages { margin-top: 6px; }
 .app-entry:has(.settings-flow) .journey-stages li { gap: 5px; }

@@ -65,6 +65,7 @@ export function ParticipantLimitField({
             aria-describedby={error ? "participantLimit-error" : "participantLimit-help"}
             className={styles.stepperInput}
           />
+          <span className={styles.stepperUnit} aria-hidden="true">명</span>
           <button
             type="button"
             aria-label="정원 늘리기"

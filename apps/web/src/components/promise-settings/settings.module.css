@@ -1,3 +1,12 @@
+@font-face {
+  font-family: "Settings Numbers";
+  src: url("../../app/fonts/NotoSansKR.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  unicode-range: U+0030-0039, U+002E, U+003A;
+}
+
 .form {
   --settings-accent: var(--accent);
   --settings-pale: var(--soft);
@@ -5,6 +14,8 @@
   --settings-muted: var(--muted);
   margin-top: 16px;
   color: var(--ink);
+  font-family: "Settings Numbers", var(--font-nanum-square-round), "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  font-variant-numeric: lining-nums tabular-nums;
 }
 
 .form :is(button, input, select):focus-visible {
@@ -231,7 +242,7 @@
 .form { margin-top: 12px; }
 .stepProgress { padding-bottom: 6px; }
 .stepActions { margin-top: 12px; }
-.flipFace { height: 56px; font-size: 42px; }
+.flipFace { height: 64px; font-size: 42px; }
 
 .dateRangeTrigger { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 64px; padding: 12px 14px; margin-top: 8px; border: 1px solid var(--settings-border); border-radius: 14px; background: var(--paper); color: var(--ink); text-align: left; }
 .dateRangeTrigger > svg { flex-shrink: 0; }
@@ -253,3 +264,82 @@
 .previous, .submit, .input, .dateRangeTrigger, .deadlinePresets button { border-radius: 8px; }
 .previous { background: white; border-color: var(--line); }
 .summaryValue { color: var(--accent); }
+
+/* Crisp numeric values within settings; Korean text keeps the rounded family. */
+.form :is(.timeValue, .stepperInput, .day, .summaryValue, .deadlineSummary),
+.form .dateRangeTrigger strong,
+.form .calendar strong { font-weight: 700; }
+.form .flipFace { font-weight: 800; letter-spacing: -.02em; }
+
+/* Settings use quiet input surfaces, clear values, and generous section spacing. */
+.form { --paper: #f3f5f9; --settings-border: #e6ebf3; --settings-muted: #66748b; margin-top: 20px; }
+.stepProgress { gap: 8px; padding: 0 0 14px; font-size: 12px; }
+.stepProgress > span[aria-current] { padding: 8px 12px; border-radius: 10px; background: #e3eaff; color: var(--accent); }
+.stepProgress > span[aria-hidden] { display: none; }
+.stepProgress > span:last-child { color: #7b879d; font-size: 11px; }
+.form .card { padding: 22px 20px; border: 0; border-radius: 22px; box-shadow: 0 4px 20px #24304704; }
+.form :is(legend, .dateHeading > span, .deadlineTitle) { font-size: 15px; font-weight: 700; line-height: 1.5; }
+.dateSection { padding-bottom: 20px; border-color: #edf0f5; }
+.timeSection { padding-block: 18px; margin-bottom: 18px; border-color: #edf0f5; }
+.help { margin-top: 8px; line-height: 1.75; word-break: keep-all; overflow-wrap: anywhere; }
+.dateRangeTrigger { min-height: 68px; margin-top: 12px; padding: 12px; gap: 10px; border: 0; border-radius: 14px; background: var(--paper); }
+.dateRangeTrigger > svg:first-child { color: var(--accent); }
+.dateRangeTrigger > svg:last-child { color: #8a96aa; }
+.dateRangeTrigger small { margin-top: 5px; color: var(--settings-muted); }
+.dateRangeTrigger:hover { background: #edf1f8; }
+.timeRange { margin-top: 14px; gap: 8px; }
+.timeBox { min-height: 64px; padding: 0 6px; border-radius: 14px; }
+.timeReading { display: grid; flex: 1; gap: 3px; min-width: 0; margin-inline-start: 6px; padding-top: 4px; }
+.timeLabel { color: var(--settings-muted); font-size: 11px; font-weight: 400; line-height: 1.2; }
+.timeValue { margin-inline-start: 0; letter-spacing: -.025em; }
+.timeInput { width: 100%; min-width: 0; min-height: 32px; padding: 0; border: 0; border-radius: 4px; background: transparent; color: var(--ink); caret-color: var(--accent); }
+.durationInput { display: block; width: 100%; min-width: 0; padding: 0; text-align: center; color: var(--ink); caret-color: var(--accent); }
+.form .durationInput[aria-invalid="true"] { box-shadow: inset 0 0 0 1px var(--danger); }
+.timeSeparator { height: 64px; color: #8a96aa; }
+.timeArrow { height: 32px; color: #536784; border-radius: 8px; }
+.timeArrow:disabled, .stepperButton:disabled { color: #b5bfce; }
+.durationBox { margin-top: 12px; gap: 10px; }
+.durationBox > .timeArrows { padding-top: 0; }
+.flipDisplay { gap: 10px; }
+.flipFace { border-radius: 14px; }
+.flipFace::after { opacity: .2; }
+.flipCaption { margin-top: 7px; line-height: 1.5; }
+.stepper { padding: 4px; border-radius: 14px; }
+.stepperButton { border-radius: 10px; color: #536784; }
+.stepperInput { height: 44px; border-radius: 10px; font-size: 22px; color: var(--ink); }
+.stepperUnit { padding-inline: 6px 4px; color: var(--settings-muted); font-size: 12px; }
+.deadlinePicker { margin-top: 22px; padding-top: 20px; border-top: 1px solid #edf0f5; }
+.deadlinePresets { gap: 8px; margin-top: 12px; }
+.deadlinePresets button { min-height: 48px; border-color: transparent; border-radius: 12px; }
+.deadlinePresets button[aria-pressed="true"] { border-color: #d9e3ff; background: #eaf0ff; color: var(--accent); }
+.form .deadlineSummary { margin-top: 12px; font-size: 12px; font-weight: 400; color: #536784; }
+.review { margin-top: 16px; padding: 20px; border-radius: 20px; background: white; color: #536784; font-size: 13px; line-height: 1.9; }
+.review > p:first-child { margin-bottom: 10px; color: var(--ink); font-weight: 700; }
+.stepActions { gap: 10px; margin-top: 18px; }
+.form .stepActions > :is(.previous, .submit) { min-height: 52px; border: 0; border-radius: 14px; font-size: 15px; font-weight: 700; }
+.form .stepActions > .previous { flex: 0 0 30%; padding-inline: 12px; background: #e3eaf5; color: #415471; }
+.form .stepActions > .submit { box-shadow: 0 4px 12px #3854df18; }
+.form .timeBox[data-invalid="true"] { box-shadow: inset 0 0 0 1px var(--danger); }
+@media (max-width: 359px) {
+  .form .card { padding: 20px 16px; }
+  .stepProgress { gap: 6px; font-size: 11px; }
+  .stepProgress > span[aria-current] { padding-inline: 9px; }
+  .dateRangeTrigger { padding-inline: 10px; gap: 8px; }
+  .timeRange { gap: 5px; }
+  .timeBox { padding-inline: 2px; }
+  .timeReading { margin-inline-start: 4px; }
+  .review { padding: 18px 16px; }
+}
+@media (max-width: 479px) and (max-height: 740px) {
+  .form { margin-top: 12px; }
+  .stepProgress { padding-bottom: 6px; }
+  .stepProgress > span[aria-current] { padding-block: 6px; }
+  .form .stepPanel { margin-top: 4px; }
+  .form .card { padding-block: 16px; }
+  .dateSection { padding-bottom: 12px; }
+  .timeSection { padding-block: 10px; margin-bottom: 10px; }
+  .timeRange { margin-top: 8px; }
+  .durationBox { margin-top: 8px; }
+  .stepActions { margin-top: 10px; }
+  .form .dateRangeTrigger { margin-top: 8px; min-height: 64px; }
+}

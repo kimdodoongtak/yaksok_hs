@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import { JourneyHeader } from "@/components/ui/journey-header";
 import { StatusStamp } from "@/components/ui/status-stamp";
 import { useEffect, useRef, useState } from "react";
@@ -62,7 +63,7 @@ export function LiveInvitation({
   }, [inviteToken, initialView.state]);
   if (["cancelled", "expired", "invalid"].includes(view.state)) {
     const kind = view.state as "cancelled" | "expired" | "invalid";
-    return <><JourneyHeader href={null}/><div className="terminal-state"><StatusStamp kind={kind}/><h1>{kind === "cancelled" ? "취소된 약속입니다." : kind === "expired" ? "만료된 약속입니다" : "유효하지 않은 초대 링크입니다."}</h1></div></>;
+    return <><JourneyHeader href={null}/><div className="terminal-state"><StatusStamp kind={kind}/><h1>{kind === "cancelled" ? "취소된 약속입니다." : kind === "expired" ? "만료된 약속입니다" : "유효하지 않은 초대 링크입니다."}</h1><Link href="/" className="terminal-create-link">새 약속 만들기</Link></div></>;
   }
   return (
     <>
