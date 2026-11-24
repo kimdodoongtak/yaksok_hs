@@ -17,10 +17,10 @@ import { DeadlineCountdown } from "./deadline-countdown";
 import { DateGrid } from "./date-grid";
 import { toggleDate } from "./date-selection";
 import { RepeatDialog } from "./repeat-dialog";
+import { AvailabilityCoachmarks } from "./availability-coachmarks";
 import styles from "./availability.module.css";
 
 const settingsRevision=(snapshot:AvailabilitySnapshot)=>[snapshot.settings,snapshot.status,snapshot.version];
-const compactTimeLabel=(minute:number)=>timeLabel(minute).replace(/:00$/, "");
 
 export function AvailabilityEditor({inviteToken,initial}:{inviteToken:string;initial:AvailabilitySnapshot}){
   const router=useRouter();
@@ -32,6 +32,7 @@ export function AvailabilityEditor({inviteToken,initial}:{inviteToken:string;ini
   const [week,setWeek]=useState(()=>weekStart(initial.settings.dateRangeStart));
   const [view,setView]=useState("mine");
   const [touchSelecting,setTouchSelecting]=useState(false);
+  const [guideRequest,setGuideRequest]=useState(0);
   const [confirmClose,setConfirmClose]=useState(false);
   const closeDialog=useRef<HTMLDialogElement>(null);
   const overview=useOverview(inviteToken,snapshot.participantId,dateView?`${month}-01`:week,["mine","all"].includes(view)?undefined:view,5,JSON.stringify(settingsRevision(snapshot)),dateView?month:undefined);
@@ -216,7 +217,7 @@ export function AvailabilityEditor({inviteToken,initial}:{inviteToken:string;ini
     } catch {setMessage("제출하지 못했어요. 선택은 유지돼요. 다시 시도해 주세요.");}
     finally {busy.current=false;setPending(false);}
   }
-  const collectionAction=closed?<Link href={`/p/${inviteToken}/candidates`}><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg>후보 보기</Link>:snapshot.role==="host"?<button type="button" disabled={pending} onClick={()=>{setSidebarOpen(false);setConfirmClose(true);}}><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg>응답 마감</button>:<span className={styles.viewBadge}>모집 중</span>;
+  const collectionAction=closed?<Link href={`/p/${inviteToken}/candidates`}><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg>후보 보기</Link>:snapshot.role==="host"?<button type="button" disabled={pending} onClick={()=>{setSidebarOpen(false);setConfirmClose(true);}}><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden="true"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3M12 14v3"/></svg>응답 마감</button>:<span className={styles.viewBadge}>모집 중</span>;
   return <main className={`${styles.page} ${styles.calendarPage}`}><div className={styles.shell}>
     <div className={styles.topBar}>
       <JourneyHeader href={`/p/${inviteToken}`}/>
@@ -227,10 +228,6 @@ export function AvailabilityEditor({inviteToken,initial}:{inviteToken:string;ini
         <div><h1>{closed?"응답 시간표":"가능 시간 입력"}</h1><p>{snapshot.nickname} · {dirty?"수정 중 · 미제출":snapshot.submittedAt?"제출 완료":"미제출"}</p></div>
       </div>
     </header>
-    <div className={styles.workspace}>
-      <aside className={styles.sidebar} aria-label="약속 정보"><AvailabilitySidebar snapshot={snapshot} inviteToken={inviteToken} {...participantProps}/></aside>
-      <section className={styles.panel} data-date-view={dateView} aria-label="가능 시간 선택">
-    <div className={styles.calendarControls} ref={controls} data-calendar-controls>
     <div className={styles.calendarTopRow}>
       <button type="button" className={styles.mobileInfoButton} aria-label="약속 정보 열기" aria-expanded={sidebarOpen} aria-controls="availability-drawer" onClick={()=>setSidebarOpen(true)}><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
     <div className={styles.viewSwitch} role="group" aria-label="시간 보기">
@@ -239,22 +236,34 @@ export function AvailabilityEditor({inviteToken,initial}:{inviteToken:string;ini
     </div>
     {(closed||snapshot.role==="host")?<div className={styles.headerAction}>{collectionAction}</div>:<span aria-hidden="true"/>}
     </div>
+    <div className={styles.workspace}>
+      <aside className={styles.sidebar} aria-label="약속 정보"><AvailabilitySidebar snapshot={snapshot} inviteToken={inviteToken} {...participantProps}/></aside>
+      <div className={styles.calendarColumn}>
+      <section className={styles.panel} data-date-view={dateView} aria-label="가능 시간 선택">
+    <div className={styles.calendarControls} ref={controls} data-calendar-controls>
     <div className={styles.toolbar}>
       <button type="button" aria-label={dateView?"이전 달":"이전 주"} disabled={dateView?month<=settings.dateRangeStart.slice(0,7):week<=weekStart(settings.dateRangeStart)} onClick={()=>dateView?moveMonth(-1):setWeek(addDays(week,-7))}>‹</button>
       {dateView?<div className={styles.weekHeading} aria-live="polite"><span>{month.slice(0,4)}년</span><strong>{Number(month.slice(5,7))}월</strong></div>:(<div className={styles.weekHeading} aria-live="polite"><span>{week.slice(0,4)}년{week.slice(0,4)!==days[6].slice(0,4)?` – ${days[6].slice(0,4)}년`:""}</span><strong>{Number(week.slice(5,7))}월 {Number(week.slice(8))}일 ~ {week.slice(0,7)!==days[6].slice(0,7)?`${Number(days[6].slice(5,7))}월 `:""}{Number(days[6].slice(8))}일</strong></div>)}
       <button type="button" aria-label={dateView?"다음 달":"다음 주"} disabled={dateView?month>=settings.dateRangeEnd.slice(0,7):addDays(week,7)>settings.dateRangeEnd} onClick={()=>dateView?moveMonth(1):setWeek(addDays(week,7))}>›</button>
     </div>
     <div className={styles.editTools}>
-      {view==="mine"&&!closed&&!dateView&&<div className={styles.touchModes} role="group" aria-label="터치 조작">
-        <button type="button" aria-pressed={!touchSelecting} disabled={pending} onClick={()=>changeTouchMode(false)}>스크롤</button>
-        <button type="button" aria-pressed={touchSelecting} disabled={pending} onClick={()=>changeTouchMode(true)}>선택</button>
+      {view==="mine"&&!closed&&!dateView&&<div className={styles.controlBlock}>
+        <div className={styles.controlLabel}>조작 방법</div>
+        <div className={styles.touchModes} role="group" aria-label="터치 조작" data-coachmark="mode">
+          <button type="button" aria-pressed={!touchSelecting} disabled={pending} onClick={()=>changeTouchMode(false)}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 3v18M7 8l5-5 5 5M7 16l5 5 5-5"/></svg>스크롤</button>
+          <button type="button" aria-pressed={touchSelecting} disabled={pending} onClick={()=>changeTouchMode(true)}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M9 12V4a2 2 0 0 1 4 0v7-3a2 2 0 0 1 4 0v4-2a2 2 0 0 1 4 0v5c0 4-3 7-7 7h-1c-2 0-4-1-5-3l-4-5a2 2 0 0 1 3-2l2 2"/></svg>선택</button>
+        </div>
       </div>}
-      <div className={styles.zoomControls} role="group" aria-label="입력 단위">{([30,60,"date"] as const).map(value=><button key={value} type="button" disabled={pending} aria-pressed={value==="date"?dateView:!dateView&&stepMinutes===value} onClick={()=>zoom(value)}>{value==="date"?"날짜":durationLabel(value)}</button>)}</div>
+      <div className={`${styles.controlBlock} ${styles.unitBlock}`}>
+        <div className={styles.controlLabel}>시간 선택 단위</div>
+        <div className={styles.zoomControls} role="group" aria-label="입력 단위" data-coachmark="unit">{([30,60,"date"] as const).map(value=><button key={value} type="button" disabled={pending} aria-pressed={value==="date"?dateView:!dateView&&stepMinutes===value} onClick={()=>zoom(value)}>{value==="date"?"날짜":durationLabel(value)}</button>)}</div>
+      </div>
     </div>
-    <div className={styles.help} aria-live="polite">
+    <div className={`${styles.help} ${styles.helpWithGuide}`} aria-live="polite">
       {overview.error ? <span>시간 정보를 불러오지 못했어요. <button type="button" onClick={overview.refresh}>다시 불러오기</button></span>
         : overview.loading ? <span>시간 정보 불러오는 중…</span>
         : <span>{view==="all"?`${closed?"집계":"임시 집계"} · 전체 ${overview.data?.participants.length ?? "–"}명`:view!=="mine"?`${overview.participants?.find(member=>member.id===view)?.nickname ?? "참여자"} · 읽기 전용`:closed?"응답이 마감됐어요. 제출한 시간만 확인할 수 있어요.":dateView?"날짜를 눌러 하루 선택·해제":<><span className={styles.mouseHelp}>드래그로 선택 · 양옆 여백을 밀어 스크롤</span><span className={styles.touchHelp}>{touchSelecting?"탭·드래그로 선택":"밀어서 스크롤"}</span></>}</span>}
+      {view==="mine"&&!closed&&<button type="button" className={styles.guideButton} disabled={pending} onClick={()=>{cancelDrag(true);setDateView(false);setGuideRequest(value=>value+1);}}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 0 1 5 0c0 2-2.5 2-2.5 4m0 3h.01"/></svg>사용법</button>}
     </div>
     {!dateView&&<div className={styles.dayHeaders}>
         <div className={styles.corner}/>{days.map((day,index)=><div className={styles.day} key={day} data-day-heading><span>{["일","월","화","수","목","금","토"][index]}</span><strong data-today={day===localDay(snapshot.serverNow)}>{Number(day.slice(8))}</strong></div>)}
@@ -263,12 +272,12 @@ export function AvailabilityEditor({inviteToken,initial}:{inviteToken:string;ini
     {dateView?<>
       <p className={styles.dateRangeHint}><span>{view==="mine"&&!closed?`날짜 선택 시 ${timeLabel(settings.dailyStartMinute)}~${timeLabel(settings.dailyEndMinute)} 가능으로 표시돼요.`:`${timeLabel(settings.dailyStartMinute)}~${timeLabel(settings.dailyEndMinute)} 기준 · 제출된 시간`}</span>{view==="mine"&&!closed&&month===localDay(snapshot.serverNow).slice(0,7)&&localDay(snapshot.serverNow)>=settings.dateRangeStart&&<span>오늘은 남은 시간만 선택해요.</span>}</p>
       <DateGrid days={monthDays(month)} settings={settings} now={snapshot.serverNow} draft={draft} view={view} closed={closed} pending={pending} data={overview.data} error={overview.error} onToggle={toggleDay}/>
-    </>:<div className={styles.scroll} ref={grid} aria-label="주별 가능 시간" data-touch-selecting={touchSelecting&&view==="mine"&&!closed} {...dragHandlers}>
-      <div className={styles.grid} style={{gridAutoRows:50}}>
+    </>:<div className={styles.scroll} ref={grid} aria-label="주별 가능 시간" data-coachmark="grid" data-touch-selecting={touchSelecting&&view==="mine"&&!closed} {...dragHandlers}>
+      <div className={styles.grid} style={{gridAutoRows:42}}>
         {minutes.map(minute=><div className={styles.row} key={minute}>
-          <div className={styles.time}>{stepMinutes>30 ? <span className={styles.timeRange}>{compactTimeLabel(minute)} ~ {compactTimeLabel(Math.min(minute+stepMinutes,settings.dailyEndMinute))}</span> : timeLabel(minute)}</div>
+          <div className={styles.time}>{stepMinutes>30?timeLabel(minute).replace(/^0/, ""):timeLabel(minute)}</div>
           {days.map(day=>{if(view!=="mine")return <HeatmapCell key={day} blocks={blocksByDay[day]} day={day} minute={minute} stepMinutes={stepMinutes} endMinute={settings.dailyEndMinute} startMinute={settings.dailyStartMinute} valid={day>=settings.dateRangeStart&&day<=settings.dateRangeEnd} data={overview.data} all={view==="all"}/>;
-          const active=cellState(day,minute),enabled=cellMinutes(minute).some(m=>editable(day,m));return <button key={day} type="button" className={styles.slot} style={{minHeight:44}} data-day={day} data-minute={minute} data-hour={minute%60===0} data-block-start={active===true && cellState(day,minute-stepMinutes)!==true} data-block-end={active===true && cellState(day,minute+stepMinutes)!==true} aria-label={`${day} ${timeLabel(minute)}${stepMinutes>30?`–${timeLabel(Math.min(minute+stepMinutes,settings.dailyEndMinute))}`:""}`} aria-pressed={active} disabled={!enabled}
+          const active=cellState(day,minute),enabled=cellMinutes(minute).some(m=>editable(day,m));return <button key={day} type="button" className={styles.slot} style={{minHeight:36}} data-day={day} data-minute={minute} data-hour={minute%60===0} data-block-start={active===true && cellState(day,minute-stepMinutes)!==true} data-block-end={active===true && cellState(day,minute+stepMinutes)!==true} aria-label={`${day} ${timeLabel(minute)}${stepMinutes>30?`–${timeLabel(Math.min(minute+stepMinutes,settings.dailyEndMinute))}`:""}`} aria-pressed={active} disabled={!enabled}
             onPointerDown={event=>{if(event.pointerType==="mouse"||touchSelecting)startDrag(event,day,minute);}}
             onClick={event=>{if(event.detail===0)toggle(day,minute);}}
             onKeyDown={event=>move(event,day,minute)}>{active?<span aria-hidden="true">{active==="mixed"?"일부":"✓"}</span>:null}</button>;})}
@@ -277,20 +286,20 @@ export function AvailabilityEditor({inviteToken,initial}:{inviteToken:string;ini
     </div>}
     {!dateView&&<div className={styles.legend}>{view!=="mine"?<span>{view==="all"?<span className={styles.heatLegend} role="group" aria-label="색상별 가능 인원"><span>0명</span><span className={styles.heatRamp} aria-hidden="true"><i data-heat="0"/>{heatLegend(overview.data?.participants.length??0).map(item=><i key={item.level} data-heat={item.level}/>)}</span><span>{overview.data?.participants.length??"–"}명</span></span>:"제출된 시간 · 읽기 전용"}</span>:<><span><i/>선택한 시간</span><span><i/>선택 불가</span>{stepMinutes>30 && <span className={styles.partialLegend}><i/>일부 선택</span>}</>}</div>}
     <footer className={styles.footer} data-readonly={view!=="mine"}>
-      {view==="mine"&&<button ref={repeatButton} type="button" className={styles.repeatButton} disabled={pending||closed} onClick={openRepeat}>주간 반복</button>}
+      {view==="mine"&&<button ref={repeatButton} type="button" data-coachmark="repeat" className={styles.repeatButton} disabled={pending||closed} onClick={openRepeat}>주간 반복</button>}
       <div className={styles.footerDeadline}>
         <DeadlineCountdown deadline={settings.votingDeadlineAt} serverNow={snapshot.serverNow} closed={closed}/>
       </div>
-      {view==="mine"&&<button type="button" disabled={pending||closed||submitted} data-submitted={submitted} onClick={submit}>{pending?"제출 중…":submitted?<><span aria-hidden="true">✓ </span>제출 완료</>:"선택 제출"}</button>}
+      {view==="mine"&&<button type="button" data-coachmark="submit" disabled={pending||closed||submitted} data-submitted={submitted} onClick={submit}>{pending?"제출 중…":submitted?<><span aria-hidden="true">✓ </span>제출 완료</>:"선택 제출"}</button>}
     </footer>
     <p role="status" className={styles.notice}>{message}</p>
 
       </section>
+      </div>
     </div>
     <dialog id="availability-drawer" ref={drawer} className={styles.drawer} aria-label="약속 정보" onClose={()=>setSidebarOpen(false)} onClick={event=>{if(event.target===event.currentTarget){const box=event.currentTarget.getBoundingClientRect();if(event.clientX>box.right || event.clientX<box.left)setSidebarOpen(false);}}}>
       <div className={styles.drawerHeader}><h2>약속 정보</h2><button type="button" aria-label="약속 정보 닫기" onClick={()=>setSidebarOpen(false)}>×</button></div>
       <div className={styles.drawerIntro}>
-        <JourneyHeader href={`/p/${inviteToken}`} stage={closed?2:1}/>
         <p>{snapshot.nickname} · {dirty?"수정 중 · 미제출":snapshot.submittedAt?"제출 완료":"미제출"}</p>
       </div>
       <AvailabilitySidebar snapshot={snapshot} inviteToken={inviteToken} {...participantProps}/>
@@ -311,6 +320,7 @@ export function AvailabilityEditor({inviteToken,initial}:{inviteToken:string;ini
       <div><button type="button" data-cancel onClick={()=>setConfirmClear(false)}>취소</button></div>
     </dialog>
   </div>
+    <AvailabilityCoachmarks enabled={!closed&&!pending&&view==="mine"&&!dateView&&!sidebarOpen&&!confirmClose&&!confirmClear&&!repeatWeek} request={guideRequest}/>
     {/* A touch target in the margin prevents browsers from snapping edge touches to a nearby slot. */}
     <div className={styles.scrollMargin} aria-hidden="true" onClick={event=>event.stopPropagation()}/>
   </main>;

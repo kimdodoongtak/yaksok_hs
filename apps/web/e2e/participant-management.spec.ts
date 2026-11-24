@@ -1,3 +1,4 @@
+import { returningCalendarUser } from "./returning-calendar-user";
 import { test, expect, type BrowserContext } from "@playwright/test";
 import { PrismaClient } from "../src/generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
@@ -17,12 +18,14 @@ test.afterAll(async () => {
   await db.$disconnect();
 });
 async function fixture(context: BrowserContext) {
+  await returningCalendarUser(context);
   const link = await db.promiseLink.create({ data: { inviteToken: newToken() } }); links.push(link.id);
   const start = new Date(Date.now()+86400000).toISOString().slice(0,10);
   const promise = await db.promiseRecord.create({ data: { promiseLinkId: link.id, status: "collecting", participantLimit: 5, dateRangeStart: new Date(start), dateRangeEnd: new Date(Date.now()+7*86400000), dailyStartMinute:540,dailyEndMinute:1080,durationMinutes:60,votingDeadlineAt:new Date(Date.now()+3600000) } });
   const host = await db.participant.create({ data: { promiseId: promise.id, nickname: "기존방장", normalizedNickname: "기존방장", passwordHash: "hidden", role: "host" } });
   const friend = await db.participant.create({ data: { promiseId: promise.id, nickname: "다음방장", normalizedNickname: "다음방장", passwordHash: "hidden", role: "member" } });
   async function login(target: BrowserContext, id: string) {
+    await returningCalendarUser(target);
     const token = newToken(), expiresAt = new Date(Date.now()+7*86400000);
     await db.participantSession.create({ data: { participantId: id, sessionTokenHash: tokenHash(token), expiresAt } });
     const cookie = sessionCookie(link.inviteToken, expiresAt);

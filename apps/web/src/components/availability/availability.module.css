@@ -215,7 +215,7 @@
 .viewSwitch button { border-radius: 100px; min-height: 36px; }
 .viewSwitch button[aria-pressed="true"] { color: var(--ink); }
 .toolbar button { border: 0; background: transparent; border-radius: 50%; }
-.toolbar strong { font-size: 17px; }
+.toolbar strong { font-size: 18px; font-weight: 800; }
 .weekHeading > span { font-size: 10px; }
 .editTools { margin: 10px 0 8px; gap: 8px; }
 .editTools button { border-radius: 100px; color: var(--ink); }
@@ -387,7 +387,7 @@
 .topBar > .headerAction { grid-column: 3; grid-row: 1; justify-self: end; }
 .topBar > :global(.journey-header) { padding: 0; }
 .header .headingRow { margin-top: 22px; }
-.calendarTopRow { display: grid; grid-template-columns: 60px minmax(0,1fr) 60px; align-items: center; gap: 6px; margin-bottom: 12px; }
+.calendarTopRow { display: grid; grid-template-columns: 60px minmax(0,1fr) 60px; align-items: center; gap: 6px; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--line); }
 .calendarTopRow .viewSwitch { width: 100%; max-width: 240px; justify-self: center; margin-bottom: 0; }
 .calendarTopRow .mobileInfoButton { grid-column: 1; grid-row: 1; width: 44px; justify-content: center; }
 .calendarTopRow .viewSwitch { grid-column: 2; grid-row: 1; }
@@ -457,9 +457,17 @@
 .calendarTopRow .headerAction a { color: var(--accent); }
 .calendarTopRow .headerAction svg { display: none; }
 .footer[data-readonly="true"] { grid-template-columns: minmax(0,1fr); }
-.editTools { flex-wrap: nowrap; min-height: 44px; }
-.editTools .zoomControls { margin-left: auto; }
-.editTools .zoomControls button { min-height: 40px; }
+/* Keep both control groups on the same label and button baselines. */
+.editTools { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; gap: 24px; width: 100%; max-width: 520px; margin: 12px 0 8px; }
+.controlBlock { min-width: 0; }
+.unitBlock { grid-column: 2; }
+.unitBlock .controlLabel { text-align: right; }
+.controlLabel { margin: 0 0 7px; padding-inline: 5px; color: var(--ink); font-size: 12px; font-weight: 700; line-height: 18px; white-space: nowrap; }
+.editTools .touchModes, .editTools .zoomControls { display: grid; width: 100%; height: 42px; margin: 0; padding: 3px; gap: 2px; border-radius: 11px; background: var(--subtle); }
+.editTools .touchModes { grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); }
+.editTools .zoomControls { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.editTools .controlBlock button { display: flex; align-items: center; justify-content: center; gap: 4px; width: 100%; height: 36px; min-width: 0; min-height: 36px; margin: 0; padding: 0 4px; border: 0; border-radius: 8px; font-size: 12px; line-height: 1; white-space: nowrap; }
+.controlBlock button svg { display: block; flex: 0 0 16px; width: 16px; height: 16px; }
 .help { min-height: 32px; }
 @media (max-width: 359px) {
   .footer { gap: 6px; }
@@ -469,9 +477,10 @@
   .calendarTopRow .headerAction :is(button,a) { font-size: 11px; padding-inline: 0; }
   .calendarTopRow { grid-template-columns: 56px minmax(0,1fr) 56px; gap: 4px; }
   .calendarTopRow .mobileInfoButton { width: 36px; }
-  .editTools { gap: 6px; }
-  .editTools .touchModes button { min-width: 46px; padding-inline: 6px; }
-  .editTools .zoomControls button { padding-inline: 7px; }
+  .editTools { gap: 18px; }
+  .controlLabel { font-size: 11px; }
+  .editTools .controlBlock button { padding-inline: 2px; gap: 2px; font-size: 11px; }
+  .controlBlock button svg { flex-basis: 14px; width: 14px; height: 14px; }
 }
 
 /* Monthly date selection shares the timetable's 30-minute slots. */
@@ -501,3 +510,153 @@
 .scroll[data-touch-selecting="true"] .slot { touch-action: none; }
 .scroll[data-touch-selecting="true"] .slot::before { content: ""; position: absolute; inset: -4px; touch-action: none; }
 @media (max-width:479px) { .scroll[data-touch-selecting="true"] .slot::before { inset-inline: -3px; } }
+
+/* Give key actions and active controls a clearer visual weight. */
+.viewSwitch button, .editTools .controlBlock button { font-weight: 700; }
+.viewSwitch button[aria-pressed="true"], .editTools .controlBlock button[aria-pressed="true"] { font-weight: 800; box-shadow: 0 1px 4px #24304720, inset 0 0 0 1px #3854df18; }
+.footer > button { font-weight: 700; }
+.time { font-weight: 700; }
+
+/* One raised calendar sheet, with navigation outside on the page background. */
+.calendarPage { --calendar-top-offset: 124px; }
+.calendarColumn { min-width: 0; }
+.calendarPage .shell > .calendarTopRow { position: sticky; top: 60px; z-index: 20; min-height: 64px; margin-bottom: 20px; padding-block: 10px; border-bottom: 0; background: var(--paper); }
+.calendarColumn > .panel { min-height: calc(100dvh - 144px); padding: 0 24px; border: 0; border-radius: 28px 28px 0 0; background: white; box-shadow: 0 -6px 28px #2430470d; }
+.calendarColumn .calendarControls { top: 124px; padding-top: 22px; background: white; }
+.calendarColumn .calendarControls::before { content: ""; position: absolute; inset: 0 -24px; z-index: -1; border-radius: 28px 28px 0 0; background: white; }
+.calendarColumn .editTools { max-width: none; }
+.calendarColumn .help { margin-bottom: 10px; }
+.calendarColumn .dayHeaders { padding-top: 10px; border-top: 1px solid var(--line); }
+.calendarColumn :is(.corner,.day,.time) { background: white; }
+.calendarColumn .footer { padding-top: 14px; border-top: 1px solid var(--line); background: white; }
+.calendarColumn .footer::before { content: ""; position: absolute; inset: 0 -24px; z-index: -1; background: white; }
+.calendarColumn .notice { padding-bottom: 12px; }
+@media (max-width:899px) {
+  .calendarPage { --calendar-top-offset: 64px; padding: 0 8px; }
+  .calendarPage .shell > .calendarTopRow { top: 0; margin-inline: 16px; }
+  .calendarColumn .calendarControls { top: 64px; }
+  .calendarColumn > .panel { min-height: calc(100dvh - 84px); }
+}
+
+/* Clear information cards inside the invitation drawer and desktop sidebar. */
+.drawer { background: #edf2fb; width: min(368px, calc(100vw - 24px)); }
+.drawerHeader { position: sticky; top: 0; z-index: 5; padding: 20px 20px 10px; background: #edf2fb; }
+.drawerHeader h2 { color: var(--ink); font-size: 22px; font-weight: 800; letter-spacing: -.02em; line-height: 1.4; }
+.drawerHeader button { width: 40px; height: 40px; background: white; color: var(--ink); border: 1px solid #dce3f0; border-radius: 12px; }
+.drawerIntro { padding: 0 22px 20px; }
+.drawerIntro p { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.6; overflow-wrap: anywhere; }
+.sidebarContent { display: flex; flex-direction: column; gap: 18px; padding: 0 16px 32px; }
+.infoCard { min-width: 0; padding: 22px 20px; border: 1px solid #e3e9f4; border-radius: 20px; background: white; box-shadow: 0 3px 12px #24304704; }
+.scheduleCard { padding: 0; overflow: hidden; }
+.scheduleCard .sidebarTitle { padding: 16px 20px; background: var(--accent); }
+.scheduleCard .sidebarTitle h3 { color: white; font-size: 15px; font-weight: 700; }
+.scheduleCard .sidebarTitle > span { padding: 4px 9px; border-radius: 20px; background: #ffffff26; color: white; font-size: 11px; font-weight: 700; }
+.infoCardBody { padding: 24px 20px 20px; }
+.infoCard .range { margin: 0 0 22px; font-size: 24px; font-weight: 800; line-height: 1.4; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+.infoCard .details { margin: 0; padding: 20px 0 0; border-top: 1px solid #edf0f6; border-bottom: 0; gap: 16px; }
+.infoCard .details > div { display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 12px; align-items: baseline; }
+.infoCard .details dt { font-size: 12px; line-height: 1.7; color: var(--muted); }
+.infoCard .details dd { color: var(--ink); font-size: 13px; font-weight: 400; line-height: 1.7; word-break: keep-all; }
+.infoCard .myHeading { margin: 0; color: var(--ink); font-size: 16px; font-weight: 700; line-height: 1.5; }
+.infoHint { margin: 8px 0 18px; color: var(--muted); font-size: 12px; line-height: 1.7; }
+.infoCard .participants { gap: 6px; }
+.infoCard .participants button { min-height: 56px; padding: 12px 10px; gap: 12px; border: 1px solid transparent; border-radius: 12px; color: var(--ink); }
+.infoCard .participants button[aria-pressed="true"] { background: #eef2ff; border-color: #dce4ff; color: var(--accent); }
+.infoCard .participants strong { font-size: 14px; font-weight: 700; line-height: 1.5; overflow-wrap: anywhere; }
+.infoCard .participants button > svg { flex-shrink: 0; width: 32px; height: 32px; }
+.infoCard .participants button > span:not(.responseCheck) { font-size: 10px; white-space: nowrap; }
+.infoCard .responseCheck { font-size: 16px; }
+.infoCard .infoLink { display: flex; align-items: center; justify-content: center; min-height: 48px; margin-top: 20px; padding: 12px 10px; border: 0; border-radius: 10px; background: #eef1f7; color: #30456c; font-size: 12px; font-weight: 700; line-height: 1.5; word-break: keep-all; }
+.infoCard .infoLink:hover { background: #e3e9f4; }
+.cardActions { display: grid; gap: 10px; margin-top: 24px; }
+.cardActions .infoLink { margin-top: 0; }
+.infoCard .myCard { margin-top: 20px; padding: 0; border: 0; background: transparent; }
+.infoCard .myCard strong { color: var(--ink); font-size: 18px; font-weight: 700; line-height: 1.5; }
+.infoCard .myCard > div > span { flex-shrink: 0; padding: 4px 8px; border-radius: 6px; background: #eef1f7; color: #52617a; font-size: 11px; font-weight: 700; }
+.infoCard .myCard p { margin-top: 16px; padding-top: 16px; border-top: 1px solid #edf0f6; color: var(--accent); font-size: 12px; font-weight: 400; line-height: 1.7; }
+@media (min-width:360px) and (max-width:899px) { .cardActions { grid-template-columns: repeat(2, minmax(0,1fr)); } .cardActions > :only-child { grid-column: 1 / -1; } }
+@media (min-width:900px) { .sidebar { border: 0; background: transparent; } .sidebarContent { padding: 0; } .infoCard .range { font-size: 22px; } }
+
+/* Match the main calendar's spacing and hierarchy to the information cards. */
+.calendarPage { --paper: #edf2fb; }
+.calendarPage .shell > .calendarTopRow .viewSwitch { padding: 4px; border-radius: 12px; background: #e4eaf5; }
+.calendarPage .shell > .calendarTopRow .viewSwitch button { border-radius: 9px; font-weight: 700; }
+.calendarPage .shell > .calendarTopRow .viewSwitch button[aria-pressed="true"] { font-weight: 800; box-shadow: 0 2px 5px #2430470c; }
+.calendarPage .shell > .calendarTopRow .headerAction :is(button,a) { min-height: 36px; padding: 7px 8px; border: 1px solid #d9e1ef; border-radius: 10px; background: white; font-size: 11px; font-weight: 700; }
+.calendarColumn .calendarControls { padding-top: 26px; }
+.calendarColumn .weekHeading > span { margin-bottom: 5px; font-size: 12px; font-weight: 400; line-height: 1.6; }
+.calendarColumn .toolbar strong { font-size: 20px; font-weight: 800; line-height: 1.4; letter-spacing: -.02em; }
+.calendarColumn .toolbar > button { border: 1px solid #e3e9f4; border-radius: 12px; background: #f5f7fb; color: var(--ink); }
+.calendarColumn .editTools { margin: 20px 0 6px; }
+.calendarColumn .controlLabel { margin-bottom: 5px; padding-inline: 4px; color: #66748b; font-size: 11px; font-weight: 400; line-height: 16px; }
+.calendarColumn .controlBlock :is(.touchModes,.zoomControls) { background: #f5f7fa; }
+.calendarColumn .editTools .controlBlock button { font-weight: 400; }
+.calendarColumn .editTools .controlBlock button[aria-pressed="true"] { font-weight: 700; box-shadow: 0 1px 4px #24304712; }
+.calendarColumn .help { min-height: 28px; margin: 0 0 10px; padding-inline: 4px; font-size: 11px; font-weight: 400; line-height: 1.7; }
+.calendarColumn .help > span { display: flex; align-items: center; flex-wrap: wrap; column-gap: 4px; }
+.calendarColumn .help > span > button { min-height: 28px; }
+.calendarColumn .dayHeaders { padding-top: 12px; border-top-color: #e8edf5; }
+.calendarColumn .day { padding-bottom: 12px; font-size: 11px; line-height: 1.5; }
+.calendarColumn .day strong { margin-top: 4px; font-size: 19px; font-weight: 700; }
+.calendarColumn .time { color: #586780; font-weight: 400; }
+.calendarColumn .legend { margin-block: 14px; gap: 14px; color: #66748b; line-height: 1.7; }
+.calendarColumn .footer { gap: 10px; padding-block: 16px max(16px, env(safe-area-inset-bottom)); border-top-color: #e8edf5; }
+.calendarColumn .footer > button { border-radius: 10px; }
+.calendarColumn .footer .repeatButton { border-color: transparent; background: #eef1f7; color: #30456c; }
+.calendarColumn .deadlineCountdown { gap: 4px; }
+.calendarColumn .deadlineCountdown span { font-size: 10px; font-weight: 400; line-height: 1.5; }
+.calendarColumn .deadlineCountdown strong { font-size: 14px; font-weight: 700; line-height: 1.4; }
+.calendarColumn .dateRangeHint { margin-block: 8px 20px; line-height: 1.7; }
+@media (max-width:359px) {
+  .calendarColumn .toolbar strong { font-size: 18px; }
+  .calendarColumn .help { font-size: 11px; }
+  .calendarColumn .footer { gap: 6px; }
+  .calendarColumn .deadlineCountdown strong { font-size: 11px; }
+  .calendarPage .shell > .calendarTopRow .headerAction :is(button,a) { padding-inline: 5px; }
+}
+
+.calendarPage .shell > .calendarTopRow .headerAction button svg { display: block; width: 13px; height: 13px; flex-shrink: 0; }
+
+.calendarPage .shell > .calendarTopRow { grid-template-columns: 44px minmax(0, 1fr) 80px; }
+@media (max-width:359px) { .calendarPage .shell > .calendarTopRow { grid-template-columns: 36px minmax(0, 1fr) 76px; } }
+
+/* Move the compact control groups toward the sheet's outer edges. */
+.calendarColumn .helpWithGuide { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.helpWithGuide > span { min-width: 0; }
+.helpWithGuide .guideButton { position: relative; display: inline-flex; align-items: center; justify-content: center; gap: 4px; flex-shrink: 0; min-width: 52px; min-height: 28px; padding: 0; border: 0; background: transparent; color: var(--accent); font-size: 11px; font-weight: 700; touch-action: manipulation; }
+.helpWithGuide .guideButton { text-decoration: none; }
+.guideButton::before { content: ""; position: absolute; inset: -8px 0; }
+.guideButton:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
+.calendarColumn .editTools { width: auto; margin-inline: -8px; grid-template-columns: minmax(0, 132px) minmax(0, 138px); justify-content: space-between; column-gap: 24px; }
+.calendarColumn .editTools .touchModes button:first-child { padding-inline: 2px 8px; }
+@media (max-width:359px) { .calendarColumn .editTools { grid-template-columns: minmax(0, 120px) minmax(0, 120px); column-gap: 24px; } }
+
+/* Align the information and calendar cards under one desktop navigation row.
+   The calendar grows with its time rows; only the document scrolls. */
+@media (min-width: 900px) {
+  .calendarPage { padding: 12px 24px 0; --calendar-top-offset: 56px; }
+  .calendarPage > .shell { display: grid; grid-template-columns: 250px minmax(0, 1fr); gap: 12px 24px; max-width: 1440px; }
+  .calendarPage .topBar { grid-column: 1; grid-row: 1; min-height: 56px; padding-block: 4px; }
+  .calendarPage .header { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  .calendarPage .shell > .calendarTopRow { grid-column: 2; grid-row: 1; top: 0; min-height: 56px; padding-block: 6px; margin: 0; }
+  .calendarPage .workspace { grid-column: 1 / -1; grid-row: 2; grid-template-columns: 250px minmax(0, 1fr); gap: 24px; align-items: start; }
+  .calendarColumn > .panel { height: auto; max-height: none; min-height: calc(100dvh - 80px); overflow: visible; border-radius: 20px 20px 0 0; }
+  .calendarColumn .scroll { height: auto; max-height: none; overflow: visible; }
+  .calendarColumn .calendarControls { display: grid; grid-template-columns: minmax(0, 1fr) 294px; gap: 8px 16px; top: 56px; padding-top: 12px; }
+  .calendarColumn .calendarControls::before { border-radius: 20px 20px 0 0; }
+  .calendarColumn .toolbar { align-self: center; }
+  .calendarColumn .toolbar > button { width: 36px; height: 36px; }
+  .calendarColumn .toolbar strong { font-size: 18px; }
+  .calendarColumn .weekHeading > span { margin-bottom: 3px; font-size: 11px; }
+  .calendarColumn .editTools { margin: 0; column-gap: 24px; }
+  .calendarColumn .help { grid-column: 1 / -1; min-height: 28px; margin-bottom: 0; }
+  .calendarColumn .dayHeaders { grid-column: 1 / -1; min-height: 60px; padding-top: 6px; }
+  .calendarColumn .day { padding-bottom: 6px; }
+  .calendarColumn .footer { padding-block: 12px; }
+}
+@media (min-width: 900px) and (max-width: 1199px) {
+  .calendarPage > .shell, .calendarPage .workspace { grid-template-columns: 220px minmax(0, 1fr); gap: 12px 20px; }
+  .calendarColumn > .panel { padding-inline: 16px; }
+  .calendarColumn .calendarControls::before, .calendarColumn .footer::before { inset-inline: -16px; }
+  .calendarColumn .toolbar strong { font-size: 16px; }
+}

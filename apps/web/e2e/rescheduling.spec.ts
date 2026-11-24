@@ -1,3 +1,4 @@
+import { returningCalendarUser } from "./returning-calendar-user";
 import { selectDeadline } from "./settings-calendar";
 import { test, expect, type BrowserContext } from "@playwright/test";
 import { PrismaClient } from "../src/generated/prisma/client";
@@ -20,6 +21,7 @@ test.afterAll(async()=>{
   await db.$disconnect();
 });
 async function fixture(context:BrowserContext){
+  await returningCalendarUser(context);
   const link=await db.promiseLink.create({data:{inviteToken:newToken()}});links.push(link.id);
   const day=(offset:number)=>new Date(Date.now()+9*3600000+offset*86400000).toISOString().slice(0,10);
   const start=day(1),end=day(15);
@@ -60,7 +62,8 @@ test("모집 중 확대 저장은 열린 시간표의 미제출 편집을 버리
  await page.getByRole("button",{name:"변경 저장",exact:true}).click();await expect(page).toHaveURL(f.path);
  await other.bringToFront();await other.evaluate(()=>window.dispatchEvent(new Event("focus")));
  await expect(other.getByText("약속 설정이 변경됐어요. 가능 시간을 확인하고 다시 제출해 주세요.",{exact:true})).toBeVisible();
- await expect(cell).toHaveAttribute("aria-pressed","false");await expect(other.getByRole("button",{name:"되돌리기",exact:true})).toBeDisabled();
+ await expect(cell).toHaveAttribute("aria-pressed","false");
+ for(const time of ["09:00","09:30","10:00"])await expect(other.getByRole("button",{name:`${f.start} ${time}`,exact:true})).toHaveAttribute("aria-pressed","true");
  await other.close();
 });
 test("변경 취소·연결 실패 재시도·중복 클릭 방지와 모바일 폼을 지원한다",async({page,context})=>{

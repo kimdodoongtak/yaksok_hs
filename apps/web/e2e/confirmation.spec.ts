@@ -1,3 +1,4 @@
+import { returningCalendarUser } from "./returning-calendar-user";
 import { test, expect, type BrowserContext } from "@playwright/test";
 import { PrismaClient } from "../src/generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
@@ -19,6 +20,7 @@ test.afterAll(async()=>{
   await db.$disconnect();
 });
 async function fixture(context:BrowserContext){
+  await returningCalendarUser(context);
   const link=await db.promiseLink.create({data:{inviteToken:newToken()}});links.push(link.id);
   const day=(offset:number)=>new Date(Date.now()+9*3600000+offset*86400000).toISOString().slice(0,10);
   const start=day(1),end=day(15);

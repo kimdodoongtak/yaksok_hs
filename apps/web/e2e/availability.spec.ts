@@ -1,3 +1,4 @@
+import { returningCalendarUser } from "./returning-calendar-user";
 import { test, expect, type Page, type BrowserContext } from "@playwright/test";
 import { PrismaClient } from "../src/generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
@@ -19,6 +20,7 @@ test.afterAll(async()=>{
   await db.$disconnect();
 });
 async function fixture(context:BrowserContext){
+  await returningCalendarUser(context);
   const link=await db.promiseLink.create({data:{inviteToken:newToken()}});links.push(link.id);
   const day=(offset:number)=>new Date(Date.now()+9*3600000+offset*86400000).toISOString().slice(0,10);
   const start=day(1),end=day(15);
@@ -131,7 +133,14 @@ test("모바일 날짜 탭과 스와이프를 구분하고 시간표 스크롤 �
     for(let n=1;n<=6;n++)await client.send("Input.dispatchTouchEvent",{type:"touchMove",touchPoints:[{x,y:y-15*n}]});
     await client.send("Input.dispatchTouchEvent",{type:"touchEnd",touchPoints:[]});
     await expect(cards.nth(2)).toHaveAttribute("aria-pressed","false");await expect(cards.first()).toHaveAttribute("aria-pressed","true");
-    await page.evaluate(()=>new Promise<void>(resolve=>{window.addEventListener("scrollend",()=>resolve(),{once:true});window.scrollTo(0,0);setTimeout(resolve,700);}));await collapseDevBadge(page);
+    await page.evaluate(()=>new Promise<void>(resolve=>{
+      let timer:ReturnType<typeof setTimeout>;
+      const done=()=>{window.removeEventListener("scroll",settle);resolve();};
+      const settle=()=>{clearTimeout(timer);timer=setTimeout(done,200);};
+      window.addEventListener("scroll",settle);settle();
+    }));
+    await page.evaluate(()=>window.scrollTo(0,0));
+    await expect.poll(()=>page.evaluate(()=>scrollY)).toBe(0);await collapseDevBadge(page);
     await page.screenshot({path:"test-results/date-touch-320.png"});
     await page.getByRole("button",{name:"1시간",exact:true}).tap();await expect(page.getByRole("button",{name:"스크롤",exact:true})).toHaveAttribute("aria-pressed","true");
   }finally{await context.close();}
@@ -493,7 +502,8 @@ test("모바일 상단 정보를 접어도 방장 마감은 밖에서 열고 선
   await menu.click();
   const dialog=page.getByRole("dialog",{name:"약속 정보",exact:true});
   await expect(dialog).toBeVisible();await expect(menu).toHaveAttribute("aria-expanded","true");
-  await expect(dialog.getByRole("link",{name:"약속 잡기"})).toBeVisible();
+  await expect(dialog.getByRole("heading",{name:"약속 일정",exact:true})).toBeVisible();
+  await expect(dialog.getByRole("link",{name:"초대 링크 · 참여 정보",exact:true})).toHaveAttribute("href",`/p/${f.link.inviteToken}`);
   await expect(dialog.getByText("내 참여 정보",{exact:true})).toBeVisible();
   await page.keyboard.press("Escape");
   await expect(dialog).not.toBeVisible();
@@ -521,7 +531,7 @@ for(const width of [320,393])test(`짧은 모바일 ${width}px에서 시간표 �
   const grid=(await page.getByLabel("주별 가능 시간").boundingBox())!;
   expect(Math.abs(last.x+last.width-(grid.x+grid.width))).toBeLessThan(1);
   expect(Math.abs(grid.x+grid.width/2-width/2)).toBeLessThan(1);
-  expect(Math.abs(view.x+view.width/2-width/2)).toBeLessThan(1);
+  // The deadline action has its own wider column; tabs stay between it and the menu.
   const menu=(await page.getByRole("button",{name:"약속 정보 열기",exact:true}).boundingBox())!;
   const close=(await page.getByRole("button",{name:"응답 마감",exact:true}).boundingBox())!;
   expect(menu.x+menu.width).toBeLessThanOrEqual(view.x);
@@ -529,7 +539,7 @@ for(const width of [320,393])test(`짧은 모바일 ${width}px에서 시간표 �
   expect(Math.abs(close.y+close.height/2-(menu.y+menu.height/2))).toBeLessThan(1);
   const footer=(await page.locator("footer").boundingBox())!;
   const slots=page.getByLabel("주별 가능 시간").locator(`button[data-day="${f.start}"]`);
-  const visibleRows=await slots.evaluateAll((cells,{top,bottom})=>cells.filter(cell=>{const box=cell.getBoundingClientRect();return box.top>=top&&box.bottom<=bottom&&box.height>=44;}).length,{top:first.y+first.height,bottom:footer.y});
+  const visibleRows=await slots.evaluateAll((cells,{top,bottom})=>cells.filter(cell=>{const box=cell.getBoundingClientRect();return box.top>=top&&box.bottom<=bottom&&box.height>=36;}).length,{top:first.y+first.height,bottom:footer.y});
   expect(visibleRows).toBeGreaterThanOrEqual(4);
   expect(await page.evaluate(()=>window.scrollY)).toBe(0);
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
@@ -853,7 +863,7 @@ for (const role of ["host", "member"] as const) {
       expect(Math.abs((box.y+box.height/2)-(submit.y+submit.height/2))).toBeLessThan(50);
       await expect(timer).toBeInViewport();
       if(role==="host"){
-        const close=page.locator("[data-calendar-controls]").getByRole("button",{name:"응답 마감",exact:true});
+        const close=page.getByRole("button",{name:"응답 마감",exact:true});
         await expect(close).toBeInViewport();
         const tabs=(await page.getByRole("group",{name:"시간 보기",exact:true}).boundingBox())!;
         const action=(await close.boundingBox())!;
@@ -879,7 +889,7 @@ for (const role of ["host", "member"] as const) {
     for(const width of [320,393,1280]){
       await page.setViewportSize({width,height:740});
       await expect(timer).toBeInViewport();
-      await expect(page.locator("[data-calendar-controls]").getByRole("link",{name:"후보 보기",exact:true})).toBeInViewport();
+      await expect(page.getByRole("link",{name:"후보 보기",exact:true})).toBeInViewport();
     }
   });
 }

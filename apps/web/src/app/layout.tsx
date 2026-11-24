@@ -3,7 +3,16 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import "./globals.css";
 
-const noto = localFont({ src: "./fonts/NotoSansKR.woff2", variable: "--font-noto-sans-kr", weight: "100 900", display: "swap", preload: false });
+const nanumRound = localFont({
+  src: [
+    { path: "./fonts/NanumSquareRoundR.woff2", weight: "400", style: "normal" },
+    { path: "./fonts/NanumSquareRoundB.woff2", weight: "700", style: "normal" },
+    { path: "./fonts/NanumSquareRoundEB.woff2", weight: "800", style: "normal" },
+  ],
+  variable: "--font-nanum-square-round",
+  display: "swap",
+  preload: false,
+});
 
 export const metadata: Metadata = {
   title: "약속 잡기 도우미",
@@ -13,7 +22,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="ko">
-      <body className={noto.variable}>{children}</body>
+      <body className={nanumRound.variable}>{children}</body>
     </html>
   );
 }
