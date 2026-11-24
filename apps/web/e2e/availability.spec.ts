@@ -658,7 +658,7 @@ for (const width of [320, 1280]) test(`내 시간의 30분 선택은 실제 위�
     await expect(halves.nth(1-selectedIndex)).toHaveAttribute("data-selected", "false");
     const top = (await halves.nth(0).boundingBox())!, bottom = (await halves.nth(1).boundingBox())!;
     expect(top.height).toBeCloseTo(bottom.height, 1);
-    expect(bottom.y - (top.y + top.height)).toBeCloseTo(2, 1);
+    expect(bottom.y - (top.y + top.height)).toBeCloseTo(0, 1);
     const colors = await halves.evaluateAll(nodes => nodes.map(node => getComputedStyle(node).backgroundColor));
     expect(colors[0]).not.toBe(colors[1]);
   }
@@ -675,7 +675,31 @@ for (const width of [320, 1280]) test(`내 시간의 30분 선택은 실제 위�
   expect((await db.participantAvailableSlot.findMany({where:{participantId:f.member.id}, orderBy:{slotStartAt:"asc"}})).map(row => row.slotStartAt.toISOString())).toEqual(["09:00", "09:30", "10:30"].map(time => f.slot(time)));
 });
 
-for (const mode of ["내 시간", "전체 시간"]) test(`반 칸의 빈 영역과 선택 영역 모두 둥근 모서리를 유지한다: ${mode}`, async ({page, context}) => {
+test("내 시간은 1시간 보기에서도 인접한 반 칸·전체 칸을 연결하고 빈 30분에서 끊는다", async ({page, context}) => {
+  const f = await fixture(context);
+  await db.participantAvailableSlot.createMany({data:["09:30","10:00","10:30","11:00","12:30","13:00","14:00"].map(time=>({participantId:f.member.id,slotStartAt:new Date(f.slot(time))}))});
+  await page.setViewportSize({width:393,height:852}); await page.goto(f.path);
+  const cell = (start:string,end:string) => page.getByRole("button",{name:`${f.start} ${start}–${end}`,exact:true});
+  const first=cell("09:00","10:00"),middle=cell("10:00","11:00"),last=cell("11:00","12:00");
+  await expect(first).toHaveAttribute("data-connected-after","true");
+  await expect(middle).toHaveAttribute("data-block-start","false");
+  await expect(middle).toHaveAttribute("data-block-end","false");
+  await expect(last).toHaveAttribute("data-connected-before","true");
+  const fills=[first.locator('[data-selected="true"]'),middle,last.locator('[data-selected="true"]')];
+  for(let i=1;i<fills.length;i++) {
+    const before=(await fills[i-1].boundingBox())!,after=(await fills[i].boundingBox())!;
+    expect(after.y).toBeLessThanOrEqual(before.y+before.height);
+  }
+  await expect(last).toHaveAttribute("data-connected-after","false");
+  await expect(cell("12:00","13:00")).toHaveAttribute("data-connected-before","false");
+  await expect(cell("12:00","13:00")).toHaveAttribute("data-connected-after","true");
+  await expect(cell("13:00","14:00")).toHaveAttribute("data-connected-before","true");
+  await expect(cell("13:00","14:00")).toHaveAttribute("data-connected-after","false");
+  await expect(cell("14:00","15:00")).toHaveAttribute("data-connected-before","false");
+  await page.screenshot({path:"test-results/my-half-connected-393.png"});
+});
+
+for (const mode of ["내 시간", "전체 시간"]) test(`반 칸은 내 시간에서 한 외곽선을 공유하고 전체 시간에서는 구간 모서리를 유지한다: ${mode}`, async ({page, context}) => {
   const f = await fixture(context);
   await db.participant.update({where:{id:f.member.id}, data:{availabilitySubmittedAt:new Date(), availabilityVersion:1}});
   await db.participantAvailableSlot.create({data:{participantId:f.member.id, slotStartAt:new Date(f.slot("09:30"))}});
@@ -685,12 +709,19 @@ for (const mode of ["내 시간", "전체 시간"]) test(`반 칸의 빈 영역�
     ? page.getByRole("button", {name:`${f.start} 09:00–10:00`, exact:true}).locator('[data-selected]')
     : page.locator(`[aria-label="${f.start} 09:00 가능 0명 / 전체 1명"], [aria-label="${f.start} 09:30 가능 1명 / 전체 1명"]`);
   await expect(parts).toHaveCount(2);
-  for (const part of await parts.all()) {
+  for (const [index, part] of (await parts.all()).entries()) {
     const corners = await part.evaluate(node => {const style=getComputedStyle(node); return [style.borderTopLeftRadius,style.borderTopRightRadius,style.borderBottomLeftRadius,style.borderBottomRightRadius].map(parseFloat);});
-    expect(corners.every(radius => radius >= 8)).toBe(true);
+    if (mode === "내 시간") expect(corners).toEqual(index === 0 ? [8,8,0,0] : [0,0,8,8]);
+    else expect(corners.every(radius => radius >= 8)).toBe(true);
   }
   const top = (await parts.nth(0).boundingBox())!, bottom = (await parts.nth(1).boundingBox())!;
-  expect(bottom.y).toBeGreaterThan(top.y + top.height);
+  if (mode === "내 시간") {
+    expect(bottom.y - (top.y + top.height)).toBeCloseTo(0, 1);
+    const cell = parts.first().locator("..");
+    await expect(cell).toHaveCSS("overflow", "visible");
+    await expect(cell).toHaveCSS("border-top-width", "1px");
+    await expect(cell).toHaveCSS("border-top-left-radius", "9px");
+  } else expect(bottom.y).toBeGreaterThan(top.y + top.height);
   await page.screenshot({path:`test-results/rounded-half-${mode === "내 시간" ? "mine" : "all"}.png`});
 });
 

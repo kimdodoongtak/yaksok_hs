@@ -256,11 +256,17 @@
 .slot[aria-pressed="true"]:not([data-block-end="true"]) { margin-bottom: -3px; border-bottom-color: var(--accent); border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
 .slot:disabled { border-color: transparent; background: var(--subtle); }
 .slot:disabled[aria-pressed="true"] { background: var(--soft); border-color: var(--soft); color: var(--accent); }
-.slot[aria-pressed="mixed"], .slot[aria-pressed="mixed"]:hover { background: transparent; border: 0; box-shadow: none; }
-.slotHalf { position: absolute; left: 0; right: 0; height: calc(50% - 1px); border: 1px solid var(--line); border-radius: 8px; background: white; pointer-events: none; }
-.slotHalf:first-child { top: 0; }
-.slotHalf:nth-child(2) { bottom: 0; }
-.slotHalf[data-selected="true"] { background: var(--soft); border-color: #93a8f3; }
+.slot[aria-pressed="mixed"], .slot[aria-pressed="mixed"]:hover { background: white; border: 1px solid var(--line); box-shadow: none; }
+.slotHalf { position: absolute; left: 0; right: 0; height: 50%; border: 0; border-radius: 0; background: white; pointer-events: none; }
+.slotHalf:first-child { top: 0; border-radius: 8px 8px 0 0; }
+.slotHalf:nth-child(2) { bottom: 0; border-radius: 0 0 8px 8px; box-shadow: 0 -1px 0 var(--line); }
+.slotHalf[data-selected="true"] { background: var(--soft); }
+.slot[aria-pressed="mixed"][data-connected-before="true"] { border-top-color: var(--soft); border-top-left-radius: 0; border-top-right-radius: 0; }
+.slot[aria-pressed="mixed"][data-connected-after="true"] { border-bottom-color: var(--soft); border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
+.slot[data-connected-before="true"] .slotHalf:first-child,
+.slot[data-connected-after="true"] .slotHalf:nth-child(2) { left: -1px; right: -1px; height: calc(50% + 7px); border-inline: 1px solid #93a8f3; border-radius: 0; }
+.slot[data-connected-before="true"] .slotHalf:first-child { top: -7px; }
+.slot[data-connected-after="true"] .slotHalf:nth-child(2) { bottom: -7px; }
 .readCell { border: 0; margin-inline: 3px; position: relative; }
 .readCell > span { --cell-fill: white; flex: 1; background: var(--cell-fill); color: var(--heat-ink); border: 0; border-radius: 8px; margin-block: 2px; }
 .readCell > span + span { border: 0; }
