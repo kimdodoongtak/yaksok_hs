@@ -641,6 +641,59 @@ test("축소해도 부분 선택을 보존하고 1시간 묶음·마지막 짧�
   expect((await db.participantAvailableSlot.findMany({where:{participantId:f.member.id},orderBy:{slotStartAt:"asc"}})).map(row=>row.slotStartAt.toISOString())).toEqual(["09:00","09:30","23:00"].map(time=>f.slot(time)));
 });
 
+for (const width of [320, 1280]) test(`내 시간의 30분 선택은 실제 위아래 반 칸으로 표시한다 ${width}`, async ({page, context}) => {
+  const f = await fixture(context);
+  await db.participantAvailableSlot.createMany({data:["09:00", "10:30"].map(time => ({participantId:f.member.id, slotStartAt:new Date(f.slot(time))}))});
+  await page.setViewportSize({width, height:852});
+  await page.goto(f.path);
+  const first = page.getByRole("button", {name:`${f.start} 09:00–10:00`, exact:true});
+  const second = page.getByRole("button", {name:`${f.start} 10:00–11:00`, exact:true});
+  for (const [cell, start, end, selectedIndex] of [[first, "09:00", "09:30", 0], [second, "10:30", "11:00", 1]] as const) {
+    await expect(cell).toHaveAttribute("aria-pressed", "mixed");
+    await expect(cell).not.toContainText("일부");
+    await expect(cell).toHaveAccessibleDescription(`${start}–${end} 선택됨`);
+    const halves = cell.locator('[data-selected]');
+    await expect(halves).toHaveCount(2);
+    await expect(halves.nth(selectedIndex)).toHaveAttribute("data-selected", "true");
+    await expect(halves.nth(1-selectedIndex)).toHaveAttribute("data-selected", "false");
+    const top = (await halves.nth(0).boundingBox())!, bottom = (await halves.nth(1).boundingBox())!;
+    expect(top.height).toBeCloseTo(bottom.height, 1);
+    expect(bottom.y - (top.y + top.height)).toBeCloseTo(2, 1);
+    const colors = await halves.evaluateAll(nodes => nodes.map(node => getComputedStyle(node).backgroundColor));
+    expect(colors[0]).not.toBe(colors[1]);
+  }
+  await page.screenshot({path:`test-results/my-half-slots-${width}.png`});
+  await page.getByRole("button", {name:"30분", exact:true}).click();
+  for (const [time, selected] of [["09:00", true], ["09:30", false], ["10:00", false], ["10:30", true]] as const)
+    await expect(page.getByRole("button", {name:`${f.start} ${time}`, exact:true})).toHaveAttribute("aria-pressed", String(selected));
+  await page.getByRole("button", {name:"1시간", exact:true}).click();
+  await first.focus(); await page.keyboard.press("Space");
+  await expect(first).toHaveAttribute("aria-pressed", "true");
+  await expect(first.locator('[data-selected]')).toHaveCount(0);
+  await page.getByRole("button", {name:"선택 제출", exact:true}).click();
+  await expect(page.getByRole("status")).toContainText("제출했어요");
+  expect((await db.participantAvailableSlot.findMany({where:{participantId:f.member.id}, orderBy:{slotStartAt:"asc"}})).map(row => row.slotStartAt.toISOString())).toEqual(["09:00", "09:30", "10:30"].map(time => f.slot(time)));
+});
+
+for (const mode of ["내 시간", "전체 시간"]) test(`반 칸의 빈 영역과 선택 영역 모두 둥근 모서리를 유지한다: ${mode}`, async ({page, context}) => {
+  const f = await fixture(context);
+  await db.participant.update({where:{id:f.member.id}, data:{availabilitySubmittedAt:new Date(), availabilityVersion:1}});
+  await db.participantAvailableSlot.create({data:{participantId:f.member.id, slotStartAt:new Date(f.slot("09:30"))}});
+  await page.setViewportSize({width:393, height:852}); await page.goto(f.path);
+  if (mode === "전체 시간") await page.getByRole("button", {name:mode, exact:true}).click();
+  const parts = mode === "내 시간"
+    ? page.getByRole("button", {name:`${f.start} 09:00–10:00`, exact:true}).locator('[data-selected]')
+    : page.locator(`[aria-label="${f.start} 09:00 가능 0명 / 전체 1명"], [aria-label="${f.start} 09:30 가능 1명 / 전체 1명"]`);
+  await expect(parts).toHaveCount(2);
+  for (const part of await parts.all()) {
+    const corners = await part.evaluate(node => {const style=getComputedStyle(node); return [style.borderTopLeftRadius,style.borderTopRightRadius,style.borderBottomLeftRadius,style.borderBottomRightRadius].map(parseFloat);});
+    expect(corners.every(radius => radius >= 8)).toBe(true);
+  }
+  const top = (await parts.nth(0).boundingBox())!, bottom = (await parts.nth(1).boundingBox())!;
+  expect(bottom.y).toBeGreaterThan(top.y + top.height);
+  await page.screenshot({path:`test-results/rounded-half-${mode === "내 시간" ? "mine" : "all"}.png`});
+});
+
 test("주간 반복은 미제출 시간을 복사하고 명시적으로 제출한다",async({page,context})=>{
   const f=await fixture(context);
   await page.setViewportSize({width:393,height:852});
